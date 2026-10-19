@@ -2,7 +2,7 @@
 
 Everything to set up before Cydex takes real orders and real money: accounts, environment variables, Supabase settings, Squad, emails, hosting and the launch test. Up to date as of 9 October 2026.
 
-Work top to bottom and tick each item (`[x]`) as it's done. Steps marked **(new project only)** are only needed if production gets its own Supabase project. The current project (`hsnguuozyigpzstwqkrk`) already has them.
+Work top to bottom and tick each item (`[x]`) as it's done. Steps marked **(new project only)** are only needed if production gets its own Supabase project. The current (test) project already has them. The production project's ref is in `.env.production` (gitignored) and in its Supabase dashboard address; below it's written as `<prod-ref>`.
 
 Feature work that isn't a launch blocker stays in [APP_TODO.md](APP_TODO.md).
 
@@ -30,15 +30,11 @@ Keep the logins for all of these in a password manager the team can access.
 
 ## 2. Code clean-up (before the production build)
 
-- [ ] **Take the Squad secret key out of the browser completely.** Payments and withdrawals already run server-side. What's left:
-  - Move virtual account creation (`src/services/squadVirtualAccountService.ts`, called from `walletSetupService.ts`) into an Edge Function.
-  - Delete the unused files that still call Squad with the secret key: `src/services/squadTransferService.ts`, `src/services/squadWebhookHandler.ts`, `src/services/webhookHandler.ts`.
-  - In `src/config/squad.ts`, remove `TEST_SECRET_KEY`, `PROD_SECRET_KEY` and `getSecretKey`, including the hardcoded fallback keys.
-  - Remove `VITE_SQUAD_SECRET_KEY` and `VITE_SQUAD_PROD_SECRET_KEY` from `.env`, `.env.example` and Vercel.
-- [ ] **Rotate both Squad secret keys** (sandbox and live) in the Squad dashboard once the step above is done. Both keys are in the git history, so treat them as public.
-- [ ] **Read the Supabase URL and anon key from the environment.** They're hardcoded in `src/integrations/supabase/client.ts` and `src/lib/supabase.ts`. Change both to use `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. This is required if production uses a different Supabase project.
+- [x] **Squad secret keys out of the browser.** Done (October 2026): virtual accounts are created by the `squad-virtual-account` Edge Function, and the browser code that held Squad and Paystack keys has been deleted. Squad now runs only in Edge Functions.
+- [ ] **Remove the old Squad and app variables from Vercel:** `VITE_SQUAD_SECRET_KEY`, `VITE_SQUAD_PROD_SECRET_KEY`, `VITE_SQUAD_PUBLIC_KEY`, `VITE_SQUAD_PROD_PUBLIC_KEY`, `VITE_SQUAD_MERCHANT_ID`, `VITE_SQUAD_API_URL`, `VITE_SQUAD_VIRTUAL_ACCOUNT_PREFIX`, `VITE_SQUAD_WEBHOOK_SECRET`, `VITE_PAYSTACK_WEBHOOK_SECRET`, `VITE_APP_URL` and `VITE_NODE_ENV`. The app no longer reads any of them.
+- [ ] **Rotate both Squad secret keys** (sandbox and live) in the Squad dashboard, then put the new ones in the Supabase function secrets (`SQUAD_SECRET_KEY`, section 3.4). The old keys were in the website's code and are in the git history, so treat them as public.
+- [ ] **Roll the old Paystack test keys** in the Paystack dashboard, if that account still exists. They're in the git history too.
 - [ ] **Use Cydex's own Google Maps key** (section 6).
-- [ ] **Switch the app's emails from Resend to Brevo.** `supabase/functions/send-emails/index.ts` still calls Resend's API (`api.resend.com/emails` with `RESEND_API_KEY`). Change it to Brevo's (`POST https://api.brevo.com/v3/smtp/email`, header `api-key: <BREVO_API_KEY>`, body `sender`, `to`, `subject`, `htmlContent`), then redeploy `send-emails`. The templates and the email queue don't change.
 
 ---
 
@@ -47,26 +43,29 @@ Keep the logins for all of these in a password manager the team can access.
 ### 3.1 Project
 
 - [ ] **Decide which project is production.**
-  - **Recommended:** create a fresh project for production and keep `hsnguuozyigpzstwqkrk` for testing.
+  - **Recommended:** create a fresh project for production and keep the current project for testing.
   - **Or keep the current one:** delete the test orders, wallets, transactions, payout requests and notifications, and remove test accounts under Authentication → Users.
 - [ ] **(new project only)** Create it in the region closest to Nigeria (e.g. `eu-west`, London). Save the database password in the password manager.
 - [ ] **Upgrade to Pro**, and turn on daily backups. Add point-in-time recovery if the budget allows.
 
 ### 3.2 Database and functions
 
+- [ ] **(new project only)** Before the first push, turn on `pg_net` and `pg_cron` in **Database → Extensions**. The migrations try to turn them on themselves; doing it first makes sure the scheduled jobs get created.
 - [ ] **(new project only)** Link the project and push everything:
   ```
-  supabase link --project-ref <prod-ref>
-  supabase db push --linked
-  supabase functions deploy squad-checkout squad-webhook squad-payout send-emails send-push admin-team
+  npx -y supabase@2.118.0 link --project-ref <prod-ref>
+  npx -y supabase@2.118.0 db push --linked
+  npx -y supabase@2.118.0 functions deploy squad-checkout squad-webhook squad-payout squad-virtual-account send-emails send-push admin-team
   ```
-  Then update `project_id` in `supabase/config.toml`. `config.toml` already turns off the login check for `squad-webhook`, `send-emails` and `send-push`, which are called by Squad and the database, not by a signed-in user.
-- [ ] **(new project only)** Point push notifications and the withdrawal status check at the new project. Run in the SQL editor:
+  `link` switches which project every later `db push` and `functions deploy` goes to. To go back to the test project afterwards, link it again with its own project ref. Run `npx -y supabase@2.118.0 projects list` to see which one is linked (marked with a ●).
+  The push runs every file in `supabase/migrations/` in order, which builds the whole database from nothing: tables, security rules, functions, triggers, storage buckets, realtime and scheduled jobs. It also adds the starting data: pricing, vehicle types, business and product categories, and settings. **No accounts, orders or other data come across** from the old project.
+  `supabase/config.toml` needs no change: its `project_id` only names the local setup. It already turns off the login check for `squad-webhook`, `send-emails` and `send-push`, which are called by Squad and the database, not by a signed-in user.
+- [ ] **(new project only)** Point push notifications and the withdrawal status check at the new project (one early migration sets this to the test project's address, and the database can't read the app's environment). Run in the SQL editor:
   ```sql
   update public.app_config set value = 'https://<prod-ref>.supabase.co/functions/v1' where key = 'functions_url';
   ```
 - [ ] **Check what the migrations set up:**
-  - **Database → Extensions:** `pg_net` and `pg_cron` are on. Turn them on if not, then run `supabase db push --linked` again.
+  - **Database → Extensions:** `pg_net` and `pg_cron` are on. If one wasn't, pushing again won't help (migrations only run once); turn it on and ask a developer to re-create the missing scheduled jobs from the migrations.
   - **Storage:** buckets `store-images` (public) and `verification-docs` (private), both with a 5 MB limit.
   - **Database → Publications → `supabase_realtime`:** includes `notifications` (unread badges and toasts), `orders` and `deliveries` (live order updates).
   - **Integrations → Cron:** these are created by the migrations. The email job is added in section 4.
@@ -105,11 +104,12 @@ Supabase dashboard → **Edge Functions → Secrets**, or `supabase secrets set 
 
 | Secret | Value | Used by |
 |---|---|---|
-| [ ] `SQUAD_SECRET_KEY` | Squad **live** secret key | checkout, webhook, payouts |
-| [ ] `SQUAD_API_URL` | `https://api-d.squadco.com` (live). The sandbox is `https://sandbox-api-d.squadco.com` | checkout, payouts |
+| [ ] `SQUAD_SECRET_KEY` | Squad **live** secret key | checkout, webhook, payouts, virtual accounts |
+| [ ] `SQUAD_API_URL` | `https://api-d.squadco.com` (live). The sandbox is `https://sandbox-api-d.squadco.com` | checkout, payouts, virtual accounts |
+| [ ] `SQUAD_VIRTUAL_ACCOUNT_PREFIX` | Optional. `CYDEX` unless Squad assigns another | virtual accounts |
 | [ ] `SQUAD_MERCHANT_ID` | Live merchant ID from the Squad dashboard | payout references |
 | [ ] `APP_URL` | `https://<domain>` | Squad's return page after paying, admin invite links |
-| [ ] `BREVO_API_KEY` | From Brevo → SMTP & API → API Keys (needs the code switch in section 2) | `send-emails` |
+| [ ] `BREVO_API_KEY` | From Brevo → SMTP & API → API Keys | `send-emails` |
 | [ ] `EMAIL_FROM` | `Cydex <hello@your-domain>` | `send-emails` |
 | [ ] `EMAIL_CRON_SECRET` | A long random string (e.g. `openssl rand -hex 32`) | `send-emails` (section 4) |
 | [ ] `VAPID_PUBLIC_KEY` | From `npx web-push generate-vapid-keys` | `send-push` |
@@ -135,7 +135,7 @@ Generate **new** VAPID keys for production. Phones that allowed notifications on
 
 The database queues emails in `email_outbox` (welcome, payment confirmed, refund, verification, suspension). The `send-emails` function sends them every minute.
 
-- [ ] Make sure the **switch to Brevo** in section 2 is done and `send-emails` is redeployed.
+- [ ] Make sure `send-emails` is deployed to the production project. It uses Brevo whenever `BREVO_API_KEY` is set.
 - [ ] In Brevo, **add Cydex's domain** (Senders, Domains & Dedicated IPs → Domains) and add the DNS records it gives you at the domain registrar: Brevo's code, DKIM and DMARC. Wait until the domain shows as **Authenticated**.
 - [ ] **Add the sender** you'll use in `EMAIL_FROM` (e.g. `hello@your-domain`) under Senders.
 - [ ] Set `BREVO_API_KEY`, `EMAIL_FROM` and `EMAIL_CRON_SECRET` (section 3.4).
@@ -186,25 +186,22 @@ Every `VITE_` variable is built into the website, so **anyone can read it**. Onl
 
 | Variable | Value | Needed |
 |---|---|---|
-| [ ] `VITE_SUPABASE_URL` | `https://<prod-ref>.supabase.co` | Yes (once section 2 is done) |
-| [ ] `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API Keys → **anon / publishable** key | Yes (once section 2 is done) |
-| [ ] `VITE_APP_URL` | `https://<domain>` | Yes |
-| [ ] `VITE_NODE_ENV` | `production` | Yes: switches Squad to live |
+| [ ] `VITE_SUPABASE_URL` | `https://<prod-ref>.supabase.co` | Yes: the app won't start without it |
+| [ ] `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API Keys → **anon / publishable** key | Yes: the app won't start without it |
 | [ ] `VITE_GOOGLE_MAPS_API_KEY` | Cydex's restricted key | Yes |
-| [ ] `VITE_SQUAD_PROD_PUBLIC_KEY` | Squad live **public** key | Yes |
-| [ ] `VITE_SQUAD_MERCHANT_ID` | Squad live merchant ID | Yes, for virtual accounts |
-| [ ] `VITE_SQUAD_VIRTUAL_ACCOUNT_PREFIX` | `CYDEX` (or what Squad assigns) | Yes, for virtual accounts |
-| [ ] `VITE_SQUAD_API_URL` | `https://api-d.squadco.com` | Yes, for virtual accounts |
 | [ ] `VITE_VAPID_PUBLIC_KEY` | The production VAPID **public** key | Yes, for push notifications |
 
-**Don't add:**
-- `VITE_SQUAD_SECRET_KEY` and `VITE_SQUAD_PROD_SECRET_KEY`: to be removed (section 2).
-- `VITE_SQUAD_WEBHOOK_SECRET` and `VITE_PAYSTACK_WEBHOOK_SECRET`: not used.
-- **Never** a secret key (Squad secret, Supabase service role, VAPID private, Brevo) as a `VITE_` variable.
+That's all four. Squad has no app variables any more: its keys are function secrets (section 3.4).
+
+**Never** add a secret key (Squad secret, Supabase service role, VAPID private, Brevo) as a `VITE_` variable.
+
+### Local `.env.production` (for a production build on your computer)
+
+The same four variables, with the production values, go in `.env.production` in the repo folder (already created, with the names and blanks to fill; it's gitignored). `npm run build` and `npm run preview` use it; `npm run dev` doesn't. Vercel doesn't read it: Vercel uses the variables above.
 
 ### Local `.env` (for `npm run dev`)
 
-Copy `.env.example` to `.env` and fill in the same names, with **sandbox** Squad keys and the test Supabase project. `.env` is in `.gitignore`; never commit it. After editing it, restart `npm run dev`.
+Copy `.env.example` to `.env` and fill in the same names, for the test Supabase project. `.env` is in `.gitignore`; never commit it. After editing it, restart `npm run dev`.
 
 ---
 
@@ -214,7 +211,7 @@ Copy `.env.example` to `.env` and fill in the same names, with **sandbox** Squad
 - [ ] Choose the **production branch** (the branch Vercel deploys to the live site).
 - [ ] Add the environment variables (section 7), then **redeploy**. Vite only reads them at build time.
 - [ ] **Domain:** add it under Settings → Domains, and add the DNS records Vercel shows at the registrar. HTTPS is automatic.
-- [ ] Update everything that mentions the domain: Supabase **Site URL** and **Redirect URLs** (3.3), `APP_URL` (3.4), `VITE_APP_URL` (7), and the Google Maps key restriction (6).
+- [ ] Update everything that mentions the domain: Supabase **Site URL** and **Redirect URLs** (3.3), `APP_URL` (3.4) and the Google Maps key restriction (6).
 
 ---
 

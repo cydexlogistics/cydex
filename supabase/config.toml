@@ -1,4 +1,6 @@
-project_id = "hsnguuozyigpzstwqkrk"
+# Only names the local development stack. Which hosted project the CLI talks to
+# is set by `supabase link --project-ref <project-ref>` (kept in supabase/.temp, not committed).
+project_id = "cydex"
 
 # Squad calls this directly; it checks the Squad signature instead of a Supabase login
 [functions.squad-webhook]

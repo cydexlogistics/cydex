@@ -340,7 +340,7 @@ Created by the database (`notify_order_events` trigger, `welcome_new_user` trigg
 
 ### Emails
 
-Emails are queued in `email_outbox` by the database and sent by the `send-emails` Edge Function, through [Brevo](https://www.brevo.com) when `BREVO_API_KEY` is set and otherwise Resend. Until that's set up (see below), emails stay queued and nothing is lost; notifications in the app work regardless.
+Emails are queued in `email_outbox` by the database and sent by the `send-emails` Edge Function, through [Brevo](https://www.brevo.com). Until that's set up (see below), emails stay queued and nothing is lost; notifications in the app work regardless.
 
 Every email uses one Cydex template (logo header, heading, a highlighted box for codes and amounts, a button, and a footer with usecydex.com). Emails sent: welcome, payment confirmed, refund, **announcements** (admin broadcasts), **delivery code** (to the recipient of a rider request or Cydex Express delivery), and the verification emails in [VERIFICATION.md](VERIFICATION.md#emails).
 

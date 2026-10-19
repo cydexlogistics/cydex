@@ -2,9 +2,8 @@
 // confirmed, refund, verification, delivery codes for recipients). Meant to
 // run every minute from pg_cron.
 // Secrets:
-//   BREVO_API_KEY      from brevo.com (SMTP & API -> API Keys). Used when set;
-//   RESEND_API_KEY     otherwise Resend is used, if this is set instead
-//   EMAIL_FROM         e.g. "Cydex <hello@usecydex.com>" (a sender on a verified domain)
+//   BREVO_API_KEY      from brevo.com (SMTP & API -> API Keys)
+//   EMAIL_FROM         e.g. "Cydex <hello@usecydex.com>" (a sender verified in Brevo)
 //   EMAIL_CRON_SECRET  any long random string; callers send it as x-cron-secret
 import { adminClient } from '../_shared/squad.ts';
 
@@ -219,23 +218,14 @@ const parseFrom = (from: string) => {
   return m ? { name: m[1] || 'Cydex', email: m[2] } : { name: 'Cydex', email: from.trim() };
 };
 
-async function send(to: string, subject: string, html: string, from: string) {
-  const brevo = Deno.env.get('BREVO_API_KEY');
-  if (brevo) {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: { 'api-key': brevo, 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ sender: parseFrom(from), to: [{ email: to }], subject, htmlContent: html }),
-    });
-    if (!res.ok) throw new Error(`Brevo ${res.status}: ${await res.text()}`);
-    return;
-  }
-  const res = await fetch('https://api.resend.com/emails', {
+// Sends one email through Brevo's transactional email API
+async function send(to: string, subject: string, html: string, from: string, apiKey: string) {
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${Deno.env.get('RESEND_API_KEY')}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to, subject, html }),
+    headers: { 'api-key': apiKey, 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ sender: parseFrom(from), to: [{ email: to }], subject, htmlContent: html }),
   });
-  if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new Error(`Brevo ${res.status}: ${await res.text()}`);
 }
 
 Deno.serve(async (req) => {
@@ -244,7 +234,8 @@ Deno.serve(async (req) => {
     return new Response('Unauthorized', { status: 401 });
   }
   const from = Deno.env.get('EMAIL_FROM');
-  if (!from || !(Deno.env.get('BREVO_API_KEY') || Deno.env.get('RESEND_API_KEY'))) {
+  const apiKey = Deno.env.get('BREVO_API_KEY');
+  if (!from || !apiKey) {
     return new Response('Email is not configured', { status: 500 });
   }
 
@@ -261,7 +252,7 @@ Deno.serve(async (req) => {
   let sent = 0;
   for (const row of emails ?? []) {
     try {
-      await send(row.to_email, row.subject, render(row.template, row.data ?? {}), from);
+      await send(row.to_email, row.subject, render(row.template, row.data ?? {}), from, apiKey);
       await db.from('email_outbox').update({ status: 'sent', sent_at: new Date().toISOString(), attempts: row.attempts + 1 })
         .eq('id', row.id);
       sent++;

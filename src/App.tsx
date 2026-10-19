@@ -1,4 +1,5 @@
 
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '@/integrations/supabase/config';
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,8 +17,8 @@ import { ConfirmProvider } from "@/contexts/ConfirmContext";
 const queryClient = new QueryClient();
 
 function App() {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+  const supabaseUrl = SUPABASE_URL;
+  const supabaseAnonKey = SUPABASE_ANON_KEY;
   return (
     <ErrorBoundary>
       <ThemeProvider>

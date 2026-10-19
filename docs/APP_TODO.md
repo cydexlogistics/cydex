@@ -8,18 +8,17 @@ Everything needed to go live (accounts, environment variables, Supabase settings
 
 ## General
 
-- [ ] **Push the second October 2026 update live.** Built and tested on a local copy of the database; not on the live project yet. It covers everything under [Built, waiting to go live](#built-waiting-to-go-live). (The first October update, the six `20261013…` migrations, is live.)
-  1. `npx -y supabase@2.118.0 db push --linked` (`20261015100000_promotion_show_in_offers.sql`; the earlier `20261014…` and `20261015000000` migrations are already live)
-  2. `npx -y supabase@2.118.0 functions deploy send-emails` (the announcement email), if not done yet
-  3. Deploy the web app.
-  4. Set how far each vehicle type goes on **Admin → Riders & vehicles**. They all start at 5 km, so nothing changes until you do.
+- [ ] **Finish putting the second October 2026 update live.** Its database changes up to `20261015100000` are live. Left to do, in this order:
+  1. `npx -y supabase@2.118.0 functions deploy squad-virtual-account` **before** deploying the web app (the app now creates virtual accounts through it).
+  2. `npx -y supabase@2.118.0 db push --linked` (`20261015200000_virtual_accounts_server_side.sql`).
+  3. `npx -y supabase@2.118.0 functions deploy send-emails` (the announcement email), if not done yet.
+  4. Deploy the web app.
+  5. Set how far each vehicle type goes on **Admin → Riders & vehicles**. They all start at 5 km, so nothing changes until you do.
 - [ ] **Use Cydex's own Google Maps API key.** The current key (`VITE_GOOGLE_MAPS_API_KEY`) belongs to the Faramove project, so Cydex's map usage is billed there.
   - Create a key in Cydex's Google Cloud project with Places API (New), Maps JavaScript API and Geocoding API enabled.
   - Restrict it to Cydex's web addresses.
   - Update `.env` and the Vercel environment variables.
-- [ ] **Move the Supabase settings into environment variables.** The Supabase URL and key are written into the code (`src/integrations/supabase/client.ts`, `src/lib/supabase.ts`) instead of read from `.env`.
-  - The key in there is the public anon key, which is safe in the browser.
-  - Make sure no secret key, such as the `service_role` key, ever goes into the code or a `VITE_` variable. Anything named `VITE_` is visible to anyone using the site.
+
 - [ ] **Rider and vendor onboarding and verification.** Make each account's verification status visible to them and to admins, and decide what an unverified account can't do.
   - **Riders:** verify their **NIN**, **address** and **vehicle**. More checks will be added later. The verified vehicle type is also the starting point for eco-friendly rewards (see [Eco-friendly deliveries](#eco-friendly-deliveries)).
   - **Vendors:** decide what they need to submit and who reviews it.
@@ -30,12 +29,11 @@ Everything needed to go live (accounts, environment variables, Supabase settings
   3. `npx supabase secrets set SQUAD_SECRET_KEY=<sandbox secret key> SQUAD_API_URL=https://sandbox-api-d.squadco.com SQUAD_MERCHANT_ID=<merchant id> APP_URL=<site URL>`. Use the live key and `https://api-d.squadco.com` in production.
 
   Until this is done, checkout and withdrawals don't work.
-- [ ] **Set the Squad webhook URL.** In the Squad dashboard, set the webhook to `https://hsnguuozyigpzstwqkrk.supabase.co/functions/v1/squad-webhook`. Without it, a payment is only confirmed if the customer returns to the confirmation page after paying.
-- [ ] **Set up sending emails.** Welcome, payment-confirmed and refund emails are queued in `email_outbox` but nothing sends them yet.
-  - The provider is [Brevo](https://www.brevo.com). `supabase/functions/send-emails` uses Brevo when `BREVO_API_KEY` is set (and Resend otherwise), with one Cydex email template.
-  - Create the Brevo account, verify Cydex's sending domain, set `BREVO_API_KEY`, `EMAIL_FROM` and `EMAIL_CRON_SECRET`, and schedule `send-emails`.
-  - Step by step: [DEPLOYMENT_CHECKLIST.md → Emails (Brevo)](DEPLOYMENT_CHECKLIST.md#4-emails-brevo).
-- [ ] **Move virtual account creation server-side.** Payments and withdrawals now use the Squad secret key only on the server, but creating virtual accounts (`walletSetupService`, `squadVirtualAccountService`) still uses it in the browser. Move that to an Edge Function, then remove `VITE_SQUAD_SECRET_KEY` / `VITE_SQUAD_PROD_SECRET_KEY` and rotate the live key that is written in `src/config/squad.ts`.
+- [ ] **Set the Squad webhook URL.** In the Squad dashboard, set the webhook to `https://<project-ref>.supabase.co/functions/v1/squad-webhook` (the project ref is in Supabase → Project Settings → General, and in `VITE_SUPABASE_URL`). Without it, a payment is only confirmed if the customer returns to the confirmation page after paying.
+- [ ] **Finish email setup: verify Cydex's domain in Brevo.** App emails are live on dev and production (15 October 2026): Brevo key, cron secret and the every-minute sender are set on both, and `send-emails` sends through Brevo only.
+  - For now they come from a temporary Gmail sender (set in `EMAIL_FROM`), which Brevo must have verified. Mail from a Gmail address sent through Brevo often lands in spam.
+  - Once `usecydex.com` is verified in Brevo, switch the sender on both projects: `npx supabase secrets set EMAIL_FROM="Cydex <hello@usecydex.com>" --project-ref <ref>`.
+  - Login emails (sign-up confirmation, password reset) are separate: Supabase Auth → SMTP settings. See [DEPLOYMENT_CHECKLIST.md → Emails (Brevo)](DEPLOYMENT_CHECKLIST.md#4-emails-brevo).
 
 ## Customers
 
@@ -94,6 +92,7 @@ The second October 2026 update. See [ORDER_FLOW.md](ORDER_FLOW.md) and [ADMIN.md
 - **Distance per delivery mode:** each vehicle type has its own longest trip, used for which vendors customers see, which modes they can pick and which deliveries riders see.
 - **Broadcasts:** admins send announcements as notifications and/or emails, to chosen groups, everywhere or near a place, now or later.
 - **Minimum withdrawal:** ₦3,000 for vendors and riders.
+- **Security clean-up:** virtual accounts created on the server (`squad-virtual-account` function); every Squad and Paystack key removed from the website's code; the app reads only four public settings from the environment. Still to do: rotate the Squad keys (see [DEPLOYMENT_CHECKLIST.md → Code clean-up](DEPLOYMENT_CHECKLIST.md#2-code-clean-up-before-the-production-build)).
 - **Landing page:** a "Get the Cydex app" section and a **Download App** link in the footer, with install steps for Android, iPhone and computers.
 
 ## Already done

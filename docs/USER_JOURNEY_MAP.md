@@ -417,8 +417,7 @@ This document outlines the complete step-by-step journeys for all three user typ
 **Implementation Reference:**
 - `src/components/customer/PaymentModal.tsx`
 - `src/pages/customer/NewOrder.tsx` (handlePaymentSuccess, lines 322-361)
-- `src/services/paymentService.ts`
-- `src/hooks/usePaystack.ts`
+- `supabase/functions/squad-checkout/` (starts and confirms Squad payments)
 
 ---
 
@@ -514,9 +513,8 @@ This document outlines the complete step-by-step journeys for all three user typ
 - Refunds can be processed if order is cancelled (implementation may vary)
 
 **Implementation Reference:**
-- `src/services/paymentService.ts`
-- `src/services/webhookHandler.ts` (Paystack webhooks)
-- Payment verification in `src/lib/paystack.ts`
+- `supabase/functions/squad-checkout/` and `supabase/functions/squad-webhook/` (Squad payment confirmation)
+- Refunds: `refund_order` in the database
 
 ---
 
@@ -768,8 +766,7 @@ On Delivery:
 
 **Services:**
 - `src/services/settlementService.ts` - Core settlement logic
-- `src/services/paymentService.ts` - Paystack integration
-- `src/services/webhookHandler.ts` - Payment webhook processing
+- `supabase/functions/squad-checkout/`, `squad-webhook/`, `squad-payout/`, `squad-virtual-account/` - Squad payments, withdrawals and virtual accounts (server-side)
 
 **Hooks:**
 - `src/hooks/useVendorFinancials.ts` - Vendor wallet management
