@@ -42,7 +42,8 @@ export const handleRegister = async (name: string, email: string, password: stri
           name,
           role: role.toLowerCase(), // Store as lowercase to match database
         },
-        emailRedirectTo: `${window.location.origin}/auth`
+        // The confirmation link comes back here; the login page then asks them to log in
+        emailRedirectTo: `${window.location.origin}/auth?confirmed=1`
       }
     });
 

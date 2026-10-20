@@ -1,6 +1,6 @@
 # Deployment Checklist
 
-Everything to set up before Cydex takes real orders and real money: accounts, environment variables, Supabase settings, Squad, emails, hosting and the launch test. Up to date as of 9 October 2026.
+Everything to set up before Cydex takes real orders and real money: accounts, environment variables, Supabase settings, Squad, emails, hosting and the launch test. Up to date as of 19 October 2026.
 
 Work top to bottom and tick each item (`[x]`) as it's done. Steps marked **(new project only)** are only needed if production gets its own Supabase project. The current (test) project already has them. The production project's ref is in `.env.production` (gitignored) and in its Supabase dashboard address; below it's written as `<prod-ref>`.
 
@@ -135,7 +135,7 @@ Generate **new** VAPID keys for production. Phones that allowed notifications on
 
 The database queues emails in `email_outbox` (welcome, payment confirmed, refund, verification, suspension). The `send-emails` function sends them every minute.
 
-- [ ] Make sure `send-emails` is deployed to the production project. It uses Brevo whenever `BREVO_API_KEY` is set.
+- [ ] Make sure `send-emails` is deployed to the production project. It sends through Brevo only, and needs `BREVO_API_KEY` and `EMAIL_FROM` to be set.
 - [ ] In Brevo, **add Cydex's domain** (Senders, Domains & Dedicated IPs → Domains) and add the DNS records it gives you at the domain registrar: Brevo's code, DKIM and DMARC. Wait until the domain shows as **Authenticated**.
 - [ ] **Add the sender** you'll use in `EMAIL_FROM` (e.g. `hello@your-domain`) under Senders.
 - [ ] Set `BREVO_API_KEY`, `EMAIL_FROM` and `EMAIL_CRON_SECRET` (section 3.4).

@@ -10,7 +10,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { errorMessage } from '@/lib/address';
 
 // Where the links in password-reset and admin-invite emails land. The link
-// signs them in; here they choose a password and go to their dashboard.
+// signs them in; here they choose a password. After a reset they're signed out
+// and sent to the login page to log in with it; invited admins go straight to
+// their dashboard.
 const SetPassword = () => {
   const navigate = useNavigate();
   const [ready, setReady] = useState<'checking' | 'yes' | 'no'>('checking');
@@ -41,9 +43,15 @@ const SetPassword = () => {
     try {
       const { data, error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
+      if (!invited) {
+        await supabase.auth.signOut();
+        toast.success('Password updated. Log in with your new password.');
+        navigate('/auth', { replace: true });
+        return;
+      }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
       const role = String(profile?.role ?? 'customer').toLowerCase();
-      toast.success(invited ? 'Welcome to the Cydex team' : 'Password updated');
+      toast.success('Welcome to the Cydex team');
       // Full load so the app picks up the signed-in profile
       window.location.replace(`/${role}`);
     } catch (err) {
