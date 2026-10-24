@@ -252,7 +252,7 @@ const VendorRecyclingPage = () => {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="history" className="w-full">
-                  <TabsList className="mb-3 sm:mb-4 w-full grid grid-cols-3 sm:w-auto sm:flex">
+                  <TabsList className="mb-3 sm:mb-4 w-full sm:w-auto">
                     <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
                     <TabsTrigger value="partners" className="text-xs sm:text-sm">Partners</TabsTrigger>
                     <TabsTrigger value="impact" className="text-xs sm:text-sm">Impact</TabsTrigger>

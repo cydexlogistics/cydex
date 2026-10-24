@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import SimplePagination from '@/components/ui/simple-pagination';
 import { supabase } from '@/integrations/supabase/client';
 import { errorMessage } from '@/lib/address';
-import { nairaWhole, periodRange, PERIOD_LABELS, type Period } from '@/lib/adminPeriod';
+import { DEFAULT_PERIOD, nairaWhole, periodRange, PERIOD_LABELS, type Period } from '@/lib/adminPeriod';
 import { formatNaira } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
 import PeriodFilter from '../PeriodFilter';
@@ -42,7 +42,7 @@ const COLUMNS: { key: keyof Row; label: string; cydex?: boolean }[] = [
 // Every delivered order's money: who paid, what the vendor and rider got and
 // what Cydex kept from each side. Refunded orders aren't here (nothing was kept).
 const EarningsTab = () => {
-  const [period, setPeriod] = useState<Period>({ preset: 'this_month' });
+  const [period, setPeriod] = useState<Period>(DEFAULT_PERIOD);
   const [type, setType] = useState('all');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);

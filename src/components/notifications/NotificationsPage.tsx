@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import {
-  Bell, BellRing, Bike, CheckCheck, CircleCheck, Megaphone, CreditCard, Landmark, MapPin, Package, PartyPopper, ShieldCheck, Truck, Undo2, XCircle,
+  Bell, BellRing, Bike, CheckCheck, CircleCheck, Megaphone, CreditCard, Landmark, MapPin, Package, PartyPopper, ShieldCheck, Trophy, Truck, Undo2, UserPlus, XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import { useState } from 'react';
 
 type Role = 'customer' | 'vendor' | 'rider' | 'admin';
 
-const ICONS: Record<string, React.ElementType> = {
+export const ICONS: Record<string, React.ElementType> = {
   welcome: PartyPopper,
   new_order: Package,
   payment_confirmed: CreditCard,
@@ -37,6 +37,8 @@ const ICONS: Record<string, React.ElementType> = {
   payout_requested: Landmark,
   payout_rejected: Landmark,
   verification_request: ShieldCheck,
+  reward: Trophy,
+  referral: UserPlus,
 };
 
 // Admin notifications that aren't about one order
@@ -49,6 +51,9 @@ const ADMIN_LINKS: Record<string, string> = {
 const orderLink = (role: Role, n: AppNotification): string | null => {
   const orderId = n.metadata?.order_id;
   if (role === 'admin') return orderId ? `/admin/orders/${orderId}` : ADMIN_LINKS[n.type] ?? null;
+  if (n.type === 'reward') return role === 'rider' ? '/rider/profile?tab=achievements' : `/${role}/rewards`;
+  // Referral rewards are paid into the wallet (riders: earnings)
+  if (n.type === 'referral') return role === 'rider' ? '/rider/earnings' : `/${role}/wallet`;
   if (!orderId) return null;
   if (role === 'customer') return `/customer/orders/${orderId}`;
   if (role === 'vendor') return `/vendor/orders/${orderId}`;

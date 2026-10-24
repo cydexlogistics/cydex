@@ -25,7 +25,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   const { position } = useRiderLocation();
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const totalEarnings = Number(order.rider_earning ?? 0); // Rider's share of the delivery fee
-  const hasCarbonSavings = Number(order.carbon_saved) > 0;
 
   return (
     <>
@@ -84,11 +83,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 
         {/* Additional Info */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {hasCarbonSavings && (
-            <Badge variant="outline" className="text-xs bg-green-50 dark:bg-green-500/15 text-green-700 dark:text-green-300 border-green-200 dark:border-green-500/30">
-              {Number(order.carbon_saved).toFixed(1)} kg CO₂ saved
-            </Badge>
-          )}
           {order.special_instructions && (
             <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/30">
               <AlertCircle className="h-3 w-3 mr-1" />

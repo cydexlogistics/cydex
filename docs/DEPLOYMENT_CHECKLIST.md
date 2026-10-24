@@ -82,9 +82,9 @@ Supabase dashboard → **Authentication**.
 - [ ] **URL Configuration:**
   - **Site URL:** `https://<domain>`
   - **Redirect URLs:**
-    - `https://<domain>/auth`: sign-up confirmation
+    - `https://<domain>/auth?confirmed=1`: sign-up confirmation (the link lands on the login page, which asks them to log in)
     - `https://<domain>/auth/set-password`: password reset **and admin invites**
-    - While testing, also `http://localhost:8080/auth` and `http://localhost:8080/auth/set-password`
+    - While testing, also `http://localhost:8080/auth?confirmed=1` and `http://localhost:8080/auth/set-password`
 - [ ] **Sign In / Providers → Email:** **Confirm email** on.
 - [ ] **Emails → SMTP Settings:** add Brevo's SMTP details (Brevo → SMTP & API → SMTP). Supabase's built-in email only sends a few messages per hour, which isn't enough for real users.
   - Host `smtp-relay.brevo.com`, port `587`
@@ -93,7 +93,7 @@ Supabase dashboard → **Authentication**.
   - Sender: `Cydex <hello@your-domain>`
 - [ ] **Emails → Templates:** brand these with Cydex's name and colours:
   - **Confirm signup**
-  - **Reset password:** the link opens the Set password page
+  - **Reset password:** the link opens the Set password page, then they log in with the new password
   - **Invite user:** sent when an admin invites another admin. Suggested subject: "You've been invited to the Cydex admin team"
 - [ ] **Attack Protection:** turn on **leaked password protection**.
 - [ ] **Advisors:** run the **Security Advisor** and **Performance Advisor**, and fix anything marked error or warning.
@@ -209,7 +209,7 @@ Copy `.env.example` to `.env` and fill in the same names, for the test Supabase 
 
 - [ ] **Import the GitHub repo** in Vercel. Framework **Vite**, build command `npm run build`, output folder `dist`. `vercel.json` already sends every page to the app.
 - [ ] Choose the **production branch** (the branch Vercel deploys to the live site).
-- [ ] Add the environment variables (section 7), then **redeploy**. Vite only reads them at build time.
+- [ ] Add the environment variables (section 7), then **redeploy**. Vite only reads them at build time. If `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` is missing from a build, the site shows a "Cydex isn't set up on this deployment yet" page naming what's missing.
 - [ ] **Domain:** add it under Settings → Domains, and add the DNS records Vercel shows at the registrar. HTTPS is automatic.
 - [ ] Update everything that mentions the domain: Supabase **Site URL** and **Redirect URLs** (3.3), `APP_URL` (3.4) and the Google Maps key restriction (6).
 

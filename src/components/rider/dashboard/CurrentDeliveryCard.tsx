@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Clock, User, Navigation, Leaf } from 'lucide-react';
+import { Package, MapPin, Clock, User, Navigation } from 'lucide-react';
 import { DeliveryData } from '@/hooks/useRiderData';
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import RiderDeliveryActions from '@/components/rider/RiderDeliveryActions';
@@ -70,10 +70,6 @@ export const CurrentDeliveryCard: React.FC<CurrentDeliveryCardProps> = ({
                             <span className="font-medium">
                               ₦{Number(delivery.rider_earning ?? 0).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                             </span>
-                          </div>
-                          <div className="flex items-center text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
-                            <Leaf className="h-3 w-3 mr-1" />
-                            <span>{Number(delivery.carbon_saved).toFixed(1)} kg CO₂</span>
                           </div>
                         </div>
                       </div>

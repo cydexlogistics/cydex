@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import ReferralCard from '@/components/referrals/ReferralCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { isValidPhone } from '@/lib/phone';
 
 import ProfileAvatar from '@/components/customer/profile/ProfileAvatar';
 import ProfileForm from '@/components/customer/profile/ProfileForm';
@@ -22,8 +22,11 @@ const ProfilePage = () => {
   // ?tab=addresses opens Saved addresses (linked from the Deliver to bar)
   const [searchParams] = useSearchParams();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState<any>(null);
+  // What's saved, and what's in the form
+  const [profileData, setProfileData] = useState<{ name: string; email: string; phone: string; dateJoined: string } | null>(null);
+  const [form, setForm] = useState({ name: '', email: '', phone: '' });
+  const [touched, setTouched] = useState({ name: false, phone: false });
+  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Fetch user's profile
@@ -45,7 +48,7 @@ const ProfilePage = () => {
         setLoading(false);
         return;
       }
-      setProfileData({
+      const loaded = {
         name: data.name || "",
         email: data.email || "",
         phone: data.phone || "",
@@ -55,10 +58,9 @@ const ProfilePage = () => {
               month: "long"
             })
           : "",
-        carbonCredits: data.carbon_credits ?? 0,
-        ordersCompleted: 0, // If available in another table, fetch and populate
-        sustainabilityScore: 8.7 // Placeholder, if you have a sourced metric, replace
-      });
+      };
+      setProfileData(loaded);
+      setForm({ name: loaded.name, email: loaded.email, phone: loaded.phone });
       setLoading(false);
     };
 
@@ -66,37 +68,38 @@ const ProfilePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
+  const errors = {
+    name: form.name.trim().length < 2 ? 'Enter your full name.' : null,
+    phone: !form.phone.trim() ? 'Enter your phone number. Riders use it to reach you.'
+      : !isValidPhone(form.phone) ? 'Enter a valid phone number, e.g. 08012345678.' : null,
+  };
+  const changed = !!profileData && (form.name.trim() !== profileData.name.trim() || form.phone.trim() !== profileData.phone.trim());
+  const valid = !errors.name && !errors.phone;
+
   const handleSave = async () => {
-    if (!user?.id) return;
-    setIsEditing(false);
+    if (!user?.id || !profileData) return;
+    setTouched({ name: true, phone: true });
+    if (!valid || !changed) return;
+    setSaving(true);
     // Addresses are managed in the Saved addresses tab
-    const updates: any = {
-      name: profileData.name,
-      phone: profileData.phone,
-    };
+    const updates = { name: form.name.trim(), phone: form.phone.trim() };
     const { error } = await supabase
       .from('profiles')
       .update(updates)
       .eq('id', user.id);
+    setSaving(false);
     if (error) {
       toast({
         variant: "destructive",
         title: "Profile update failed",
         description: error.message,
       });
-    } else {
-      toast({
-        variant: "default",   // Fixed: "success" not allowed, use "default"
-        title: "Profile updated successfully!"
-      });
+      return;
     }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setProfileData((prev: any) => ({
-      ...prev,
-      [field]: value
-    }));
+    setProfileData({ ...profileData, ...updates });
+    setForm((f) => ({ ...f, ...updates }));
+    setTouched({ name: false, phone: false });
+    toast({ variant: "default", title: "Profile updated" });
   };
 
   if (loading || !profileData) {
@@ -113,21 +116,11 @@ const ProfilePage = () => {
   return (
     <DashboardLayout userRole="CUSTOMER">
       <div className="p-2 sm:p-4 md:p-6 max-w-full mx-auto space-y-3 sm:space-y-4 md:space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          <div>
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">My Profile</h1>
-            <p className="text-sm sm:text-base text-gray-600">
-              Manage your profile information and settings
-            </p>
-          </div>
-          <Button 
-            onClick={() => setIsEditing(true)} 
-            disabled={isEditing}
-            className="text-sm sm:text-base w-full sm:w-auto"
-          >
-            <Settings className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-            Edit Profile
-          </Button>
+        <div>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">My Profile</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Manage your profile information and settings
+          </p>
         </div>
 
         <Card>
@@ -145,17 +138,22 @@ const ProfilePage = () => {
                 </TabsTrigger>
                 <TabsTrigger value="security" className="text-xs sm:text-sm flex-1">Security</TabsTrigger>
                 <TabsTrigger value="preferences" className="text-xs sm:text-sm flex-1">Preferences</TabsTrigger>
+                <TabsTrigger value="referrals" className="text-xs sm:text-sm flex-1">Referrals</TabsTrigger>
               </TabsList>
 
               <TabsContent value="account">
                 <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
                   <ProfileAvatar name={profileData.name} />
-                  <ProfileForm 
-                    profileData={profileData}
-                    isEditing={isEditing}
-                    handleInputChange={handleInputChange}
-                    handleSave={handleSave}
-                    setIsEditing={setIsEditing}
+                  <ProfileForm
+                    values={form}
+                    errors={errors}
+                    // Missing details show their error straight away; others once edited
+                    showErrors={{ name: touched.name || !profileData.name, phone: touched.phone || !profileData.phone }}
+                    onChange={(field, value) => setForm((f) => ({ ...f, [field]: value }))}
+                    onBlur={(field) => setTouched((t) => ({ ...t, [field]: true }))}
+                    onSave={handleSave}
+                    canSave={changed && valid}
+                    saving={saving}
                   />
                 </div>
               </TabsContent>
@@ -171,12 +169,16 @@ const ProfilePage = () => {
               <TabsContent value="preferences">
                 <PreferencesSettings />
               </TabsContent>
+
+              <TabsContent value="referrals">
+                <ReferralCard />
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <AccountSummary profileData={profileData} />
+          <AccountSummary dateJoined={profileData.dateJoined} />
           <RecentActivity />
         </div>
       </div>

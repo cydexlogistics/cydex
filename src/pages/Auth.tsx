@@ -17,7 +17,8 @@ import LoadingDisplay from "@/components/ui/LoadingDisplay";
 const Auth = () => {
   const { isAuthenticated, user, loading } = useAuth();
   const [searchParams] = useSearchParams();
-  const defaultTab = searchParams.get('tab') === 'register' ? 'signup' : 'login';
+  // ?ref=CODE is a referral link: open Sign up with the code filled in
+  const defaultTab = searchParams.get('tab') === 'register' || searchParams.get('ref') ? 'signup' : 'login';
   const navigate = useNavigate();
   // True once the saved session has been checked. `loading` alone also turns on
   // during a login attempt, which mustn't hide (and reset) the form.
@@ -64,7 +65,7 @@ const Auth = () => {
   return (
     <AuthLayout>
       <Tabs defaultValue={confirmed ? 'login' : defaultTab}>
-        <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsList className="w-full mb-6">
           <TabsTrigger value="login">Login</TabsTrigger>
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
         </TabsList>

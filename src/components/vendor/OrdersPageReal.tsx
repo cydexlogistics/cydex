@@ -212,7 +212,7 @@ const OrdersPageReal = () => {
           
           <CardContent>
             <Tabs defaultValue="all" className="w-full">
-              <TabsList className="mb-4 w-full sm:w-auto grid grid-cols-5 sm:flex">
+              <TabsList className="mb-4 w-full sm:w-auto">
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="today">Today</TabsTrigger>
                 <TabsTrigger value="pending">New</TabsTrigger>

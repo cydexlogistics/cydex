@@ -15,6 +15,7 @@ import ProcessOrder from '../pages/vendor/ProcessOrder';
 import VendorWallet from '../pages/vendor/Wallet';
 // import VendorRecycling from '../pages/vendor/Recycling';
 import VendorSettings from '../pages/vendor/Settings';
+import VendorRewards from '../pages/vendor/Rewards';
 import AddProduct from '../pages/vendor/AddProduct';
 
 const VendorRoutes = () => {
@@ -91,6 +92,15 @@ const VendorRoutes = () => {
           </ProtectedRoute>
         } 
       /> */}
+
+      <Route
+        path="/rewards"
+        element={
+          <ProtectedRoute allowedRoles={['VENDOR']}>
+            <VendorRewards />
+          </ProtectedRoute>
+        }
+      />
 
       <Route 
         path="/settings" 

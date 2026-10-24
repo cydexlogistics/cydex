@@ -49,7 +49,7 @@ const CustomerDashboard = () => {
   const { maxTripText } = useVehicleTypes();
 
   const activeOrders = orders.filter((o) => !['delivered', 'cancelled', 'rejected'].includes(o.status));
-  const totalCarbonSaved = orders.reduce((total, o) => total + (o.carbon_credits_earned || 0), 0);
+  const deliveredCount = orders.filter((o) => o.status === 'delivered').length;
 
   // Nearby: closest first. Popular: most orders in the last 30 days.
   // Other vendors: everyone not already shown above.
@@ -97,11 +97,11 @@ const CustomerDashboard = () => {
           </Card>
           <Card>
             <CardHeader className="pb-1 sm:pb-2">
-              <CardTitle className="text-sm font-medium sm:text-base">Carbon Savings</CardTitle>
+              <CardTitle className="text-sm font-medium sm:text-base">Delivered</CardTitle>
             </CardHeader>
             <CardContent className="pt-1 sm:pt-2">
-              <div className="text-2xl font-bold sm:text-3xl">{totalCarbonSaved.toFixed(1)} kg</div>
-              <p className="text-xs text-muted-foreground sm:text-sm">CO₂ reduced</p>
+              <div className="text-2xl font-bold sm:text-3xl">{ordersLoading ? '–' : deliveredCount}</div>
+              <p className="text-xs text-muted-foreground sm:text-sm">Orders received</p>
             </CardContent>
           </Card>
           <Card className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => navigate('/customer/orders')}>

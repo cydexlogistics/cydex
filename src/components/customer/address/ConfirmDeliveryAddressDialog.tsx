@@ -173,7 +173,7 @@ export const ConfirmDeliveryAddressDialog: React.FC<ConfirmDeliveryAddressDialog
                 usesLeft={quote.promotion_uses_left}
                 couponApplied={couponApplied}
                 // An items offer only fits its own business
-                fits={(o) => o.applies_to !== 'items' || o.vendor_id === vendorId}
+                fits={(o) => (o.applies_to !== 'items' || o.vendor_id === vendorId) && (!o.partner_vendor_ids || o.partner_vendor_ids.includes(vendorId))}
                 onUseCode={setCoupon}
                 vehicleType={quote.vehicle_type}
                 distanceKm={quote.distance_km}

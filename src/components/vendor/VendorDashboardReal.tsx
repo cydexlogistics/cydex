@@ -3,17 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Package, 
-  TrendingUp, 
-  DollarSign, 
-  Leaf, 
-  Star,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Plus
-} from 'lucide-react';
+import { Package, TrendingUp, DollarSign, Star, Clock, CheckCircle, AlertCircle, Plus, CheckCircle2 } from 'lucide-react';
 import { useVendorStats } from '@/hooks/useVendorStats';
 import { useVendorOrders } from '@/hooks/useVendorOrders';
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
@@ -130,15 +120,15 @@ const VendorDashboardReal = () => {
 
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 py-2 px-3">
-            <CardTitle className="text-xs sm:text-sm font-medium">Carbon</CardTitle>
-            <Leaf className="h-3 w-3 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Delivered</CardTitle>
+            <CheckCircle2 className="h-3 w-3 text-muted-foreground" />
           </CardHeader>
           <CardContent className="py-2 px-3">
             <div className="text-base sm:text-lg font-bold">
-              {(stats?.total_carbon_saved || 0).toFixed(1)}kg
+              {stats?.delivered_orders || 0}
             </div>
             <p className="text-[10px] sm:text-xs text-muted-foreground">
-              Saved
+              Orders completed
             </p>
           </CardContent>
         </Card>

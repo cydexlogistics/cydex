@@ -333,8 +333,8 @@ const CydexExpress = () => {
                     discount={quote.discount_amount}
                     usesLeft={quote.promotion_uses_left}
                     couponApplied={couponApplied}
-                    // Items offers are for orders from a business, not Express
-                    fits={(o) => o.applies_to !== 'items'}
+                    // Items and vendor partnership offers are for orders from a business, not Express
+                    fits={(o) => o.applies_to !== 'items' && !o.partner_vendor_ids}
                     onUseCode={setCoupon}
                     vehicleType={quote.vehicle_type}
                     distanceKm={quote.distance_km}

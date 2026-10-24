@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   AlertTriangle, ArrowRightLeft, Banknote, Bell, Bike, CheckCircle2, ChevronRight, Clock, Landmark, Mail, Package,
-  ShieldCheck, Store, Truck, Wallet,
+  ShieldCheck, Store, Truck, UserCheck, Wallet,
 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { supabase } from '@/integrations/supabase/client';
-import { nairaWhole, periodRange, PERIOD_LABELS, type Period } from '@/lib/adminPeriod';
+import { DEFAULT_PERIOD, nairaWhole, periodRange, PERIOD_LABELS, type Period } from '@/lib/adminPeriod';
 import { orderStatusLabel } from '@/lib/orderStatus';
 import PeriodFilter from './PeriodFilter';
 
@@ -65,7 +65,7 @@ const Stat = ({
 
 // Admin home: money for the chosen period, what's happening now, and orders that look stuck
 const Overview = () => {
-  const [period, setPeriod] = useState<Period>({ preset: 'this_month' });
+  const [period, setPeriod] = useState<Period>(DEFAULT_PERIOD);
   const [chart, setChart] = useState<'money' | 'orders'>('money');
   const range = periodRange(period);
 
@@ -80,6 +80,24 @@ const Overview = () => {
       });
       if (error) throw error;
       return data as unknown as DashboardStats;
+    },
+  });
+
+  // Customers, vendors and riders active in the period
+  const { data: active } = useQuery({
+    queryKey: ['admin-active-users', range.from, range.to],
+    placeholderData: (previous) => previous,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('admin_active_users', {
+        p_from: range.from ?? undefined,
+        p_to: range.to ?? undefined,
+      });
+      if (error) throw error;
+      return data as unknown as {
+        customers: number; vendors: number; riders: number;
+        total_customers: number; total_vendors: number; total_riders: number;
+      };
     },
   });
 
@@ -195,6 +213,31 @@ const Overview = () => {
         />
         <Stat label="Paid to vendors" icon={Store} value={dash ?? nairaWhole(s?.revenue.paid_to_vendors)} />
         <Stat label="Paid to riders" icon={Bike} value={dash ?? nairaWhole(s?.revenue.paid_to_riders)} />
+      </div>
+
+      {/* Who was active in the period */}
+      <div className="grid grid-cols-1 gap-3 xs:grid-cols-3">
+        <Stat
+          label="Active customers"
+          icon={UserCheck}
+          value={active ? String(active.customers) : '…'}
+          hint={active && `Placed a paid order · of ${active.total_customers}`}
+          to="/admin/users"
+        />
+        <Stat
+          label="Active vendors"
+          icon={Store}
+          value={active ? String(active.vendors) : '…'}
+          hint={active && `Had a paid order or rider request · of ${active.total_vendors}`}
+          to="/admin/users"
+        />
+        <Stat
+          label="Active riders"
+          icon={Bike}
+          value={active ? String(active.riders) : '…'}
+          hint={active && `Took a delivery · of ${active.total_riders}`}
+          to="/admin/users"
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">

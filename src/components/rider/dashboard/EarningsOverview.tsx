@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { RiderEarnings } from '@/hooks/useRiderData';
+import { useRiderPendingEarnings } from '@/hooks/rider/useRiderPerformance';
 
 interface EarningsOverviewProps {
   todaysEarnings: RiderEarnings[];
@@ -18,6 +19,7 @@ export const EarningsOverview: React.FC<EarningsOverviewProps> = ({
 }) => {
   const totalEarnings = todaysEarnings.reduce((sum, earning) => sum + Number(earning.total_earnings), 0);
   const progressPercentage = Math.min((deliveriesCompleted / dailyGoal) * 100, 100);
+  const { data: pending } = useRiderPendingEarnings();
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
@@ -34,13 +36,15 @@ export const EarningsOverview: React.FC<EarningsOverviewProps> = ({
       
       <Card>
         <CardHeader className="pb-1 sm:pb-2">
-          <CardTitle className="text-sm sm:text-base font-medium">Carbon Impact</CardTitle>
+          <CardTitle className="text-sm sm:text-base font-medium">Pending Earnings</CardTitle>
         </CardHeader>
         <CardContent className="pt-1 sm:pt-2">
           <div className="text-xl sm:text-2xl md:text-3xl font-bold">
-            {(todaysEarnings.reduce((sum, earning) => sum + Number(earning.carbon_credits_earned || 0), 0) / 1000).toFixed(1)} kg
+            ₦{(pending?.amount ?? 0).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
           </div>
-          <p className="text-xs sm:text-sm text-gray-500">CO₂ emissions prevented today</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {pending?.deliveries ? `For ${pending.deliveries} deliver${pending.deliveries === 1 ? 'y' : 'ies'} in progress` : 'No deliveries in progress'}
+          </p>
         </CardContent>
       </Card>
       

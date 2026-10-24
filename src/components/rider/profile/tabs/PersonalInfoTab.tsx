@@ -1,107 +1,61 @@
-
-import React, { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import React, { useEffect, useState } from 'react';
 import PersonalInfoForm from './forms/PersonalInfoForm';
 import NotificationSettingsCard from '@/components/notifications/NotificationSettingsCard';
-
-export interface PersonalDraft {
-  name: string;
-  phone: string;
-  preferences: { notifications: { app: boolean; email: boolean; sms: boolean; marketing: boolean } };
-}
+import { isValidPhone } from '@/lib/phone';
 
 interface PersonalInfoTabProps {
-  editing: boolean;
   profile: any;
-  onSaveProfile?: (updatedData?: any) => Promise<void>;
-  onDraftChange?: (draft: PersonalDraft) => void;
+  /** Saves the name and phone; resolves true when saved */
+  onSaveProfile?: (updatedData: { name: string; phone: string }) => Promise<boolean>;
 }
 
-const PersonalInfoTab = ({ editing, profile, onSaveProfile, onDraftChange }: PersonalInfoTabProps) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-  });
+type Field = 'name' | 'phone';
 
-  // Riders don't set delivery preferences (distance, zones, days): the order
-  // radius is set by Cydex. Only notification preferences remain.
-  const [preferences, setPreferences] = useState({
-    notifications: {
-      app: true,
-      email: true,
-      sms: false,
-      marketing: false
-    }
-  });
+// Always editable. "Save changes" is enabled once something changes and every
+// field is valid; errors show under the fields.
+const PersonalInfoTab = ({ profile, onSaveProfile }: PersonalInfoTabProps) => {
+  const saved = { name: profile?.name || '', email: profile?.email || '', phone: profile?.phone || '' };
+  const [formData, setFormData] = useState(saved);
+  const [touched, setTouched] = useState<Record<Field, boolean>>({ name: false, phone: false });
+  const [saving, setSaving] = useState(false);
 
-  // Load the saved values whenever the rider isn't editing (initially and after
-  // a save). While editing, keep what they've typed even if the profile reloads.
+  // Start again from the saved values whenever they change (loaded, or saved)
   useEffect(() => {
-    if (!profile?.id || editing) return;
-    setFormData({
-      name: profile.name || '',
-      email: profile.email || '',
-      phone: profile.phone || '',
-    });
-    if (profile.preferences?.notifications) {
-      setPreferences({ notifications: profile.preferences.notifications });
-    }
-  }, [profile, editing]);
+    setFormData({ name: profile?.name || '', email: profile?.email || '', phone: profile?.phone || '' });
+    setTouched({ name: false, phone: false });
+  }, [profile?.name, profile?.email, profile?.phone]);
 
-  // Let the page's header "Save Changes" button save these values too
-  useEffect(() => {
-    onDraftChange?.({ name: formData.name, phone: formData.phone, preferences });
-  }, [formData.name, formData.phone, preferences, onDraftChange]);
-
-  const handleInputChange = (field: string, value: string) => {
-    console.log('[PersonalInfoTab] Input change:', field, value);
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const errors = {
+    name: formData.name.trim().length < 2 ? 'Enter your full name.' : null,
+    phone: !formData.phone.trim() ? 'Enter your phone number. Customers and vendors use it to reach you.'
+      : !isValidPhone(formData.phone) ? 'Enter a valid phone number, e.g. 08012345678.' : null,
   };
+  const changed = formData.name.trim() !== saved.name.trim() || formData.phone.trim() !== saved.phone.trim();
+  const valid = !errors.name && !errors.phone;
 
-  const handleSave = async () => {
-    if (!onSaveProfile) {
-      toast.error('Save function not available');
-      return;
-    }
-
-    console.log('[PersonalInfoTab] Saving profile data:', { formData, preferences });
-    
+  const save = async () => {
+    setTouched({ name: true, phone: true });
+    if (!valid || !changed || !onSaveProfile) return;
+    setSaving(true);
     try {
-      const updateData = {
-        name: formData.name,
-        phone: formData.phone,
-        preferences
-      };
-      
-      await onSaveProfile(updateData);
-    } catch (error) {
-      console.error('[PersonalInfoTab] Save error:', error);
-      toast.error('Failed to save profile');
+      await onSaveProfile({ name: formData.name.trim(), phone: formData.phone.trim() });
+    } finally {
+      setSaving(false);
     }
-  };
-
-  const handleNotificationChange = (field: string, checked: boolean) => {
-    console.log('[PersonalInfoTab] Notification change:', field, checked);
-    setPreferences(prev => ({
-      ...prev,
-      notifications: { 
-        ...prev.notifications, 
-        [field]: checked 
-      }
-    }));
   };
 
   return (
     <>
       <PersonalInfoForm
         formData={formData}
-        editing={editing}
-        onInputChange={handleInputChange}
-        onSave={handleSave}
+        errors={errors}
+        // Missing details show their error straight away; others once edited
+        showErrors={{ name: touched.name || !saved.name, phone: touched.phone || !saved.phone }}
+        onInputChange={(field, value) => setFormData((f) => ({ ...f, [field]: value }))}
+        onBlur={(field) => setTouched((t) => ({ ...t, [field]: true }))}
+        onSave={save}
+        canSave={changed && valid}
+        saving={saving}
       />
 
       <div className="mt-4">

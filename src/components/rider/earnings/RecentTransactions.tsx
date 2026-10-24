@@ -23,7 +23,7 @@ type Row =
   | { kind: 'earning'; id: string; at: string; title: string; amount: number }
   | { kind: 'withdrawal'; id: string; at: string; title: string; amount: number; status: string; reason?: string | null };
 
-// Delivery earnings and withdrawals together, newest first
+// Delivery earnings, reward bonuses and withdrawals together, newest first
 const RecentTransactions = ({ payoutRequests }: { payoutRequests: RiderPayoutRequest[] }) => {
   const { user } = useAuth();
   const { data: earnings = [] } = useQuery({
@@ -35,7 +35,8 @@ const RecentTransactions = ({ payoutRequests }: { payoutRequests: RiderPayoutReq
         .from('rider_transactions')
         .select('id, amount, net_amount, description, created_at')
         .eq('rider_id', user!.id)
-        .eq('type', 'earning')
+        // Delivery earnings and reward bonuses
+        .in('type', ['earning', 'bonus'])
         .order('created_at', { ascending: false })
         .limit(100);
       if (error) throw error;

@@ -4,8 +4,7 @@ import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'sonner';
 import { useRiderProfileQueries } from './useRiderProfileQueries';
 import { useRiderReviews } from './useRiderReviews';
-import { useRiderAchievements } from './useRiderAchievements';
-import type { RiderProfileData, ReviewData, AchievementData, BankDetail } from './types';
+import type { RiderProfileData, ReviewData, BankDetail } from './types';
 
 export type { VehicleInfo, DocumentInfo, BankDetail, ReviewData, AchievementData, RiderProfileData } from './types';
 
@@ -13,13 +12,11 @@ export const useRiderProfileData = () => {
   const { user } = useAuth();
   const [riderProfile, setRiderProfile] = useState<RiderProfileData | null>(null);
   const [recentReviews, setRecentReviews] = useState<ReviewData[]>([]);
-  const [achievements, setAchievements] = useState<AchievementData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { fetchRiderProfile, updateProfile, updateRiderStatus, addBankDetails } = useRiderProfileQueries();
   const { fetchRecentReviews } = useRiderReviews();
-  const { fetchAchievements } = useRiderAchievements();
 
   // Memoize the user ID to prevent unnecessary re-renders
   const userId = useMemo(() => user?.id, [user?.id]);
@@ -57,17 +54,6 @@ export const useRiderProfileData = () => {
       console.error('[RiderProfile] Error loading reviews:', error);
     }
   }, [userId, fetchRecentReviews]);
-
-  const loadAchievements = useCallback(async () => {
-    if (!userId) return;
-
-    try {
-      const achievementsData = await fetchAchievements(userId);
-      setAchievements(achievementsData);
-    } catch (error) {
-      console.error('[RiderProfile] Error loading achievements:', error);
-    }
-  }, [userId, fetchAchievements]);
 
   const handleUpdateProfile = useCallback(async (updates: Partial<RiderProfileData>) => {
     if (!userId) return false;
@@ -127,15 +113,13 @@ export const useRiderProfileData = () => {
   useEffect(() => {
     if (riderProfile?.id) {
       loadRecentReviews();
-      loadAchievements();
     }
-  }, [riderProfile?.id, loadRecentReviews, loadAchievements]);
+  }, [riderProfile?.id, loadRecentReviews]);
 
   // Memoize the return object to prevent unnecessary re-renders
   const returnValue = useMemo(() => ({
     riderProfile,
     recentReviews,
-    achievements,
     loading,
     error,
     updateProfile: handleUpdateProfile,
@@ -145,7 +129,6 @@ export const useRiderProfileData = () => {
   }), [
     riderProfile,
     recentReviews,
-    achievements,
     loading,
     error,
     handleUpdateProfile,

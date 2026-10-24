@@ -1,57 +1,48 @@
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import PersonalInfoTab, { type PersonalDraft } from './tabs/PersonalInfoTab';
+import PersonalInfoTab from './tabs/PersonalInfoTab';
 import BankingTab from './tabs/BankingTab';
 import ReviewsTab from './tabs/ReviewsTab';
 import AchievementsTab from './tabs/AchievementsTab';
 import SecuritySettings from './SecuritySettings';
+import DeliveryGoalCard from './DeliveryGoalCard';
+import ReferralCard from '@/components/referrals/ReferralCard';
 
 interface ProfileTabsProps {
-  editing: boolean;
   profile: any;
   recentReviews: any[];
-  achievements: any[];
-  onAddBankDetails?: (bankDetails: any) => Promise<boolean>;
-  onSaveProfile?: (updatedData?: any) => Promise<void>;
-  /** Receives the Personal tab's current (unsaved) values, for the header Save button */
-  onPersonalDraftChange?: (draft: PersonalDraft) => void;
+  onSaveProfile?: (updatedData: { name: string; phone: string }) => Promise<boolean>;
 }
 
-const ProfileTabs = ({ 
-  editing, 
-  profile, 
-  recentReviews, 
-  achievements, 
-  onAddBankDetails,
-  onSaveProfile,
-  onPersonalDraftChange
-}: ProfileTabsProps) => {
+const TABS = ['personal', 'bank', 'security', 'reviews', 'achievements', 'referrals'];
+
+const ProfileTabs = ({ profile, recentReviews, onSaveProfile }: ProfileTabsProps) => {
+  // ?tab=achievements (from reward notifications) opens that tab
+  const [params, setParams] = useSearchParams();
+  const tab = TABS.includes(params.get('tab') ?? '') ? params.get('tab')! : 'personal';
   return (
-    <Tabs defaultValue="personal" className="w-full">
+    <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })} className="w-full">
       <div className="mb-3 sm:mb-4 md:mb-6">
-        <ScrollArea className="w-full">
-          <TabsList className="flex w-max min-w-full h-10">
+          <TabsList className="w-full">
             <TabsTrigger value="personal" className="text-xs sm:text-sm whitespace-nowrap flex-shrink-0 px-2 sm:px-3">Personal</TabsTrigger>
             <TabsTrigger value="bank" className="text-xs sm:text-sm whitespace-nowrap flex-shrink-0 px-2 sm:px-3">Banking</TabsTrigger>
             <TabsTrigger value="security" className="text-xs sm:text-sm whitespace-nowrap flex-shrink-0 px-2 sm:px-3">Security</TabsTrigger>
             <TabsTrigger value="reviews" className="text-xs sm:text-sm whitespace-nowrap flex-shrink-0 px-2 sm:px-3">Reviews</TabsTrigger>
             <TabsTrigger value="achievements" className="text-xs sm:text-sm whitespace-nowrap flex-shrink-0 px-2 sm:px-3">Achievements</TabsTrigger>
+            <TabsTrigger value="referrals" className="text-xs sm:text-sm whitespace-nowrap flex-shrink-0 px-2 sm:px-3">Referrals</TabsTrigger>
           </TabsList>
-        </ScrollArea>
       </div>
       
       <TabsContent value="personal" className="mt-0">
-        <PersonalInfoTab 
-          editing={editing} 
-          profile={profile} 
-          onSaveProfile={onSaveProfile}
-          onDraftChange={onPersonalDraftChange}
-        />
+        <div className="space-y-4">
+          <PersonalInfoTab profile={profile} onSaveProfile={onSaveProfile} />
+          <DeliveryGoalCard />
+        </div>
       </TabsContent>
       
       <TabsContent value="bank" className="mt-0">
-        <BankingTab editing={editing} profile={profile} onAddBankDetails={onAddBankDetails} />
+        <BankingTab />
       </TabsContent>
       
       <TabsContent value="security" className="mt-0">
@@ -63,7 +54,11 @@ const ProfileTabs = ({
       </TabsContent>
       
       <TabsContent value="achievements" className="mt-0">
-        <AchievementsTab profile={profile} achievements={achievements} />
+        <AchievementsTab />
+      </TabsContent>
+
+      <TabsContent value="referrals" className="mt-0">
+        <ReferralCard />
       </TabsContent>
     </Tabs>
   );

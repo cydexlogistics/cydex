@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { isAvailable, maxOrderable, stockLabel, stockLimit } from '@/lib/products';
+import { discountLabel, hasDiscount, isAvailable, maxOrderable, salePrice, stockLabel, stockLimit } from '@/lib/products';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSupabase } from '@/contexts/SupabaseContext';
 import { useCartContext } from '@/contexts/CartContext';
@@ -89,7 +89,8 @@ const ProductDetails = () => {
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: salePrice(product),
+      list_price: hasDiscount(product) ? Number(product.price) : null,
       vendor_id: product.vendor_id,
       vendor_name: product.vendor?.name || 'Unknown Vendor',
       max_quantity: stockLimit(product)
@@ -211,7 +212,15 @@ const ProductDetails = () => {
               <CardContent className="space-y-4 sm:space-y-6 pt-0">
                 <div className="flex flex-col gap-3 sm:gap-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-                    <span className="text-2xl sm:text-3xl md:text-4xl font-bold">₦{product.price.toLocaleString()}</span>
+                    <div className="flex flex-wrap items-baseline gap-2">
+                      <span className="text-2xl sm:text-3xl md:text-4xl font-bold">₦{salePrice(product).toLocaleString()}</span>
+                      {discountLabel(product) && (
+                        <>
+                          <span className="text-base sm:text-lg text-muted-foreground line-through">₦{Number(product.price).toLocaleString()}</span>
+                          <Badge className="bg-red-600 text-white hover:bg-red-600">{discountLabel(product)}</Badge>
+                        </>
+                      )}
+                    </div>
                     <Badge variant="outline" className="flex items-center gap-1 w-fit text-xs sm:text-sm">
                       <Package className="h-3 w-3 sm:h-4 sm:w-4" />
                       <span>{stockLabel(product) ?? 'Available'}</span>

@@ -229,7 +229,7 @@ const NewRiderRequest = () => {
         {!hasPhone && <VendorPhoneNotice />}
 
         <Tabs value={mode} onValueChange={(v) => switchMode(v as 'single' | 'batch')}>
-          <TabsList className="grid w-full grid-cols-2 sm:w-80">
+          <TabsList className="w-full sm:w-80">
             <TabsTrigger value="single">Single delivery</TabsTrigger>
             <TabsTrigger value="batch">Batch drop-offs</TabsTrigger>
           </TabsList>

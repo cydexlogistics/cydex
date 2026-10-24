@@ -23,9 +23,11 @@ For how each feature is meant to work, see [ORDER_FLOW.md](ORDER_FLOW.md), [ADMI
 13. [Promotions and coupons](#13-promotions-and-coupons)
 14. [Wallets and withdrawals](#14-wallets-and-withdrawals)
 15. [Broadcasts](#15-broadcasts)
-16. [Admin](#16-admin)
-17. [Notifications, emails and the installed app](#17-notifications-emails-and-the-installed-app)
-18. [Things that should be refused](#18-things-that-should-be-refused)
+16. [Rewards and challenges](#16-rewards-and-challenges)
+17. [Referrals](#17-referrals)
+18. [Admin](#18-admin)
+19. [Notifications, emails and the installed app](#19-notifications-emails-and-the-installed-app)
+20. [Things that should be refused](#20-things-that-should-be-refused)
 
 ---
 
@@ -209,6 +211,11 @@ Use Ngozi (sender), Bisi (recipient, no account) and a rider.
 | VS-05 | Open **Orders → Rider requests** tab. | Past rider requests are listed, separate from customer orders. |
 | VS-06 | Open a delivered order. | Items total, Cydex commission and the amount credited. No delivery fee or Service Charge. |
 | VS-07 | Remove the phone number from the profile and try to accept an order. | Accept is disabled, with a notice linking to Settings. |
+| VS-08 | Edit a ₦1,000 product. Set **Discount** to **Percentage off**, 20. | The form shows "Customers pay ₦800.00 ~~₦1,000.00~~ (20% off)". After saving, the product list shows ₦800 with ₦1,000 crossed out and a **20% off** badge. |
+| VS-09 | As a customer, open that vendor's products, the product page and the cart. | Each shows ₦800 with ₦1,000 crossed out. Check out: the items total is ₦800 a unit, and the vendor's commission is worked out on ₦800. |
+| VS-10 | Set **Amount off (₦)** to 1,000 or more on a ₦1,000 product, or a percentage of 100. | It can't be saved: the discount must be less than the price, or under 100%. |
+| VS-11 | Set **Discount** back to **No discount**. | Customers see the full price again, with nothing crossed out. |
+| VS-12 | Add or edit a product. | There's no carbon impact field. |
 
 ---
 
@@ -249,6 +256,9 @@ Use Campus Mart, with money in the vendor wallet for some scenarios.
 | RD-08 | Two riders tap **Accept** on the same order at the same moment. | One gets it. The other is told it's no longer available. |
 | RD-09 | Remove the phone number and try to accept. | Accept is disabled, with a notice linking to Profile. |
 | RD-10 | Open **Earnings** after a delivery. | The delivery fee, Cydex's commission and the amount credited. Total trips has gone up by one. |
+| RD-11 | In **Admin → Riders & vehicles**, set Walking to see orders within 1 km and be alerted within 0.5 km. As a walking rider 2 km from a vendor, have an order made ready. | The rider gets no alert and doesn't see the order. Available Orders says "pickups within 1 km of you". Move within 0.5 km: the next order alerts them. |
+| RD-12 | Try to set an alert distance bigger than the see-orders distance. | It can't be saved. |
+| RD-13 | On a phone, open pages whose tabs don't fit the screen (rider Profile, customer Profile, admin Money, vendor Settings, customer Wallet). | The tabs scroll sideways; none are squashed or cut off. |
 
 ---
 
@@ -324,6 +334,14 @@ Created in **Admin → Promotions → New promotion**. Switch each promotion off
 | PR-28 | As the admin, open **Money → Earnings** for the orders in PR-23 and PR-25. | Each row still adds up. The discount shows in **Promo cost**. |
 | PR-29 | Try to give a commission promotion a coupon code. | The coupon field isn't offered. |
 | PR-30 | Create a promotion for **Everyone** on the delivery fee. | Customers get it on orders and Cydex Express. Vendors get it on single rider requests. |
+| PR-31 | On the **General** tab, create a customer promotion with **Only for emails at** `gmail.com`. | A customer with a gmail.com address sees it under Offers for you and gets it. A customer with another address doesn't see it. |
+| PR-32 | Give that promotion a code, and enter it as the other customer. | Refused: "That coupon is only for @gmail.com email addresses." |
+| PR-33 | Use `ui.edu.ng` and sign in as `name@student.ui.edu.ng`. | They get it (subdomains count). |
+| PR-34 | Type `not a domain` in the email field. | The form can't be saved and says what's expected. |
+| PR-35 | On **Vendor partnerships**, add Mama Put as a partner with a 5% commission on sales. Deliver a ₦10,000 order from Mama Put. | Cydex's commission is ₦500 instead of the standard rate. Another vendor's order still uses the standard rate. |
+| PR-36 | Give a partner a rider request commission, then request a rider as that vendor. | The quote uses their rate. |
+| PR-37 | Create a **partnership promotion**: free delivery on orders from Mama Put. | Customers see "orders from Mama Put" in Offers for you. It applies to a Mama Put order, not to another vendor's order or to Cydex Express. |
+| PR-38 | Switch the partner off, or remove them. | Their orders go back to the standard commission. |
 
 ---
 
@@ -364,7 +382,56 @@ Sent from **Admin → Broadcasts → New broadcast**. Have a customer near the t
 
 ---
 
-## 16. Admin
+## 16. Rewards and challenges
+
+Set up in **Admin → Rewards → New reward**. Each person can see their rewards: customers and vendors under **Rewards** in the menu, riders under **Profile → Achievements**.
+
+| ID | Steps | What should happen |
+|---|---|---|
+| RW-01 | Create a reward for **Customers**: **Orders completed**, 2, **Wallet bonus** ₦500, a gift icon in pink, starting now. | Before saving, the preview shows the icon, title and "₦500 wallet bonus". It's listed as **Running**. |
+| RW-02 | As a customer, open **Rewards**. | The reward is there with its icon, "₦500 wallet bonus" and a progress bar at "0 orders of 2 orders". |
+| RW-03 | Complete one order (delivered). | Progress shows 1 of 2. No bonus yet. |
+| RW-04 | Complete a second order. | The customer is notified "Reward unlocked". The wallet balance goes up by ₦500, with a **Reward** transaction in the wallet history. The reward shows **Earned**. |
+| RW-05 | Complete a third order. | No second bonus: an achievement is earned once. |
+| RW-06 | Create a customer reward: **Amount spent** ₦5,000, reward **Discount offer**, delivery fee, 100% off, 2 orders, 30 days. Use a coupon on an order so the customer pays less than the order's full price. | Only what they paid counts towards ₦5,000. Once reached, "Free delivery fee for 2 orders" appears under **Offers for you** for that customer only, and applies by itself on their next two orders. Other customers don't see it. It isn't listed under Admin → Promotions. |
+| RW-07 | Create a reward for **Vendors**: **Amount sold** ₦10,000, wallet bonus ₦1,000. Deliver orders until the vendor's items total reaches ₦10,000. | The vendor gets ₦1,000 in their wallet (withdrawable), with a **Reward** transaction under the wallet's **Rewards** tab. |
+| RW-08 | Create a rider **Daily challenge**: **Deliveries completed**, 3, wallet bonus ₦500. As a rider, open **Current Deliveries**. | A **Challenges** section shows the challenge, progress (0 of 3) and when it resets. |
+| RW-09 | Complete 3 deliveries the same day. | The rider gets ₦500, listed as a reward in Earnings → Recent Transactions. The challenge shows **Earned** until midnight. The next day, progress starts again at 0 and it can be earned again. |
+| RW-10 | Create a rider **Weekly challenge**: **Distance covered**, 20 km. | It shows next to the daily one on Current Deliveries. Progress counts from Monday and resets the next Monday. |
+| RW-11 | Switch every daily and weekly challenge off (or let them end). | The **Challenges** section disappears from Current Deliveries. |
+| RW-12 | Create a rider reward: **Time online**, 1 hour, wallet bonus ₦200. Go online and stay online for over an hour. | Within 10 minutes of passing an hour (or on going offline), the rider gets ₦200. |
+| RW-13 | Create a rider reward: **New fastest delivery**, trips of 1 km or more, ₦300. Complete a 2 km delivery in 20 minutes, then one in 15 minutes, then one in 18 minutes. | The first sets the time to beat (no reward). The second earns ₦300 and the time to beat becomes 15 min. The third earns nothing. A 0.5 km trip never counts. |
+| RW-14 | Create a reward with a start date a month ago. | Orders delivered since that date count towards it. |
+| RW-15 | Open **Admin → Money → Rewards**, period **Today**. | Every reward given today is listed with the person, the reward and the bonus (or "Offer"), with totals at the top. |
+| RW-16 | Try to create a customer reward that counts distance, or a daily challenge for vendors. | Not possible: the form only offers what fits who it's for. |
+| RW-17 | As a rider, open **Profile → Personal** and set **Daily delivery goal** to 5. Open **Earnings**. | The **Deliveries** card shows "Goal: x of 5" and the percentage for today. |
+
+| RW-18 | Earn a few rewards, including a daily challenge on two different days. Open **Rewards** (riders: **Profile → Achievements**). | Rewards still to earn are at the top. **Earned** lists every reward unlocked, newest first, each with its date, 10 to a page. Earned achievements stay after the reward ends. |
+
+---
+
+## 17. Referrals
+
+Each customer and rider has a code on the **Referrals** tab of their Profile; vendors on the **Referrals** tab of Settings. Use a fresh email for each new account.
+
+| ID | Steps | What should happen |
+|---|---|---|
+| RF-01 | As a customer, open **Profile → Referrals**. | A code like CX7KQ2MP, **Copy code** and **Copy link** buttons, and "you get ₦500 … completes 2 orders". No list of people referred. |
+| RF-02 | Open the copied link while logged out. | Sign up opens with the code filled in and **Customer** chosen. |
+| RF-03 | Sign up as a new customer with the code. Complete one order. | Nothing is paid yet. |
+| RF-04 | Complete a second order as the new customer. | The referrer gets ₦500 in their wallet, a **Reward** transaction "Referral reward: … joined with your code" and a notification that opens their wallet. |
+| RF-05 | Try to sign up as a **vendor** with a customer's code. | Refused before the account is created: "That code is for customers." |
+| RF-06 | Sign up as a rider with another rider's code, then make 2 deliveries. | The referring rider gets ₦1,000, listed in Earnings → Recent Transactions. |
+| RF-07 | Sign up as a vendor with another vendor's code. Have 3 rider requests delivered (or 5 sales). | The referring vendor gets ₦1,000, under the wallet's **Rewards** tab. |
+| RF-08 | Sign up without a code. Open **Profile → Referrals**, enter someone's code under **Were you referred?** | It's added. After your first order the box is gone. |
+| RF-09 | Enter your own code, or a second code. | Refused with the reason. |
+| RF-10 | In **Admin → Rewards → Referrals**, change customers to ₦700 after 1 order. Refer a new customer and complete one order. | The referrer gets ₦700. |
+| RF-11 | **Pause** customer referrals, then try a customer code at sign-up. | Refused: referrals are paused. No rewards are paid until it's switched back on. |
+| RF-12 | Open **Admin → Rewards → Referrals** and **Money → Rewards**. | Every referral with progress and totals; referral rewards listed as "Referral: … joined". |
+
+---
+
+## 18. Admin
 
 | ID | Steps | What should happen |
 |---|---|---|
@@ -385,7 +452,7 @@ Sent from **Admin → Broadcasts → New broadcast**. Have a customer near the t
 
 ---
 
-## 17. Notifications, emails and the installed app
+## 19. Notifications, emails and the installed app
 
 | ID | Steps | What should happen |
 |---|---|---|
@@ -404,7 +471,7 @@ Sent from **Admin → Broadcasts → New broadcast**. Have a customer near the t
 
 ---
 
-## 18. Things that should be refused
+## 20. Things that should be refused
 
 These check that the rules can't be got around. Each should fail with a clear message.
 
@@ -426,3 +493,5 @@ These check that the rules can't be got around. Each should fail with a clear me
 | NG-14 | Send a rider request or Cydex Express delivery without the recipient's email. | The form can't be sent. |
 | NG-15 | Add more than 5 drop-offs to a batch. | Not allowed. |
 | NG-16 | Cancel a customer order after the vendor accepted, or an Express delivery after a rider accepted. | No cancel button. |
+| NG-17 | As a customer, use another customer's reward offer. | It's never offered or applied to anyone but its owner. |
+| NG-18 | Set a daily delivery goal of 0 or 101. | It can't be saved. |

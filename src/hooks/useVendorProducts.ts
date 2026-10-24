@@ -12,7 +12,10 @@ export interface VendorProduct {
   price: number;
   category?: string;
   is_eco_friendly: boolean;
-  carbon_impact: number;
+  carbon_impact?: number | null;
+  /** Optional discount: 'percent' (under 100) or 'flat' (₦, under the price) */
+  discount_type: string | null;
+  discount_value: number | null;
   stock_quantity: number | null;
   /** When true, stock_quantity is required and drives availability */
   track_stock: boolean;
@@ -71,7 +74,8 @@ export const useVendorProducts = () => {
     price: number;
     category?: string;
     is_eco_friendly: boolean;
-    carbon_impact: number;
+    discount_type: string | null;
+    discount_value: number | null;
     track_stock: boolean;
     stock_quantity: number | null;
     image_url?: string;

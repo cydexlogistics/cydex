@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { EyeOff, Loader2, Pencil, Plus, TicketPercent } from 'lucide-react';
+import { AtSign, EyeOff, Handshake, Loader2, Pencil, Plus, TicketPercent, X } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminPage from '@/components/admin/AdminPage';
+import VendorPartners from '@/components/admin/promotions/VendorPartners';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useConfirm } from '@/contexts/ConfirmContext';
 import { useVehicleTypes } from '@/hooks/useVehicleTypes';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +30,7 @@ type Promo = {
   uses: number; total_discount: number;
   audience: string; max_users: number | null; max_uses_per_user: number | null; users: number;
   show_in_offers: boolean;
+  email_domains: string[] | null; partner_vendor_ids: string[] | null; partner_vendor_names: string[] | null;
 };
 
 type Draft = {
@@ -38,6 +41,10 @@ type Draft = {
   max_users: string; max_uses_per_user: string;
   // Listed under "Offers for you" (home pages and the codes offered at checkout)
   show_in_offers: boolean;
+  // General: only for emails at these domains, comma separated ('' = anyone)
+  email_domains: string;
+  // Vendor partnership: for customers ordering from these vendors
+  partner: boolean; partners: { id: string; name: string }[];
 };
 
 const STATES: Record<string, { label: string; className: string }> = {
@@ -50,7 +57,8 @@ const STATES: Record<string, { label: string; className: string }> = {
 
 // datetime-local value (local time) <-> ISO
 const toLocal = (iso: string) => format(new Date(iso), "yyyy-MM-dd'T'HH:mm");
-const blank = (): Draft => ({
+const blank = (partner = false): Draft => ({
+  email_domains: '', partner, partners: [],
   id: null, name: '', code: '', discount_type: 'percent', discount_value: '', audience: 'customer', applies_to: 'delivery_fee',
   vendor_id: '', vendor_name: '', cost_bearer: 'cydex', max_distance_km: '', vehicle_types: [], max_users: '', max_uses_per_user: '', show_in_offers: true,
   starts_at: toLocal(new Date().toISOString()), ends_at: toLocal(new Date(Date.now() + 7 * 86400e3).toISOString()), is_active: true,
@@ -58,6 +66,10 @@ const blank = (): Draft => ({
 
 const describe = (p: Pick<Promo, 'discount_type' | 'discount_value' | 'applies_to' | 'vendor_name' | 'audience'>) =>
   describePromotion(p, p.audience === 'all' ? 'customer' : (p.audience as PromoAudience));
+
+// "gmail.com, @ui.edu.ng" -> ['gmail.com', 'ui.edu.ng']
+const domainsOf = (v: string) => v.split(/[\s,]+/).map((d) => d.trim().replace(/^@+/, '').toLowerCase()).filter(Boolean);
+const DOMAIN = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/;
 
 // '' -> null (no limit); otherwise a whole number of at least 1, or NaN
 const limit = (v: string | undefined) => (v === undefined || v.trim() === '' ? null : Number.isInteger(Number(v)) && Number(v) >= 1 ? Number(v) : NaN);
@@ -90,7 +102,7 @@ const AdminPromotions = () => {
 
   const { data: vendors = [] } = useQuery({
     queryKey: ['admin-promo-vendors', vendorQuery],
-    enabled: !!draft && draft.applies_to === 'items',
+    enabled: !!draft && (draft.applies_to === 'items' || draft.partner),
     queryFn: async () => {
       const { data, error } = await supabase.rpc('admin_users', { p_search: vendorQuery || undefined, p_role: 'vendor', p_limit: 8, p_offset: 0 });
       if (error) throw error;
@@ -104,7 +116,9 @@ const AdminPromotions = () => {
     && (draft.applies_to !== 'items' || !!draft.vendor_id)
     && !!draft.starts_at && !!draft.ends_at && new Date(draft.ends_at) > new Date(draft.starts_at)
     && (km === null || km > 0)
-    && !Number.isNaN(limit(draft.max_users)) && !Number.isNaN(limit(draft.max_uses_per_user));
+    && !Number.isNaN(limit(draft.max_users)) && !Number.isNaN(limit(draft.max_uses_per_user))
+    && domainsOf(draft.email_domains).every((d) => DOMAIN.test(d))
+    && (!draft.partner || draft.partners.length > 0);
   const commission = draft?.applies_to === 'commission';
 
   // Changing who it's for keeps the target if that audience has it
@@ -125,7 +139,8 @@ const AdminPromotions = () => {
     ].filter(Boolean).join(', ');
     if (!(await confirm({
       title: draft.id ? `Are you sure you want to save “${draft.name.trim()}”?` : `Are you sure you want to create “${draft.name.trim()}”?`,
-      description: `For ${AUDIENCES[draft.audience].toLowerCase()}: ${summary}, ${
+      description: `For ${draft.partner ? `customers ordering from ${draft.partners.map((v) => v.name).join(', ')}` : AUDIENCES[draft.audience].toLowerCase()}${
+        !draft.partner && domainsOf(draft.email_domains).length ? ` with ${domainsOf(draft.email_domains).map((d) => `@${d}`).join(' or ')} emails` : ''}: ${summary}, ${
         draft.code.trim() && !commission ? `with coupon code ${draft.code.trim().toUpperCase()}` : 'applied automatically'
       }${limits ? `, for ${limits}` : ''}. ${
         draft.applies_to === 'items' && draft.cost_bearer === 'vendor' ? 'The business pays for it.' : 'Cydex pays for it.'
@@ -155,6 +170,8 @@ const AdminPromotions = () => {
       p_ends_at: new Date(draft.ends_at).toISOString(),
       p_is_active: draft.is_active,
       p_show_in_offers: draft.show_in_offers,
+      p_email_domains: !draft.partner && domainsOf(draft.email_domains).length ? domainsOf(draft.email_domains) : undefined,
+      p_partner_vendor_ids: draft.partner ? draft.partners.map((v) => v.id) : undefined,
     });
     setSaving(false);
     if (error) return toast.error(errorMessage(error, 'Could not save the promotion'));
@@ -172,64 +189,101 @@ const AdminPromotions = () => {
       max_users: p.max_users == null ? '' : String(p.max_users),
       max_uses_per_user: p.max_uses_per_user == null ? '' : String(p.max_uses_per_user),
       show_in_offers: p.show_in_offers ?? true,
+      email_domains: (p.email_domains ?? []).join(', '),
+      partner: !!p.partner_vendor_ids?.length,
+      partners: (p.partner_vendor_ids ?? []).map((id, i) => ({ id, name: p.partner_vendor_names?.[i] ?? 'Vendor' })),
       vendor_name: p.vendor_name ?? '', cost_bearer: p.cost_bearer as Draft['cost_bearer'],
       max_distance_km: p.max_distance_km == null ? '' : String(p.max_distance_km), vehicle_types: p.vehicle_types ?? [],
       starts_at: toLocal(p.starts_at), ends_at: toLocal(p.ends_at), is_active: p.is_active,
     });
   };
 
+  // General promotions, or the vendor partnership ones (for customers ordering from partner vendors)
+  const promoList = (list: Promo[], empty: string) => (
+    <Card>
+      <CardContent className="p-0">
+        {isLoading ? (
+          <div className="space-y-2 p-4">{[0, 1].map((i) => <div key={i} className="h-16 animate-pulse rounded bg-muted" />)}</div>
+        ) : list.length === 0 ? (
+          <p className="p-8 text-center text-muted-foreground">{empty}</p>
+        ) : (
+          <ul className="divide-y">
+            {list.map((p) => (
+            <li key={p.id} className="flex items-start gap-3 p-3 sm:px-4">
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="flex flex-wrap items-center gap-2 font-medium">
+                  {p.name}
+                  <Badge variant="outline" className={cn('border-transparent', STATES[p.state]?.className)}>{STATES[p.state]?.label ?? p.state}</Badge>
+                  <Badge variant="outline">{AUDIENCES[p.audience as PromoAudience] ?? p.audience}</Badge>
+                  {p.code ? <Badge variant="secondary" className="font-mono">{p.code}</Badge> : <Badge variant="outline">Automatic</Badge>}
+                  {!p.show_in_offers && <Badge variant="outline" className="gap-1"><EyeOff className="h-3 w-3" /> Not in offers</Badge>}
+                  {p.email_domains?.length ? <Badge variant="outline" className="gap-1"><AtSign className="h-3 w-3" /> {p.email_domains.join(', ')}</Badge> : null}
+                </p>
+                <p className="text-sm">{describe(p)}</p>
+                {p.partner_vendor_names?.length ? (
+                  <p className="flex items-center gap-1 text-xs"><Handshake className="h-3 w-3" /> On orders from {p.partner_vendor_names.join(', ')}</p>
+                ) : null}
+                <p className="text-xs text-muted-foreground">
+                  {format(new Date(p.starts_at), 'd MMM yyyy, HH:mm')} – {format(new Date(p.ends_at), 'd MMM yyyy, HH:mm')}
+                  {p.max_distance_km != null && ` · up to ${Number(p.max_distance_km)} km`}
+                  {p.vehicle_types?.length ? ` · ${p.vehicle_types.map(labelOf).join(', ')}` : ''}
+                  {p.applies_to === 'items' && ` · paid by ${p.cost_bearer === 'vendor' ? 'the business' : 'Cydex'}`}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Used {Number(p.uses)} time{Number(p.uses) === 1 ? '' : 's'} by {Number(p.users)}
+                  {p.max_users != null ? ` of the first ${p.max_users}` : ''} {Number(p.users) === 1 && p.max_users == null ? 'person' : 'people'}
+                  {p.max_uses_per_user != null ? ` · ${p.max_uses_per_user} use${p.max_uses_per_user === 1 ? '' : 's'} each` : ''}
+                  {' · '}{formatNaira(Number(p.total_discount))} given
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => edit(p)}><Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit</Button>
+            </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   return (
     <AdminPage
       title="Promotions"
       icon={TicketPercent}
       description="Discounts for customers, vendors and riders, with optional limits on how many people and how many times each."
-      actions={<Button onClick={() => { setVendorSearch(''); setDraft(blank()); }}><Plus className="mr-1.5 h-4 w-4" /> New promotion</Button>}
     >
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="space-y-2 p-4">{[0, 1].map((i) => <div key={i} className="h-16 animate-pulse rounded bg-muted" />)}</div>
-          ) : promos.length === 0 ? (
-            <p className="p-8 text-center text-muted-foreground">No promotions yet.</p>
-          ) : (
-            <ul className="divide-y">
-              {promos.map((p) => (
-                <li key={p.id} className="flex items-start gap-3 p-3 sm:px-4">
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="flex flex-wrap items-center gap-2 font-medium">
-                      {p.name}
-                      <Badge variant="outline" className={cn('border-transparent', STATES[p.state]?.className)}>{STATES[p.state]?.label ?? p.state}</Badge>
-                      <Badge variant="outline">{AUDIENCES[p.audience as PromoAudience] ?? p.audience}</Badge>
-                      {p.code ? <Badge variant="secondary" className="font-mono">{p.code}</Badge> : <Badge variant="outline">Automatic</Badge>}
-                      {!p.show_in_offers && <Badge variant="outline" className="gap-1"><EyeOff className="h-3 w-3" /> Not in offers</Badge>}
-                    </p>
-                    <p className="text-sm">{describe(p)}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(p.starts_at), 'd MMM yyyy, HH:mm')} – {format(new Date(p.ends_at), 'd MMM yyyy, HH:mm')}
-                      {p.max_distance_km != null && ` · up to ${Number(p.max_distance_km)} km`}
-                      {p.vehicle_types?.length ? ` · ${p.vehicle_types.map(labelOf).join(', ')}` : ''}
-                      {p.applies_to === 'items' && ` · paid by ${p.cost_bearer === 'vendor' ? 'the business' : 'Cydex'}`}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Used {Number(p.uses)} time{Number(p.uses) === 1 ? '' : 's'} by {Number(p.users)}
-                      {p.max_users != null ? ` of the first ${p.max_users}` : ''} {Number(p.users) === 1 && p.max_users == null ? 'person' : 'people'}
-                      {p.max_uses_per_user != null ? ` · ${p.max_uses_per_user} use${p.max_uses_per_user === 1 ? '' : 's'} each` : ''}
-                      {' · '}{formatNaira(Number(p.total_discount))} given
-                    </p>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => edit(p)}><Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit</Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="general">
+        <TabsList>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="partners">Vendor partnerships</TabsTrigger>
+        </TabsList>
+        <TabsContent value="general" className="space-y-3">
+          <div className="flex justify-end">
+            <Button onClick={() => { setVendorSearch(''); setDraft(blank()); }}><Plus className="mr-1.5 h-4 w-4" /> New promotion</Button>
+          </div>
+          {promoList(promos.filter((p) => !p.partner_vendor_ids?.length), 'No promotions yet.')}
+        </TabsContent>
+        <TabsContent value="partners" className="space-y-4">
+          <VendorPartners />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Partnership promotions</h2>
+              <p className="text-sm text-muted-foreground">For customers, only on orders from the vendors you choose.</p>
+            </div>
+            <Button onClick={() => { setVendorSearch(''); setDraft(blank(true)); }}><Plus className="mr-1.5 h-4 w-4" /> New partnership promotion</Button>
+          </div>
+          {promoList(promos.filter((p) => !!p.partner_vendor_ids?.length), 'No partnership promotions yet.')}
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={!!draft} onOpenChange={(o) => !o && !saving && setDraft(null)}>
         <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{draft?.id ? 'Edit promotion' : 'New promotion'}</DialogTitle>
-            <DialogDescription>Choose who it's for first; that decides what it can take money off.</DialogDescription>
+            <DialogTitle>{draft?.partner ? (draft.id ? 'Edit partnership promotion' : 'New partnership promotion') : draft?.id ? 'Edit promotion' : 'New promotion'}</DialogTitle>
+            <DialogDescription>
+              {draft?.partner
+                ? 'For customers, on the delivery fee or Service Charge of orders from the vendors you choose.'
+                : 'Choose who it\'s for first; that decides what it can take money off.'}
+            </DialogDescription>
           </DialogHeader>
           {draft && (
             <div className="space-y-4">
@@ -238,6 +292,37 @@ const AdminPromotions = () => {
                 <Input id="pr-name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="e.g. Free delivery weekend" />
               </div>
 
+              {draft.partner ? (
+                <div className="space-y-1.5">
+                  <Label htmlFor="pr-partners">Partner vendors</Label>
+                  {draft.partners.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {draft.partners.map((v) => (
+                        <Badge key={v.id} variant="secondary" className="gap-1 py-1">
+                          {v.name}
+                          <button type="button" aria-label={`Remove ${v.name}`} onClick={() => setDraft({ ...draft, partners: draft.partners.filter((x) => x.id !== v.id) })}>
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <Input id="pr-partners" value={vendorSearch} onChange={(e) => setVendorSearch(e.target.value)} placeholder="Search businesses to add" />
+                  <ul className="max-h-40 divide-y overflow-y-auto rounded-md border">
+                    {vendors.filter((v) => !draft.partners.some((x) => x.id === v.id)).length === 0
+                      ? <li className="p-2 text-sm text-muted-foreground">No more businesses found.</li>
+                      : vendors.filter((v) => !draft.partners.some((x) => x.id === v.id)).map((v) => (
+                        <li key={v.id}>
+                          <button type="button" className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                            onClick={() => setDraft({ ...draft, partners: [...draft.partners, { id: v.id, name: v.name ?? 'Business' }] })}>
+                            {v.name} <span className="text-xs text-muted-foreground">{v.email}</span>
+                          </button>
+                        </li>
+                      ))}
+                  </ul>
+                  {draft.partners.length === 0 && <p className="text-xs text-destructive">Add at least one vendor.</p>}
+                </div>
+              ) : (
               <div className="space-y-1.5">
                 <Label>Who it's for</Label>
                 <Select value={draft.audience} onValueChange={(v) => setAudience(v as PromoAudience)}>
@@ -247,13 +332,17 @@ const AdminPromotions = () => {
                   </SelectContent>
                 </Select>
               </div>
+              )}
 
               <div className="space-y-1.5">
                 <Label>What it takes money off</Label>
                 <Select value={draft.applies_to} onValueChange={(v) => setDraft({ ...draft, applies_to: v as Draft['applies_to'] })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {Object.entries(TARGETS[draft.audience]).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+                    {Object.entries(TARGETS[draft.audience])
+                      // Partnership promotions: the delivery fee or Service Charge
+                      .filter(([k]) => !draft.partner || k === 'delivery_fee' || k === 'service_charge')
+                      .map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 {commission && (
@@ -347,6 +436,20 @@ const AdminPromotions = () => {
                   places are taken, nobody new gets it.
                 </p>
               </div>
+
+              {!draft.partner && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="pr-domains">Only for emails at (optional)</Label>
+                  <Input id="pr-domains" value={draft.email_domains} onChange={(e) => setDraft({ ...draft, email_domains: e.target.value })} placeholder="e.g. gmail.com, ui.edu.ng" />
+                  {domainsOf(draft.email_domains).some((d) => !DOMAIN.test(d)) ? (
+                    <p className="text-xs text-destructive">Enter email domains like gmail.com or ui.edu.ng, separated by commas.</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Only people whose email ends with one of these get it (ui.edu.ng also covers student.ui.edu.ng). Leave empty for everyone.
+                    </p>
+                  )}
+                </div>
+              )}
 
               {!commission && (
               <div className="space-y-1.5">

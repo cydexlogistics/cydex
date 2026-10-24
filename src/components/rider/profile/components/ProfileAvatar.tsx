@@ -9,11 +9,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface ProfileAvatarProps {
   profile: any;
-  editing: boolean;
   onAvatarUpdate?: (avatarUrl: string) => void;
 }
 
-const ProfileAvatar = ({ profile, editing, onAvatarUpdate }: ProfileAvatarProps) => {
+const ProfileAvatar = ({ profile, onAvatarUpdate }: ProfileAvatarProps) => {
   const [uploading, setUploading] = useState(false);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,8 +77,7 @@ const ProfileAvatar = ({ profile, editing, onAvatarUpdate }: ProfileAvatarProps)
           </AvatarFallback>
         )}
       </Avatar>
-      {editing && (
-        <>
+      <>
           <input
             type="file"
             accept="image/*"
@@ -101,8 +99,7 @@ const ProfileAvatar = ({ profile, editing, onAvatarUpdate }: ProfileAvatarProps)
               </span>
             </Button>
           </label>
-        </>
-      )}
+      </>
       {uploading && (
         <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

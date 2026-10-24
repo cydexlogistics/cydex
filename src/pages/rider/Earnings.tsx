@@ -5,26 +5,33 @@ import { useRiderData } from '@/hooks/useRiderData';
 import { useRiderWallet } from '@/hooks/useRiderWallet';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   TrendingUp, 
   Wallet, 
   Calendar,
   RefreshCw,
   Download,
-  ArrowDown,
-  Plus
+  ArrowDown
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { NIGERIAN_BANKS } from '@/utils/nigerianBanks';
 import RecentTransactions from '@/components/rider/earnings/RecentTransactions';
+import RiderBankAccounts from '@/components/rider/RiderBankAccounts';
 import WithdrawalBreakdown from '@/components/wallet/WithdrawalBreakdown';
 import { belowMinimumPayout, MIN_PAYOUT_AMOUNT } from '@/lib/pricing';
+import { useRiderPendingEarnings, useRiderPerformance } from '@/hooks/rider/useRiderPerformance';
+import { useRiderDeliveryGoal } from '@/hooks/rider/useRiderDeliveryGoal';
+
+// Start of the period the earnings tabs show (same periods as the earnings figures)
+const periodStart = (period: 'today' | 'week' | 'month') => {
+  const now = new Date();
+  if (period === 'today') return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (period === 'week') return new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+};
 
 const EarningsPage = () => {
   const { 
@@ -49,17 +56,17 @@ const EarningsPage = () => {
   
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
+  // Recomputed when the period changes (not on every render)
+  const [performanceSince, setPerformanceSince] = useState(() => periodStart('today'));
+  useEffect(() => setPerformanceSince(periodStart(selectedPeriod)), [selectedPeriod]);
+  const { data: performance, refetch: refetchPerformance } = useRiderPerformance(performanceSince);
+  const { data: pending, refetch: refetchPending } = useRiderPendingEarnings();
+  // Set by the rider on their profile
+  const { goal: dailyGoal } = useRiderDeliveryGoal();
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [showAddBankDialog, setShowAddBankDialog] = useState(false);
-  const [newBankAccount, setNewBankAccount] = useState({
-    account_name: '',
-    bank_name: '',
-    bank_code: '',
-    account_number: '',
-    is_default: false,
-    is_verified: false
-  });
+
 
   // Auto-refresh earnings every 60 seconds
   useEffect(() => {
@@ -79,30 +86,15 @@ const EarningsPage = () => {
         refetch.todaysEarnings(),
         refetch.weeklyEarnings(),
         refetch.monthlyEarnings(),
-        refreshWalletData()
+        refreshWalletData(),
+        refetchPerformance(),
+        refetchPending()
       ]);
       toast.success('Earnings refreshed');
     } catch (error) {
       toast.error('Failed to refresh earnings');
     } finally {
       setRefreshing(false);
-    }
-  };
-
-  const handleAddBankAccount = async () => {
-    try {
-      await addBankAccount(newBankAccount);
-      setNewBankAccount({
-        account_name: '',
-        bank_name: '',
-        bank_code: '',
-        account_number: '',
-        is_default: false,
-        is_verified: false
-      });
-      setShowAddBankDialog(false);
-    } catch (error) {
-      // Error handled in hook
     }
   };
 
@@ -187,7 +179,6 @@ const EarningsPage = () => {
   };
 
   const currentData = getEarningsData();
-  const dailyGoal = 8; // Target deliveries per day
   const progressPercentage = selectedPeriod === 'today' 
     ? Math.min((deliveriesCompleted / dailyGoal) * 100, 100)
     : 100;
@@ -360,7 +351,7 @@ const EarningsPage = () => {
               {selectedPeriod === 'today' && (
                 <div className="mt-1">
                   <div className="flex justify-between text-xs mb-0.5">
-                    <span>Goal Progress</span>
+                    <span>Goal: {Math.min(deliveriesCompleted, dailyGoal)} of {dailyGoal}</span>
                     <span>{Math.round(progressPercentage)}%</span>
                   </div>
                   <Progress value={progressPercentage} className="h-1" />
@@ -422,19 +413,24 @@ const EarningsPage = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">On-Time Rate</span>
-                <span className="font-medium">97%</span>
+                <span className="text-muted-foreground">On-Time Rate</span>
+                <span className="font-medium">{performance?.onTimeRate != null ? `${performance.onTimeRate}%` : '—'}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">Avg. Delivery Time</span>
-                <span className="font-medium">23 mins</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">CO₂ Saved</span>
-                <span className="font-medium text-green-600">
-                  {(todaysEarnings.reduce((sum, earning) => sum + Number(earning.carbon_credits_earned || 0), 0) / 1000).toFixed(1)} kg
+                <span className="text-muted-foreground">Avg. Delivery Time</span>
+                <span className="font-medium">
+                  {performance?.avgDeliveryMinutes != null ? `${performance.avgDeliveryMinutes} mins` : '—'}
                 </span>
               </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Distance Covered</span>
+                <span className="font-medium">{(performance?.distanceKm ?? 0).toFixed(1)} km</span>
+              </div>
+              <p className="pt-1 text-xs text-muted-foreground">
+                {performance?.deliveries
+                  ? `From ${performance.deliveries} completed deliver${performance.deliveries === 1 ? 'y' : 'ies'} in this period. On time means delivered within the trip's expected ride time plus 5 minutes.`
+                  : 'No completed deliveries in this period yet.'}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -454,9 +450,14 @@ const EarningsPage = () => {
             <div className="flex justify-between items-center text-sm">
               <span className="text-gray-600">Pending Earnings</span>
               <span className="font-medium text-amber-600">
-                {formatCurrency(walletBalance.pending_balance)}
+                {formatCurrency(pending?.amount ?? 0)}
               </span>
             </div>
+            <p className="-mt-1 text-xs text-muted-foreground">
+              {pending?.deliveries
+                ? `For ${pending.deliveries} deliver${pending.deliveries === 1 ? 'y' : 'ies'} in progress. Added to your available balance when delivered.`
+                : 'What you earn for deliveries in progress shows here until they\'re delivered.'}
+            </p>
             <div className="border-t pt-2 flex justify-between items-center">
               <span className="font-bold text-sm">Total Earned</span>
               <span className="text-base font-bold">{formatCurrency(walletBalance.total_earned)}</span>
@@ -481,125 +482,13 @@ const EarningsPage = () => {
         {/* Recent Transactions: delivery earnings and withdrawals */}
         <RecentTransactions payoutRequests={payoutRequests} />
 
-        {/* Bank Accounts Section */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Bank Accounts</CardTitle>
-            <p className="text-xs text-gray-500 mt-1">Manage your bank accounts for withdrawals</p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {bankAccounts.length > 0 ? (
-                bankAccounts.map((account) => (
-                  <div key={account.id} className="p-2 border rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div>
-                        <p className="font-medium text-sm">{account.bank_name}</p>
-                        <p className="text-xs text-gray-500">**** {account.account_number.slice(-4)}</p>
-                      </div>
-                    </div>
-                    {account.is_default && (
-                      <Badge variant="outline" className="border-green-500 text-green-500 text-xs">
-                        Default
-                      </Badge>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-4">
-                  No bank accounts added yet
-                </p>
-              )}
-              
-              <Dialog open={showAddBankDialog} onOpenChange={setShowAddBankDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full border-dashed text-xs">
-                    <Plus className="mr-2 h-3 w-3" />
-                    Add Bank Account
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add Bank Account</DialogTitle>
-                    <DialogDescription>
-                      Add a new bank account for withdrawals
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="account-name">Account Name</Label>
-                      <Input
-                        id="account-name"
-                        placeholder="Account holder name"
-                        value={newBankAccount.account_name}
-                        onChange={(e) => setNewBankAccount(prev => ({ ...prev, account_name: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="bank-select">Select Bank</Label>
-                      <Select
-                        value={newBankAccount.bank_code}
-                        onValueChange={(code) => {
-                          const bank = NIGERIAN_BANKS.find(b => b.code === code);
-                          if (bank) {
-                            setNewBankAccount(prev => ({
-                              ...prev,
-                              bank_name: bank.name,
-                              bank_code: bank.code
-                            }));
-                          }
-                        }}
-                      >
-                        <SelectTrigger id="bank-select">
-                          <SelectValue placeholder="Select your bank" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {NIGERIAN_BANKS.map((bank) => (
-                            <SelectItem key={bank.code} value={bank.code}>
-                              {bank.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Select your bank from the list. The bank code will be automatically filled.
-                      </p>
-                    </div>
-                    <div>
-                      <Label htmlFor="account-number">Account Number</Label>
-                      <Input
-                        id="account-number"
-                        placeholder="Account number"
-                        value={newBankAccount.account_number}
-                        onChange={(e) => setNewBankAccount(prev => ({ ...prev, account_number: e.target.value }))}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="is-default"
-                        checked={newBankAccount.is_default}
-                        onChange={(e) => setNewBankAccount(prev => ({ ...prev, is_default: e.target.checked }))}
-                        className="rounded"
-                      />
-                      <Label htmlFor="is-default" className="text-sm cursor-pointer">
-                        Set as default account
-                      </Label>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowAddBankDialog(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleAddBankAccount}>
-                      Add Account
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Bank Accounts Section (same card as Profile -> Banking) */}
+        <RiderBankAccounts
+          accounts={bankAccounts}
+          onAdd={addBankAccount}
+          open={showAddBankDialog}
+          onOpenChange={setShowAddBankDialog}
+        />
       </div>
     </DashboardLayout>
   );

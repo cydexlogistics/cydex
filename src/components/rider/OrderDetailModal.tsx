@@ -45,7 +45,6 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   if (!order) return null;
 
   const totalEarnings = Number(order.rider_earning ?? 0); // Rider's share of the delivery fee
-  const hasCarbonSavings = Number(order.carbon_saved) > 0;
 
   // Prefer richer sources if present
   const customerEmail = order.customer_email || (order as any).order?.customer_profile?.email || '';
@@ -295,13 +294,6 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   <span className="text-sm">Cydex commission:</span>
                   <span className="text-sm">−{formatNaira(Number(order.delivery_fee ?? 0) - Number(order.rider_earning ?? 0))}</span>
                 </div>
-                
-                {hasCarbonSavings && (
-                  <div className="flex justify-between">
-                    <span className="text-sm text-green-700 dark:text-green-300">Carbon Saved:</span>
-                    <span className="text-sm font-medium text-green-700 dark:text-green-300">{Number(order.carbon_saved).toFixed(1)} kg CO₂</span>
-                  </div>
-                )}
                 
                 <Separator className="my-2" />
                 

@@ -14,6 +14,7 @@ import { OrdersTable } from '@/components/rider/orders/OrdersTable';
 import { useRiderLocation } from '@/hooks/useRiderLocation';
 import { pickupDistanceKm } from '@/lib/riderLocation';
 import PagedList from '@/components/ui/paged-list';
+import { kmText, useRiderSeeOrdersKm } from '@/hooks/useVehicleTypes';
 
 const AvailableOrdersPage = () => {
   const { 
@@ -32,6 +33,8 @@ const AvailableOrdersPage = () => {
   
   const [searchQuery, setSearchQuery] = useState('');
   const { position } = useRiderLocation();
+  // Their vehicle type's distance to see orders (Admin -> Riders & vehicles)
+  const seeOrdersKm = useRiderSeeOrdersKm();
   const [sortBy, setSortBy] = useState('distance');
   const [filteredOrders, setFilteredOrders] = useState(availableDeliveries);
   const [acceptingOrder, setAcceptingOrder] = useState<string | null>(null);
@@ -130,7 +133,7 @@ const AvailableOrdersPage = () => {
           <div>
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Available Orders</h1>
             <p className="text-sm sm:text-base text-muted-foreground">
-              Deliveries your vehicle can cover, with pickups within 5 km of you
+              Deliveries your vehicle can cover, with pickups within {kmText(seeOrdersKm)} of you
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -229,7 +232,7 @@ const AvailableOrdersPage = () => {
           <CardHeader className="pb-3 sm:pb-4">
             <CardTitle className="text-base sm:text-lg">Delivery Excellence Tips</CardTitle>
             <CardDescription className="text-sm">
-              Maximize your earnings and sustainability impact
+              Maximize your earnings
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">

@@ -13,7 +13,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 const SignupForm = () => {
@@ -21,7 +22,14 @@ const SignupForm = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("CUSTOMER");
+  // A referral link (/auth?ref=CODE&role=vendor) fills in the code and the kind of account
+  const [params] = useSearchParams();
+  const linkRole = params.get('role')?.toUpperCase();
+  const [role, setRole] = useState<UserRole>(
+    linkRole === 'RIDER' || linkRole === 'VENDOR' ? (linkRole as UserRole) : "CUSTOMER"
+  );
+  const [referralCode, setReferralCode] = useState(params.get('ref')?.toUpperCase() ?? "");
+  const [referralError, setReferralError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,7 +56,17 @@ const SignupForm = () => {
     
     setIsSubmitting(true);
     try {
-      await register(signupName, signupEmail, signupPassword, role);
+      // A code only works for the same kind of account, so check it first
+      const code = referralCode.replace(/\s/g, '').toUpperCase();
+      if (code) {
+        const { data: problem, error } = await supabase.rpc('check_referral_code', { p_code: code, p_role: role.toLowerCase() });
+        if (error) throw error;
+        if (problem) {
+          setReferralError(problem);
+          return;
+        }
+      }
+      await register(signupName, signupEmail, signupPassword, role, code || undefined);
       
       // Reset form
       setSignupName("");
@@ -56,6 +74,7 @@ const SignupForm = () => {
       setSignupPassword("");
       setSignupConfirmPassword("");
       setRole("CUSTOMER");
+      setReferralCode("");
     } catch (error) {
       console.error("Signup failed:", error);
     } finally {
@@ -143,7 +162,7 @@ const SignupForm = () => {
         
         <div className="space-y-2">
           <Label htmlFor="role">I want to join as a</Label>
-          <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
+          <Select value={role} onValueChange={(value) => { setRole(value as UserRole); setReferralError(null); }}>
             <SelectTrigger id="role" className="w-full">
               <SelectValue placeholder="Select your role" />
             </SelectTrigger>
@@ -153,6 +172,24 @@ const SignupForm = () => {
               <SelectItem value="VENDOR">Vendor</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="referral-code">Referral code (optional)</Label>
+          <Input
+            id="referral-code"
+            value={referralCode}
+            onChange={(e) => { setReferralCode(e.target.value.toUpperCase()); setReferralError(null); }}
+            placeholder="e.g. CX7KQ2MP"
+            maxLength={12}
+            className="font-mono uppercase"
+            aria-invalid={!!referralError}
+          />
+          {referralError ? (
+            <p className="text-sm text-destructive">{referralError}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground">From someone joining as the same kind of account as you.</p>
+          )}
         </div>
         
         <Button

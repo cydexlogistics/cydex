@@ -19,16 +19,19 @@ import { formatNaira } from '@/lib/pricing';
 
 type Draft = {
   key: string | null; name: string; customer_label: string; rate_per_km: string; avg_speed_kmh: string; max_distance_km: string;
+  // How close to a pickup riders must be to see new orders, and to be alerted about them
+  see_orders_km: string; alert_orders_km: string;
   needs_details: boolean; needs_registration: boolean; is_active: boolean;
 };
 
 const blank: Draft = {
-  key: null, name: '', customer_label: '', rate_per_km: '200', avg_speed_kmh: '15', max_distance_km: '5',
+  key: null, name: '', customer_label: '', rate_per_km: '200', avg_speed_kmh: '15', max_distance_km: '5', see_orders_km: '5', alert_orders_km: '5',
   needs_details: true, needs_registration: false, is_active: true,
 };
 const toDraft = (t: VehicleType): Draft => ({
   key: t.key, name: t.name, customer_label: t.customer_label ?? '', rate_per_km: String(t.rate_per_km),
-  avg_speed_kmh: String(t.avg_speed_kmh), max_distance_km: String(Number(t.max_distance_km)), needs_details: t.needs_details, needs_registration: t.needs_registration,
+  avg_speed_kmh: String(t.avg_speed_kmh), max_distance_km: String(Number(t.max_distance_km)),
+  see_orders_km: String(Number(t.see_orders_km ?? 5)), alert_orders_km: String(Number(t.alert_orders_km ?? 5)), needs_details: t.needs_details, needs_registration: t.needs_registration,
   is_active: t.is_active,
 });
 
@@ -64,8 +67,11 @@ const AdminVehicles = () => {
   const rate = Number(draft?.rate_per_km);
   const speed = Number(draft?.avg_speed_kmh);
   const reach = Number(draft?.max_distance_km);
+  const see = Number(draft?.see_orders_km);
+  const alert = Number(draft?.alert_orders_km);
   const valid = !!draft && draft.name.trim().length > 1 && Number.isFinite(rate) && rate >= 0 && Number.isFinite(speed) && speed > 0
-    && Number.isFinite(reach) && reach > 0 && reach <= 100;
+    && Number.isFinite(reach) && reach > 0 && reach <= 100
+    && see > 0 && see <= 50 && alert > 0 && alert <= see;
 
   const save = async () => {
     if (!draft || !valid) return;
@@ -82,6 +88,8 @@ const AdminVehicles = () => {
       p_rate_per_km: rate,
       p_avg_speed_kmh: speed,
       p_max_distance_km: reach,
+      p_see_orders_km: see,
+      p_alert_orders_km: alert,
       p_needs_details: draft.needs_details,
       p_needs_registration: draft.needs_details && draft.needs_registration,
       p_is_active: draft.is_active,
@@ -145,7 +153,7 @@ const AdminVehicles = () => {
                       {!t.is_active && <Badge variant="outline">Off</Badge>}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatNaira(Number(t.rate_per_km))} per km · trips up to {Number(t.max_distance_km)} km · about{' '}
+                      {formatNaira(Number(t.rate_per_km))} per km · trips up to {Number(t.max_distance_km)} km · sees orders within {Number(t.see_orders_km ?? 5)} km, alerted within {Number(t.alert_orders_km ?? 5)} km · about{' '}
                       {Number(t.avg_speed_kmh)} km/h ·{' '}
                       {!t.needs_details ? 'No vehicle details needed'
                         : t.needs_registration ? 'Colour, photo, registration number and document'
@@ -215,9 +223,27 @@ const AdminVehicles = () => {
                 <Input id="vt-reach" type="number" min={0.1} max={100} step="any" value={draft.max_distance_km} onChange={(e) => setDraft({ ...draft, max_distance_km: e.target.value })} />
                 <p className="text-xs text-muted-foreground">
                   Riders with this vehicle only see deliveries up to this distance, and customers can only pick it for
-                  trips this short. The rider still has to be within 5 km of the pickup.
+                  trips this short. The rider also has to be close enough to the pickup (below).
                 </p>
               </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="vt-see">Sees new orders within (km of the pickup)</Label>
+                  <Input id="vt-see" type="number" min={0.1} max={50} step="any" value={draft.see_orders_km} onChange={(e) => setDraft({ ...draft, see_orders_km: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="vt-alert">Alerted to new orders within (km)</Label>
+                  <Input id="vt-alert" type="number" min={0.1} max={50} step="any" value={draft.alert_orders_km} onChange={(e) => setDraft({ ...draft, alert_orders_km: e.target.value })} />
+                </div>
+              </div>
+              {(!(see > 0 && see <= 50) || !(alert > 0 && alert <= see)) ? (
+                <p className="-mt-2 text-xs text-destructive">Enter up to 50 km to see orders, and an alert distance no more than that.</p>
+              ) : (
+                <p className="-mt-2 text-xs text-muted-foreground">
+                  Riders with this vehicle only see orders ready for pickup within the first distance, and get the
+                  "Order nearby" alert within the second. Keep both small for walking riders.
+                </p>
+              )}
               <label className="flex items-center justify-between gap-3 text-sm">
                 <span>Riders give the vehicle's colour and a photo</span>
                 <Switch checked={draft.needs_details} onCheckedChange={(v) => setDraft({ ...draft, needs_details: v })} />

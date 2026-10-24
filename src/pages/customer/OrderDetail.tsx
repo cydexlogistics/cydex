@@ -8,7 +8,7 @@ import { useSupabase } from '@/contexts/SupabaseContext';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useCartContext } from '@/contexts/CartContext';
 import { orderActions } from '@/services/orderActions';
-import { isAvailable, stockLimit } from '@/lib/products';
+import { hasDiscount, isAvailable, salePrice, stockLimit } from '@/lib/products';
 import { errorMessage } from '@/lib/address';
 import { invokeFunction } from '@/lib/edgeFunctions';
 import { supabase as typedSupabase } from '@/integrations/supabase/client';
@@ -237,7 +237,7 @@ const OrderDetailPage = () => {
         .eq('order_id', order.id);
       const productIds = [...new Set((lines ?? []).map((l) => l.product_id).filter(Boolean))] as string[];
       const { data: products } = productIds.length
-        ? await supabase.from('products').select('id, name, price, vendor_id, status, track_stock, stock_quantity').in('id', productIds)
+        ? await supabase.from('products').select('id, name, price, discount_type, discount_value, vendor_id, status, track_stock, stock_quantity').in('id', productIds)
         : { data: [] };
 
       const available = (products ?? []).filter((p) => isAvailable(p));
@@ -252,7 +252,8 @@ const OrderDetailPage = () => {
         addToCart({
           id: product.id,
           name: product.name,
-          price: Number(product.price),
+          price: salePrice(product),
+          list_price: hasDiscount(product) ? Number(product.price) : null,
           vendor_id: product.vendor_id,
           vendor_name: order.vendor?.name || 'Unknown Vendor',
           max_quantity: stockLimit(product),

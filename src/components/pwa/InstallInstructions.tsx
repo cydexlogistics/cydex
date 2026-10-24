@@ -52,7 +52,7 @@ const InstallInstructions = ({ className }: { className?: string }) => {
       ) : null}
 
       <Tabs value={device} onValueChange={(v) => setDevice(v as Device)}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="w-full">
           <TabsTrigger value="android" className="gap-1.5"><Smartphone className="h-4 w-4" /> Android</TabsTrigger>
           <TabsTrigger value="iphone" className="gap-1.5"><Smartphone className="h-4 w-4" /> iPhone</TabsTrigger>
           <TabsTrigger value="computer" className="gap-1.5"><Monitor className="h-4 w-4" /> Computer</TabsTrigger>

@@ -188,7 +188,7 @@ const OrdersPage = () => {
 
         {/* Tabs - Compact */}
         <Tabs defaultValue="active" className="space-y-3 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-4 h-8 sm:h-10">
+          <TabsList className="w-full h-8 sm:h-10">
             <TabsTrigger value="all" className="text-xs sm:text-sm px-1 sm:px-3">
               All
               <span className="ml-1">({orders.length})</span>

@@ -1,7 +1,7 @@
 
 import { 
   Bell, Bike, Boxes, Home, Package, Wallet, Recycle, User, Settings, Users, ShieldCheck, Navigation,
-  Banknote, Mail, ScrollText, Shield, SlidersHorizontal, Star, TicketPercent, Zap, Megaphone } from 'lucide-react';
+  Banknote, Mail, ScrollText, Shield, SlidersHorizontal, Star, TicketPercent, Zap, Megaphone, Trophy } from 'lucide-react';
 
 interface SidebarLink {
   name: string;
@@ -21,6 +21,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
         { name: 'Notifications', href: '/customer/notifications', icon: Bell },
         { name: 'Cydex Express', href: '/customer/express', icon: Zap },
         { name: 'Wallet', href: '/customer/wallet', icon: Wallet },
+        { name: 'Rewards', href: '/customer/rewards', icon: Trophy },
         // { name: 'Recycling', href: '/customer/recycling', icon: Recycle },
         { name: 'Profile', href: '/customer/profile', icon: User },
       ];
@@ -41,6 +42,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
         { name: 'Request Rider', href: '/vendor/rider-requests', icon: Bike },
         { name: 'Notifications', href: '/vendor/notifications', icon: Bell },
         { name: 'Wallet', href: '/vendor/wallet', icon: Wallet },
+        { name: 'Rewards', href: '/vendor/rewards', icon: Trophy },
         // { name: 'Recycling', href: '/vendor/recycling', icon: Recycle },
         { name: 'Settings', href: '/vendor/settings', icon: Settings },
       ];
@@ -55,6 +57,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
         { name: 'Pricing', href: '/admin/pricing', icon: SlidersHorizontal },
         { name: 'Riders & vehicles', href: '/admin/vehicles', icon: Bike },
         { name: 'Promotions', href: '/admin/promotions', icon: TicketPercent },
+        { name: 'Rewards', href: '/admin/rewards', icon: Trophy },
         { name: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
         { name: 'Notifications', href: '/admin/notifications', icon: Bell },
         { name: 'Emails', href: '/admin/emails', icon: Mail },
@@ -82,4 +85,15 @@ export const getRoleTitle = (userRole: string): string => {
     default:
       return '';
   }
+};
+
+/**
+ * The account page for the profile menu: customers and riders have a Profile
+ * page, vendors keep theirs under Settings, and admins have neither (null)
+ */
+export const getAccountLink = (userRole: string): { href: string; label: string } | null => {
+  const role = userRole.toLowerCase();
+  if (role === 'customer' || role === 'rider') return { href: `/${role}/profile`, label: 'Profile' };
+  if (role === 'vendor') return { href: '/vendor/settings', label: 'Settings' };
+  return null;
 };

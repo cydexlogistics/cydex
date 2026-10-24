@@ -19,7 +19,7 @@ export interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role: UserRole, additionalInfo?: any) => Promise<void>;
+  register: (name: string, email: string, password: string, role: UserRole, referralCode?: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   verifyEmail: (token: string) => Promise<void>;

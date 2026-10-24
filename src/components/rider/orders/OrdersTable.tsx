@@ -178,11 +178,6 @@ export const OrdersTable: React.FC<OrdersTableProps> = ({
                     <p className="text-sm font-medium text-foreground">
                       {formatNaira(Number(order.rider_earning ?? 0))}
                     </p>
-                    {Number(order.carbon_saved) > 0 && (
-                      <p className="text-xs text-green-500 dark:text-green-400">
-                        {Number(order.carbon_saved).toFixed(1)} kg CO₂ saved
-                      </p>
-                    )}
                   </div>
                 </td>
                 

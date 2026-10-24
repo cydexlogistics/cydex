@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Wallet, ArrowUp, ArrowDown, RefreshCw, Download, Plus, Calendar,
   Search, CreditCard, DollarSign, BarChart4, Filter, ChevronDown,
-  Info, AlertCircle, CheckCircle, XCircle, TrendingUp, Loader2
+  Info, AlertCircle, CheckCircle, XCircle, TrendingUp, Loader2, Gift
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useVendorFinancials } from '@/hooks/useVendorFinancials';
@@ -94,6 +94,8 @@ const WalletPage = () => {
         return <ArrowUp className="h-4 w-4 sm:h-6 sm:w-6 text-blue-500" />;
       case 'refund':
         return <RefreshCw className="h-4 w-4 sm:h-6 sm:w-6 text-amber-500" />;
+      case 'reward':
+        return <Gift className="h-4 w-4 sm:h-6 sm:w-6 text-purple-500" />;
       default:
         return <DollarSign className="h-4 w-4 sm:h-6 sm:w-6 text-gray-500" />;
     }
@@ -505,7 +507,7 @@ const WalletPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="today" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-4">
+              <TabsList className="w-full mb-4">
                 <TabsTrigger value="today" className="text-xs sm:text-sm">Today</TabsTrigger>
                 <TabsTrigger value="week" className="text-xs sm:text-sm">This Week</TabsTrigger>
                 <TabsTrigger value="month" className="text-xs sm:text-sm">This Month</TabsTrigger>
@@ -608,11 +610,12 @@ const WalletPage = () => {
           
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="mb-3 sm:mb-4 w-full sm:w-auto grid grid-cols-4 sm:flex sm:gap-2">
+              <TabsList className="mb-3 sm:mb-4 w-full sm:w-auto sm:gap-2">
                 <TabsTrigger value="all" className="text-xs sm:text-sm">All</TabsTrigger>
                 <TabsTrigger value="sale" className="text-xs sm:text-sm">Sales</TabsTrigger>
                 <TabsTrigger value="payout" className="text-xs sm:text-sm">Payouts</TabsTrigger>
                 <TabsTrigger value="refund" className="text-xs sm:text-sm">Refunds</TabsTrigger>
+                <TabsTrigger value="reward" className="text-xs sm:text-sm">Rewards</TabsTrigger>
               </TabsList>
               
               <div className="space-y-3 sm:space-y-4">
@@ -661,6 +664,7 @@ const TransactionCard = ({
           transaction.status === 'failed' ? 'bg-red-100' :
           transaction.type === 'sale' ? 'bg-green-100' :
           transaction.type === 'payout' ? 'bg-blue-100' : 
+          transaction.type === 'reward' ? 'bg-purple-100' :
           'bg-amber-100'
         }`}>
           {getTransactionIcon(transaction.type, transaction.status)}
@@ -686,11 +690,11 @@ const TransactionCard = ({
       
       <div className="text-right">
         <span className={`font-bold text-sm sm:text-base ${
-          transaction.type === 'sale' ? 'text-green-600' :
+          transaction.type === 'sale' || transaction.type === 'reward' ? 'text-green-600' :
           transaction.type === 'payout' ? 'text-blue-600' :
           'text-amber-600'
         }`}>
-          {transaction.type === 'sale' ? '+' : '-'}{formatAmount(transaction.amount)}
+          {transaction.type === 'sale' || transaction.type === 'reward' ? '+' : '-'}{formatAmount(transaction.amount)}
         </span>
         {transaction.fee > 0 && (
           <p className="text-xs text-gray-500">

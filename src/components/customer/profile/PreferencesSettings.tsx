@@ -15,7 +15,7 @@ const PreferencesSettings = () => {
           <CardDescription>Customize the look and feel of your account.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button>Change Theme</Button>
+          <Button disabled>Change Theme</Button>
         </CardContent>
       </Card>
     </div>

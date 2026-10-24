@@ -13,6 +13,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { toast } from 'sonner';
 import UnreadBadge from '@/components/notifications/UnreadBadge';
 import { useNotifications } from '@/hooks/useNotifications';
+import { getAccountLink } from './navigationLinks';
 
 interface MobileHeaderProps {
   onMenuToggle: () => void;
@@ -32,6 +33,8 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
   const { theme, setTheme } = useTheme();
   const { unreadCount } = useNotifications();
   const role = userRole.toLowerCase();
+  // Profile, or Settings for vendors (admins have neither)
+  const account = getAccountLink(role);
   const hasNotifications = role === 'customer' || role === 'vendor' || role === 'rider' || role === 'admin';
 
   // Get role title for display
@@ -125,12 +128,14 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to={`/${userRole}/profile`} className="cursor-pointer">
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </Link>
-            </DropdownMenuItem>
+            {account && (
+              <DropdownMenuItem asChild>
+                <Link to={account.href} className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>{account.label}</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={handleMessages} className="opacity-60 cursor-pointer">
               <MessageSquare className="mr-2 h-4 w-4" />
               <span>Messages</span>

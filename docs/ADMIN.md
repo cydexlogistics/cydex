@@ -12,13 +12,14 @@ Before an action runs, the admin is asked **"Are you sure…?"**. Actions that a
 |---|---|
 | **Overview** | A To do list, money for a chosen period, a chart, live numbers and stuck orders. See below. |
 | **Orders** | Every customer order and rider request. Search by order number, customer, vendor, rider or recipient, and filter by status and type. Open an order for its full details and the support actions. |
-| **Money** | Five tabs: Earnings (the per-order breakdown), Withdrawals (approve or reject), Wallets, Held funds and Customer payments. |
+| **Money** | Six tabs: Earnings (the per-order breakdown), Withdrawals (approve or reject), Wallets, Held funds, Customer payments and Rewards (every reward given out). |
 | **Users** | Everyone, with their role, status and verification. Edit a name or phone, suspend or reinstate customers, and invite or remove admins. |
 | **Verifications** | Review vendors and riders, and manage business categories. See [VERIFICATION.md](VERIFICATION.md). |
 | **Reviews** | Vendor and rider reviews. Hide fake or abusive ones. |
 | **Pricing** | The delivery charge, Service Charge and commissions, with the change history. |
 | **Riders & vehicles** | The vehicle types riders can register, each with its own price per km, and how long an idle rider stays online. |
-| **Promotions** | Discounts and coupon codes for customers, vendors and riders, with limits. |
+| **Promotions** | Two tabs. **General:** discounts and coupon codes for customers, vendors and riders, with limits, optionally only for some email domains. **Vendor partnerships:** partner vendors with their own commission rates, and promotions for customers ordering from them. |
+| **Rewards** | Two tabs. **Rewards:** achievements for customers, vendors and riders, and daily or weekly challenges for riders, each with a wallet bonus or a personal offer. **Referrals:** the referral reward and goal for each kind of account, and every referral. See below. |
 | **Broadcasts** | Announcements to customers, vendors or riders, as a notification, an email or both. |
 | **Notifications** | The admin's own notifications (withdrawals to approve, verifications to review), with a bell on mobile. |
 | **Emails** | Emails the app sends. Retry failed ones. |
@@ -100,6 +101,7 @@ Migration [`20261013000000_vehicles_categories_hours.sql`](../supabase/migration
   - **Price per km**, used for the delivery fee.
   - **Longest trip**, pickup to drop-off, in km (5 to start with). Riders with this vehicle only see deliveries up to this distance, customers can only pick it for trips this short, and customers see vendors as far away as the longest trip of any active type. See [ORDER_FLOW.md → How far each mode goes](ORDER_FLOW.md#how-far-each-mode-goes).
   - **Average speed**, used for delivery time estimates until the type has 5 real deliveries.
+  - **Sees new orders within** and **Alerted to new orders within** (km of the pickup, 5 to start with; the alert distance can't be more than the first). Riders with this vehicle only see orders ready for pickup within the first distance, and get the "Order nearby" alert within the second. Keep both small for walking riders (migration [`20261025100000_partnerships_and_order_radius.sql`](../supabase/migrations/20261025100000_partnerships_and_order_radius.sql)).
   - **What riders must give:** nothing (walking); colour and a photo of the vehicle; or also the registration number and registration document.
   - **Name customers see**, if different.
   - **Active:** riders can register with it and customers can pick it as their preferred delivery mode.
@@ -121,6 +123,7 @@ Audiences and limits: migration [`20261014100000_promotion_audience_limits.sql`]
 | **Coupon code** | Leave empty for a promotion that applies by itself; enter a code to make people type it. Commission promotions can't have a code. |
 | **Conditions** | Maximum distance in km; one or more delivery modes (rider groups) |
 | **Dates** | Start and end |
+| **Only for emails at** (General tab, optional) | Email domains, for example `gmail.com, ui.edu.ng`. Only people whose email ends with one of them get it; `ui.edu.ng` also covers `student.ui.edu.ng`. |
 | **Show in "Offers for you"** | On to start with. Off: it isn't listed on home pages or among the codes at checkout. A hidden coupon still works for anyone given the code; a hidden automatic promotion still applies by itself. |
 
 - An order gets one discount on what's paid: a valid coupon first, otherwise the promotion that saves the most. A commission promotion for the vendor or rider can apply on top.
@@ -129,6 +132,41 @@ Audiences and limits: migration [`20261014100000_promotion_audience_limits.sql`]
 - People see every promotion they can still use under **Offers for you** on their home page, with the uses and places left. Coupons are listed with their code, and offered at checkout, one tap to apply. For a code meant only for particular people, switch **Show in "Offers for you"** off (migration [`20261015100000_promotion_show_in_offers.sql`](../supabase/migrations/20261015100000_promotion_show_in_offers.sql)); the list marks it **Not in offers**.
 - **Earnings** has a **Promo cost** column and the Overview shows what promotions cost Cydex in the period, commission promotions included. The row still adds up: customer paid = vendor + rider + Cydex.
 - Batches of rider requests aren't discounted.
+
+#### Vendor partnerships
+
+**Admin → Promotions → Vendor partnerships.** Migration [`20261025100000_partnerships_and_order_radius.sql`](../supabase/migrations/20261025100000_partnerships_and_order_radius.sql).
+
+- **Partner vendors:** add a vendor, then optionally give them their own **commission on sales** and **rider request commission** (0–50%). Leave either empty for the standard rate from Pricing. Switching a partner off, or removing them, puts them back on the standard rates. New rates apply to orders settled from then on.
+- **Partnership promotions:** like a general promotion, but always for customers, on the delivery fee or Service Charge, and only on orders from the vendors you add. Customers see them under Offers for you with the vendors' names.
+
+### Rewards
+
+Migration [`20261024200000_rewards.sql`](../supabase/migrations/20261024200000_rewards.sql). **Admin → Rewards → New reward.** How rewards are earned and paid: [ORDER_FLOW.md → Rewards](ORDER_FLOW.md#rewards).
+
+| Field | Choices |
+|---|---|
+| **Title** and **write-up** | What people see. Without a write-up they see the goal ("Complete 10 orders"). |
+| **Who it's for** | Customers, vendors or riders. This decides what it can count. |
+| **Type** | **Achievement** (earned once), or for riders a **Daily challenge** or **Weekly challenge** (progress starts again each day, or each Monday, Nigerian time; earned once per day or week). |
+| **What it counts** | **Customers:** orders completed, amount spent. **Vendors:** orders completed, amount sold. **Riders:** deliveries completed, distance covered, time online (in hours), new fastest delivery. |
+| **Reward** | A **wallet bonus** in naira, or a **discount offer**: what it takes money off (as for promotions, without items), the discount, how many orders it covers and how many days they have to use it. |
+| **Icon** and **colour** | Shown next to the reward on the user's side. |
+| **Dates** | Start (required) and end (optional). Progress counts from the start, so a start in the past counts earlier activity. |
+| **Active** | Off hides it and stops it being earned. |
+
+- The list shows each reward's state (scheduled, running, ended, off), who it's for, and how many times and by how many people it's been earned, with the total paid in wallet bonuses.
+- **Money → Rewards** lists every reward given in a period, newest first: who got it, what for, and the wallet bonus (or "Offer"). Totals at the top: rewards given, paid into wallets, offers given.
+- Editing a reward doesn't take back rewards already given.
+- Offers given as rewards are personal (only the winner can use them) and aren't listed under Promotions.
+
+#### Referrals
+
+**Admin → Rewards → Referrals.** Migration [`20261025000000_referrals.sql`](../supabase/migrations/20261025000000_referrals.sql). How referrals work: [ORDER_FLOW.md → Referrals](ORDER_FLOW.md#referrals).
+
+- One card each for customers, vendors and riders: the reward, the goal (vendors: sales, or rider requests), and **On** or **Paused**. While paused, codes can't be used and nothing is paid.
+- Below, every referral with who referred whom, the code, progress and the reward paid, filtered by kind and status, with totals.
+- Referral rewards are also listed under **Money → Rewards** ("Referral: Ada joined").
 
 ### Broadcasts
 

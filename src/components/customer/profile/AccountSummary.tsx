@@ -1,20 +1,52 @@
-
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Package, Receipt, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Leaf, Award, Package } from 'lucide-react';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { formatNaira } from '@/lib/pricing';
 
-interface ProfileData {
-  carbonCredits: number;
-  sustainabilityScore: number;
-  ordersCompleted: number;
-  dateJoined: string;
-}
+// The customer's orders delivered (and what they cost) and their wallet balance
+const AccountSummary = ({ dateJoined }: { dateJoined: string }) => {
+  const { user } = useAuth();
+  const { data, isLoading } = useQuery({
+    queryKey: ['customer-account-summary', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const [{ data: delivered, error }, { data: wallet }] = await Promise.all([
+        supabase.from('orders').select('total_amount').eq('customer_id', user!.id).eq('status', 'delivered'),
+        supabase.from('customer_wallet').select('available_balance').eq('customer_id', user!.id).maybeSingle(),
+      ]);
+      if (error) throw error;
+      return {
+        completed: delivered?.length ?? 0,
+        spent: (delivered ?? []).reduce((sum, o) => sum + Number(o.total_amount ?? 0), 0),
+        wallet: Number(wallet?.available_balance ?? 0),
+      };
+    },
+  });
 
-interface AccountSummaryProps {
-  profileData: ProfileData;
-}
+  const items = [
+    {
+      icon: Package,
+      color: 'text-blue-500',
+      title: `${data?.completed ?? 0} ${data?.completed === 1 ? 'Order' : 'Orders'} Completed`,
+      detail: dateJoined ? `Delivered to you since joining in ${dateJoined}` : 'Delivered to you',
+    },
+    {
+      icon: Receipt,
+      color: 'text-amber-500',
+      title: `${formatNaira(data?.spent ?? 0)} Spent`,
+      detail: 'On your delivered orders, including delivery and service charges',
+    },
+    {
+      icon: Wallet,
+      color: 'text-green-600',
+      title: `${formatNaira(data?.wallet ?? 0)} Wallet Balance`,
+      detail: 'Refunds land here and pay for your next order first',
+    },
+  ];
 
-const AccountSummary = ({ profileData }: AccountSummaryProps) => {
   return (
     <Card>
       <CardHeader>
@@ -22,27 +54,15 @@ const AccountSummary = ({ profileData }: AccountSummaryProps) => {
         <CardDescription>Your account activity at a glance</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center space-x-4">
-          <Leaf className="h-6 w-6 text-green-500" />
-          <div>
-            <h3 className="text-lg font-medium">{profileData.carbonCredits} Carbon Credits</h3>
-            <p className="text-sm text-gray-500">Earn more by making eco-friendly choices</p>
+        {items.map(({ icon: Icon, color, title, detail }) => (
+          <div key={title} className="flex items-center space-x-4">
+            <Icon className={`h-6 w-6 shrink-0 ${color}`} />
+            <div>
+              {isLoading ? <div className="h-6 w-40 animate-pulse rounded bg-muted" /> : <h3 className="text-lg font-medium">{title}</h3>}
+              <p className="text-sm text-muted-foreground">{detail}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Award className="h-6 w-6 text-amber-500" />
-          <div>
-            <h3 className="text-lg font-medium">{profileData.sustainabilityScore} Sustainability Score</h3>
-            <p className="text-sm text-gray-500">Based on your eco-friendly actions</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Package className="h-6 w-6 text-blue-500" />
-          <div>
-            <h3 className="text-lg font-medium">{profileData.ordersCompleted} Orders Completed</h3>
-            <p className="text-sm text-gray-500">Since joining in {profileData.dateJoined}</p>
-          </div>
-        </div>
+        ))}
       </CardContent>
     </Card>
   );

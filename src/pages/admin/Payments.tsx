@@ -6,12 +6,13 @@ import CustomerTransactionsTab from '@/components/admin/money/CustomerTransactio
 import EarningsTab from '@/components/admin/money/EarningsTab';
 import HeldFundsTab from '@/components/admin/money/HeldFundsTab';
 import PayoutsTab from '@/components/admin/money/PayoutsTab';
+import RewardsTab from '@/components/admin/money/RewardsTab';
 import WalletsTab from '@/components/admin/money/WalletsTab';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 
-const TABS = ['earnings', 'payouts', 'wallets', 'held', 'transactions'] as const;
+const TABS = ['earnings', 'payouts', 'wallets', 'held', 'transactions', 'rewards'] as const;
 
 const AdminPayments = () => {
   const [params, setParams] = useSearchParams();
@@ -26,7 +27,7 @@ const AdminPayments = () => {
   });
 
   return (
-    <AdminPage title="Money" icon={Banknote} description="What Cydex earns, withdrawals to approve, and every wallet.">
+    <AdminPage title="Money" icon={Banknote} description="What Cydex earns, withdrawals to approve, every wallet, and rewards paid out.">
       <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })}>
         <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:px-0">
           <TabsList>
@@ -37,6 +38,7 @@ const AdminPayments = () => {
             <TabsTrigger value="wallets">Wallets</TabsTrigger>
             <TabsTrigger value="held">Held funds</TabsTrigger>
             <TabsTrigger value="transactions">Customer payments</TabsTrigger>
+            <TabsTrigger value="rewards">Rewards</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="earnings"><EarningsTab /></TabsContent>
@@ -44,6 +46,7 @@ const AdminPayments = () => {
         <TabsContent value="wallets"><WalletsTab /></TabsContent>
         <TabsContent value="held"><HeldFundsTab /></TabsContent>
         <TabsContent value="transactions"><CustomerTransactionsTab /></TabsContent>
+        <TabsContent value="rewards"><RewardsTab /></TabsContent>
       </Tabs>
     </AdminPage>
   );

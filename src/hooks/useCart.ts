@@ -4,7 +4,10 @@ import { toast } from 'sonner';
 export interface CartItem {
   id: string;
   name: string;
+  /** What the customer pays each: the sale price when the vendor set a discount */
   price: number;
+  /** The price before the vendor's discount (shown crossed out); unset when there's no discount */
+  list_price?: number | null;
   quantity: number;
   vendor_id: string;
   vendor_name: string;

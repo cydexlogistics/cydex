@@ -13,11 +13,13 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Package, ArrowLeft, Upload, Leaf, Store } from 'lucide-react';
+import { Package, ArrowLeft, Upload, Store } from 'lucide-react';
 import { useVendorProducts } from '@/hooks/useVendorProducts';
 import { useProductCategories } from '@/hooks/useProductCategories';
 import { supabase } from '@/integrations/supabase/client';
 import { checkUploadSize, MAX_UPLOAD_LABEL } from '@/lib/uploads';
+import { discountLabel, salePrice } from '@/lib/products';
+import { formatNaira } from '@/lib/pricing';
 
 // Stock is optional: tick "Track stock" to enter a number (it then goes down
 // with each paid order and the product shows as out of stock at 0). Without it,
@@ -33,11 +35,19 @@ const productSchema = z
     available: z.boolean().default(true),
     image_url: z.string().optional(),
     is_eco_friendly: z.boolean().optional().default(true),
-    carbon_impact: z.coerce.number().min(0).optional().default(0),
+    discount_type: z.enum(['none', 'percent', 'flat']).default('none'),
+    discount_value: z.union([z.literal(''), z.coerce.number()]).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.track_stock && (data.stock_quantity === '' || data.stock_quantity === undefined)) {
       ctx.addIssue({ code: 'custom', path: ['stock_quantity'], message: 'Enter how many you have in stock.' });
+    }
+    const off = data.discount_value === '' || data.discount_value === undefined ? null : Number(data.discount_value);
+    if (data.discount_type === 'percent' && (off === null || off <= 0 || off >= 100)) {
+      ctx.addIssue({ code: 'custom', path: ['discount_value'], message: 'Enter a percentage between 0 and 100.' });
+    }
+    if (data.discount_type === 'flat' && (off === null || off <= 0 || off >= data.price)) {
+      ctx.addIssue({ code: 'custom', path: ['discount_value'], message: 'Enter an amount less than the price.' });
     }
   });
 
@@ -67,10 +77,15 @@ const AddProduct = () => {
       available: true,
       image_url: '',
       is_eco_friendly: true,
-      carbon_impact: 0,
+      discount_type: 'none',
+      discount_value: '',
     },
   });
   const trackStock = form.watch('track_stock');
+  const [price, discountType, discountValue] = form.watch(['price', 'discount_type', 'discount_value']);
+  const preview = discountType === 'none' || discountValue === '' || discountValue === undefined
+    ? null
+    : { price: Number(price) || 0, discount_type: discountType, discount_value: Number(discountValue) };
 
   useEffect(() => {
     if (!productId) return;
@@ -96,7 +111,8 @@ const AddProduct = () => {
           available: data.status === 'active',
           image_url: data.image_url ?? '',
           is_eco_friendly: data.is_eco_friendly ?? true,
-          carbon_impact: Number(data.carbon_impact ?? 0),
+          discount_type: (data.discount_type as 'percent' | 'flat' | null) ?? 'none',
+          discount_value: data.discount_value ?? '',
         });
         setSelectedImage(data.image_url || null);
       });
@@ -134,7 +150,8 @@ const AddProduct = () => {
         status: (data.track_stock || data.available ? 'active' : 'inactive') as 'active' | 'inactive',
         image_url: data.image_url || '',
         is_eco_friendly: Boolean(data.is_eco_friendly),
-        carbon_impact: Number(data.carbon_impact),
+        discount_type: data.discount_type === 'none' ? null : data.discount_type,
+        discount_value: data.discount_type === 'none' ? null : Number(data.discount_value),
       };
 
       const success = isEditing
@@ -214,6 +231,71 @@ const AddProduct = () => {
                     />
                   </div>
 
+                  {/* Discount (optional): customers see the old price crossed out */}
+                  <div className="space-y-3 rounded-lg border p-3 sm:p-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="discount_type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm sm:text-base">Discount</FormLabel>
+                            <FormControl>
+                              <select
+                                className="flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm sm:text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  if (e.target.value === 'none') form.setValue('discount_value', '');
+                                }}
+                              >
+                                <option value="none">No discount</option>
+                                <option value="percent">Percentage off (%)</option>
+                                <option value="flat">Amount off (₦)</option>
+                              </select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {discountType !== 'none' && (
+                        <FormField
+                          control={form.control}
+                          name="discount_value"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm sm:text-base">
+                                {discountType === 'percent' ? 'Percentage off*' : 'Amount off (₦)*'}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  step="any"
+                                  placeholder={discountType === 'percent' ? 'e.g. 10' : 'e.g. 500'}
+                                  className="text-sm sm:text-base"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </div>
+                    {preview && discountLabel(preview) ? (
+                      <p className="text-sm">
+                        Customers pay <span className="font-semibold">{formatNaira(salePrice(preview))}</span>{' '}
+                        <span className="text-muted-foreground line-through">{formatNaira(preview.price)}</span>{' '}
+                        <span className="text-muted-foreground">({discountLabel(preview)})</span>
+                      </p>
+                    ) : (
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Customers see the discounted price with the old price crossed out.
+                      </p>
+                    )}
+                  </div>
+
                   <FormField
                     control={form.control}
                     name="description"
@@ -235,7 +317,7 @@ const AddProduct = () => {
                     )}
                   />
 
-                  <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="category"
@@ -263,22 +345,6 @@ const AddProduct = () => {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="carbon_impact"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center text-sm sm:text-base">
-                            <Leaf className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            Carbon Impact (kg CO2)
-                          </FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.01" className="text-sm sm:text-base" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   </div>
 
                   {/* Stock (optional) or manual availability */}

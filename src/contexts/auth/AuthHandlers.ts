@@ -30,7 +30,7 @@ export const handleLogin = async (email: string, password: string) => {
   }
 };
 
-export const handleRegister = async (name: string, email: string, password: string, role: UserRole) => {
+export const handleRegister = async (name: string, email: string, password: string, role: UserRole, referralCode?: string) => {
   try {
     console.log('Attempting registration for:', email, 'with role:', role);
     
@@ -41,6 +41,8 @@ export const handleRegister = async (name: string, email: string, password: stri
         data: {
           name,
           role: role.toLowerCase(), // Store as lowercase to match database
+          // Checked by the form first; the database links it to whoever shared it
+          ...(referralCode ? { referral_code: referralCode } : {}),
         },
         // The confirmation link comes back here; the login page then asks them to log in
         emailRedirectTo: `${window.location.origin}/auth?confirmed=1`

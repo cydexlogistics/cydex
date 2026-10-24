@@ -12,6 +12,8 @@ export interface Product {
   category: string | null;
   is_eco_friendly: boolean;
   carbon_impact: number;
+  discount_type: string | null;
+  discount_value: number | null;
   stock_quantity: number | null;
   track_stock: boolean;
   image_url: string | null;

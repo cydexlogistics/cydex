@@ -27,7 +27,7 @@ interface OrderTabsProps {
 const OrderTabs = ({ orders }: OrderTabsProps) => {
   return (
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="mb-3 sm:mb-4 w-full sm:w-auto grid grid-cols-3 sm:flex sm:gap-2">
+      <TabsList className="mb-3 sm:mb-4 w-full sm:w-auto sm:gap-2">
         <TabsTrigger value="all" className="whitespace-nowrap text-xs sm:text-sm">
           All Orders
         </TabsTrigger>

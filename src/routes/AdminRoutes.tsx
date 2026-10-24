@@ -14,6 +14,7 @@ import AdminVerifications from '../pages/admin/Verifications';
 import AdminSecurity from '../pages/admin/Security';
 import AdminVehicles from '../pages/admin/Vehicles';
 import AdminPromotions from '../pages/admin/Promotions';
+import AdminRewards from '../pages/admin/Rewards';
 import AdminBroadcasts from '../pages/admin/Broadcasts';
 
 const PAGES: [string, JSX.Element][] = [
@@ -27,6 +28,7 @@ const PAGES: [string, JSX.Element][] = [
   ['/pricing', <AdminPricing />],
   ['/vehicles', <AdminVehicles />],
   ['/promotions', <AdminPromotions />],
+  ['/rewards', <AdminRewards />],
   ['/broadcasts', <AdminBroadcasts />],
   ['/emails', <AdminEmails />],
   ['/notifications', <AdminNotifications />],

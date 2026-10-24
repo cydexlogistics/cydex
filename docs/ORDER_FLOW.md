@@ -12,7 +12,7 @@ The same status names are used for customers, vendors and riders. Each screen ju
 |---|---|---|---|---|
 | 1 | `pending` | Pending | Order placed. Until it's paid, only the customer can see it. | Customer (checkout) |
 | 2 | `accepted` | Accepted | The vendor has accepted the paid order and is preparing it. **Both handover codes are created now.** | Vendor |
-| 3 | `ready_for_pickup` | Ready for pickup | Ready to collect. Online riders within 5 km of the pickup whose vehicle covers the trip are notified, and it appears in their Available Orders. | Vendor |
+| 3 | `ready_for_pickup` | Ready for pickup | Ready to collect. Online riders whose vehicle covers the trip are notified if they're within their vehicle type's alert distance of the pickup, and it appears in Available Orders for those within its see-orders distance (both 5 km to start with). | Vendor |
 | 4 | `rider_assigned` | Rider assigned | A rider has accepted it. | Rider |
 | 5 | `picking_up` | Rider heading to vendor | The rider is on the way to the vendor. | Rider |
 | 6 | `out_for_delivery` | Out for delivery | The vendor handed it over, confirmed with the rider's **pickup code**. | Vendor (with code) |
@@ -50,7 +50,7 @@ Vendors only see orders whose payment is `paid` or `refunded`. Unpaid orders sta
 | Mark ready | Vendor | `accepted` | `vendor_mark_ready` |
 | Reject (with an optional reason) | Vendor | `pending`, `accepted` or `ready_for_pickup`, and **no rider yet** | `vendor_reject_order` |
 | Cancel | Customer | `pending` only (before the vendor accepts) | `customer_cancel_order` |
-| Accept delivery | Rider | `ready_for_pickup`, no rider yet, pickup within 5 km of the rider, the trip within how far the rider's vehicle goes, the rider has **no other active delivery**, and has a **phone number** on their profile | `rider_accept_order` |
+| Accept delivery | Rider | `ready_for_pickup`, no rider yet, pickup within the rider's vehicle type's see-orders distance (5 km to start with), the trip within how far the rider's vehicle goes, the rider has **no other active delivery**, and has a **phone number** on their profile | `rider_accept_order` |
 | Head to vendor | Rider | `rider_assigned` | `rider_start_pickup` |
 | Confirm pickup (enter the rider's code) | Vendor | `rider_assigned` or `picking_up` | `vendor_confirm_pickup` |
 | I've arrived | Rider | `out_for_delivery` | `rider_mark_arrived` |
@@ -95,7 +95,7 @@ Migration [`20261014000000_delivery_distances.sql`](../supabase/migrations/20261
 - **Riders only see, are alerted about and can accept deliveries their vehicle covers,** even after an order is offered to every mode.
 - **Too far for every mode:** the order is refused with the real limit, for example "The longest delivery we do is 7 km".
 - The same limits apply to Request Rider (each leg of a batch) and Cydex Express.
-- **Unchanged:** a rider still has to be within 5 km of the pickup to see or accept an order.
+- **How close riders must be:** each vehicle type has a distance to see and accept new orders, and a distance to be alerted to them (Admin → Riders & vehicles, both 5 km to start with; the alert distance is no more than the other). Walking riders can be set closer.
 
 ### Preferred delivery mode
 
@@ -121,6 +121,13 @@ Worked out per delivery mode from real deliveries (`delivery_eta`): the average 
 - Refunds return everything paid, wallet and card, to the wallet.
 
 ### Promotions and coupons
+
+Two optional limits (migration [`20261025100000_partnerships_and_order_radius.sql`](../supabase/migrations/20261025100000_partnerships_and_order_radius.sql)):
+
+- **Email domains:** a promotion can be only for people whose email ends with given domains, for example `gmail.com` or `ui.edu.ng` (which also covers `student.ui.edu.ng`). Others don't see it in their offers and can't use its code ("That coupon is only for @ui.edu.ng email addresses").
+- **Vendor partnerships:** a promotion for customers that only applies to orders from chosen partner vendors, on the delivery fee or Service Charge. It isn't offered for Cydex Express or other vendors.
+
+Partner vendors can also have their own commission on sales and on rider requests instead of the standard rates (`vendor_partners`; `vendor_commission_rate()` and `rider_request_commission_rate()` pick theirs if set). Set under **Admin → Promotions → Vendor partnerships**.
 
 Migration [`20261013400000_promotions.sql`](../supabase/migrations/20261013400000_promotions.sql). Set up in **Admin → Promotions** ([ADMIN.md](ADMIN.md#promotions)).
 
@@ -179,6 +186,16 @@ Stock is optional for each product (migration [`20261001000000_product_stock.sql
 - **Customers can't order more than is in stock.** Checkout fails with "Only 3 of Jollof left. Reduce the quantity in your cart."
 - **Unavailable products still show to customers**, greyed out and labelled "Out of stock" or "Unavailable", with Add to cart disabled. Available products are listed first.
 - **Two customers can both check out the last item** if neither has paid yet. Whoever pays second takes the stock to 0 (it never goes negative), and the vendor can reject that order to refund it.
+
+### Discounts
+
+Vendors can discount a product by a percentage (under 100%) or an amount in naira (less than the price), from **Add product** or **Edit product** (migration [`20261024100000_product_discounts.sql`](../supabase/migrations/20261024100000_product_discounts.sql)).
+
+- **Customers pay the discounted price.** `cart_subtotal` and `place_order` charge `product_sale_price(price, discount)`, rounded to the kobo, so the vendor's items total and commission are worked out on the discounted price.
+- **Customers see the old price crossed out** on product cards, the product page and in the cart, with a "20% off" or "₦500 off" label.
+- Each order item keeps the price before the discount (`order_items.list_price`) beside what was charged (`unit_price`).
+- The discount is the vendor's: Cydex doesn't pay for it. Admin promotions on items from a business are separate and can apply on top.
+- The vendor's product form no longer asks for a carbon impact.
 
 ## Ratings
 
@@ -291,7 +308,7 @@ Refunds used to be done by the vendor's browser; those access rules have been re
 Wallet balances are only changed by the database; users can read their wallet but not write it (migration [`20260930100000_wallets_server_side.sql`](../supabase/migrations/20260930100000_wallets_server_side.sql)).
 
 - **Wallets are created automatically** when an account is created, and a new virtual account is linked to its wallet automatically.
-- **Credits:** order settlement on delivery (vendor, rider) and refunds (customer).
+- **Credits:** order settlement on delivery (vendor, rider), refunds (customer) and reward wallet bonuses (everyone, see [Rewards](#rewards)).
 - **Minimum withdrawal:** vendors and riders can't withdraw less than **₦3,000** at a time (migration [`20261014300000_minimum_withdrawal.sql`](../supabase/migrations/20261014300000_minimum_withdrawal.sql)). The amount is `app_config.min_payout_amount`. Customers withdrawing a refund aren't limited.
 - **Withdrawals:**
   1. `request_payout(amount, bank account)` checks the balance and the bank account, deducts the amount, and creates a `pending` payout request, with a 1.5% fee taken from the amount sent. The user is told it's waiting for approval, and admins are notified.
@@ -300,6 +317,47 @@ Wallet balances are only changed by the database; users can read their wallet bu
   
   See [ADMIN.md → Withdrawals need an admin](ADMIN.md#withdrawals-need-an-admin).
 - Users can view their payout requests but can't create or change them directly.
+
+## Rewards
+
+Admins set rewards under **Admin → Rewards** ([ADMIN.md → Rewards](ADMIN.md#rewards)); migration [`20261024200000_rewards.sql`](../supabase/migrations/20261024200000_rewards.sql).
+
+| Counts | For | How it's measured |
+|---|---|---|
+| Orders completed | Customers, vendors | Delivered orders (customers: orders and Cydex Express; vendors: their customer orders) |
+| Amount spent | Customers | `total_amount` of delivered orders: what they paid by card or wallet, after any discount |
+| Amount sold | Vendors | The items total (`subtotal`) of delivered orders |
+| Deliveries completed | Riders | Delivered orders |
+| Distance covered | Riders | `distance_km` of delivered orders |
+| Time online | Riders | Time with the status **available**, from `rider_online_sessions` (recorded from when this went live) |
+| New fastest delivery | Riders | Pickup to drop-off time, on trips of at least the set distance |
+
+- **Progress counts from the reward's start**, and only within its dates. Daily and weekly challenges (riders only) count from the start of the day, or of the week (Monday), Nigerian time.
+- **When it's earned:** checked when an order is delivered (for its customer, vendor and rider), when a rider goes offline, and every 10 minutes for riders online (`evaluate-online-rewards`). Each achievement is earned once per person; each challenge once per day or week. **New fastest delivery** is earned every time a rider beats their own best time; their first trip after the reward starts sets the time to beat.
+- **Wallet bonuses** go to the wallet's available balance with a transaction in the user's history: customers' as **Reward** (used first when they pay), vendors' as **Reward** and riders' as **Bonus** (both withdrawable, and counted in total earned).
+- **Discount offers** become a personal promotion (`promotions.user_id`) only that person can use, listed under **Offers for you** and applied automatically, for the number of orders and days the admin set.
+- The user is notified ("Reward unlocked: …"); tapping it opens their rewards.
+- **Where people see them:** customers and vendors under **Rewards** in the menu, riders under **Profile → Achievements**, each with the reward, a progress bar and when it ends or resets. Riders also see running daily and weekly challenges at the top of **Current Deliveries**; the section is hidden when there are none.
+
+### Referrals
+
+Every customer, vendor and rider has a referral code (`profiles.referral_code`, like `CX7KQ2MP`) on the **Referrals** tab of their Profile (vendors: Settings), with buttons to copy the code or a sign-up link (`/auth?ref=CODE&role=…`, which opens Sign up with the code filled in). Migration [`20261025000000_referrals.sql`](../supabase/migrations/20261025000000_referrals.sql).
+
+| Kind of account | Referrer gets | Once the new account has |
+|---|---|---|
+| Customers | ₦500 | 2 delivered orders (orders or Cydex Express) |
+| Riders | ₦1,000 | made 2 deliveries |
+| Vendors | ₦1,000 | made 5 sales, or had 3 rider requests delivered |
+
+- Admins can change each reward and goal, or pause a programme, under **Admin → Rewards → Referrals**. Changes apply to referrals not yet rewarded.
+- **A code only works for the same kind of account.** The sign-up form checks the code first (`check_referral_code`) and says why one can't be used ("That code is for vendors"). Someone who didn't enter a code at sign-up can add one on their Referrals tab until their first order, delivery or sale. Each person can be referred once, and not with their own code.
+- **The reward is paid when an order is delivered** and the referred person reaches the goal: into the referrer's wallet (available balance), with a transaction in their history: **Reward** for customers and vendors, **Bonus** for riders, described "Referral reward: Ada joined with your code". The referrer is notified; tapping it opens their wallet (riders: Earnings).
+- Users don't see a list of the people they referred: they see each reward in their wallet or earnings history.
+- Admins see every referral and its progress under **Admin → Rewards → Referrals**, and the rewards paid under **Money → Rewards**.
+
+### Delivery goal
+
+Riders set how many deliveries they aim for each day under **Profile → Personal → Daily delivery goal** (1 to 100, 10 to start with; `rider_profiles.daily_delivery_goal`). The **Deliveries** card on the Earnings page shows today's progress towards it.
 
 ## When vendors and riders are paid
 
@@ -322,7 +380,7 @@ Created by the database (`notify_order_events` trigger, `welcome_new_user` trigg
 | Account created | Welcome + **email** | Welcome + **email** | Welcome + **email** |
 | Payment confirmed | Payment confirmed + **email** | New order | |
 | `accepted` | Order accepted | | |
-| `ready_for_pickup` | Order ready | | Order nearby (online riders within 5 km of the pickup whose vehicle covers the trip) |
+| `ready_for_pickup` | Order ready | | Order nearby (online riders within their vehicle type's alert distance of the pickup, whose vehicle covers the trip) |
 | `rider_assigned` | Rider assigned | | |
 | `picking_up` | Rider heading to vendor | | |
 | `out_for_delivery` | Order on its way | Order picked up | |

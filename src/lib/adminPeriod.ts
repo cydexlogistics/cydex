@@ -1,7 +1,11 @@
-import { addDays, startOfDay, startOfMonth, subMonths } from 'date-fns';
+import { addDays, startOfDay, startOfMonth, subDays, subMonths } from 'date-fns';
 
 // Date filters for the admin Overview and Earnings
-export type PeriodPreset = 'all' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'custom';
+export type PeriodPreset =
+  | 'today' | 'last_7_days' | 'last_14_days' | 'this_month' | 'last_month' | 'last_3_months' | 'last_6_months' | 'all' | 'custom';
+
+// Every admin date filter starts on today
+export const DEFAULT_PERIOD: Period = { preset: 'today' };
 
 export interface Period {
   preset: PeriodPreset;
@@ -11,12 +15,16 @@ export interface Period {
   to?: string;
 }
 
+// In the order they're listed
 export const PERIOD_LABELS: Record<PeriodPreset, string> = {
-  all: 'All time',
+  today: 'Today',
+  last_7_days: 'Last 7 days',
+  last_14_days: 'Last 14 days',
   this_month: 'This month',
   last_month: 'Last month',
   last_3_months: 'Last 3 months',
   last_6_months: 'Last 6 months',
+  all: 'All time',
   custom: 'Custom dates',
 };
 
@@ -24,6 +32,13 @@ export const PERIOD_LABELS: Record<PeriodPreset, string> = {
 export const periodRange = (p: Period, now = new Date()): { from: string | null; to: string | null } => {
   const iso = (d: Date) => d.toISOString();
   switch (p.preset) {
+    case 'today':
+      return { from: iso(startOfDay(now)), to: null };
+    // Today and the days before it
+    case 'last_7_days':
+      return { from: iso(subDays(startOfDay(now), 6)), to: null };
+    case 'last_14_days':
+      return { from: iso(subDays(startOfDay(now), 13)), to: null };
     case 'this_month':
       return { from: iso(startOfMonth(now)), to: null };
     case 'last_month':

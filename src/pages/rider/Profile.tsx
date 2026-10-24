@@ -1,9 +1,6 @@
 
-import React, { useCallback, useRef, useState } from 'react';
+import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { isValidPhone } from '@/lib/phone';
-import type { PersonalDraft } from '@/components/rider/profile/tabs/PersonalInfoTab';
-import { useAuth } from '@/contexts/SupabaseAuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import LoadingDisplay from '@/components/ui/LoadingDisplay';
@@ -12,59 +9,27 @@ import ProfileHeader from '@/components/rider/profile/ProfileHeader';
 import VerificationCard from '@/components/verification/VerificationCard';
 import ProfileTabs from '@/components/rider/profile/ProfileTabs';
 import { useRiderProfileData } from '@/hooks/rider/useRiderProfileData';
-import { toast } from 'sonner';
 
 const RiderProfilePage = () => {
-  const { user } = useAuth();
-  const [editing, setEditing] = useState(false);
-  
   const { 
     riderProfile, 
     recentReviews, 
-    achievements, 
     loading, 
     error, 
     updateProfile,
-    addBankDetails,
     refetchProfile
   } = useRiderProfileData();
 
-  // The Personal tab's current values, so the header "Save Changes" saves what
-  // the rider typed (not the profile as it was loaded)
   const queryClient = useQueryClient();
-  const personalDraft = useRef<PersonalDraft | null>(null);
-  const handleDraftChange = useCallback((draft: PersonalDraft) => {
-    personalDraft.current = draft;
-  }, []);
 
-  const handleSaveProfile = async (updatedData?: Partial<PersonalDraft>) => {
-    if (!riderProfile) {
-      toast.error('No profile data to save');
-      return;
-    }
-
-    const draft = updatedData ?? personalDraft.current;
-    if (!draft) {
-      setEditing(false);
-      return;
-    }
-    const name = draft.name?.trim() ?? '';
-    const phone = draft.phone?.trim() ?? '';
-    if (!name) {
-      toast.error('Enter your name');
-      return;
-    }
-    if (!isValidPhone(phone)) {
-      toast.error('Enter a valid phone number, e.g. 08012345678');
-      return;
-    }
-
-    const success = await updateProfile({ name, phone, preferences: draft.preferences });
+  // Saves the Personal tab (it checks the values first)
+  const handleSaveProfile = async ({ name, phone }: { name: string; phone: string }) => {
+    const success = await updateProfile({ name, phone });
     if (success) {
-      setEditing(false);
       // Clears the "add your phone number" notice
       queryClient.invalidateQueries({ queryKey: ['has-phone'] });
     }
+    return !!success;
   };
 
   const handleAvatarUpdate = async (avatarUrl: string) => {
@@ -105,22 +70,14 @@ const RiderProfilePage = () => {
   return (
     <DashboardLayout userRole="RIDER">
       <div className="p-2 sm:p-4 md:p-6 max-w-7xl mx-auto">
-        <RiderProfileHeader 
-          editing={editing}
-          onEditToggle={() => setEditing(!editing)}
-          onSave={() => handleSaveProfile()}
-        />
+        <RiderProfileHeader />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {/* Left Column - Profile Info */}
           <div className="lg:col-span-1 space-y-3 sm:space-y-4 md:space-y-6">
             <Card>
               <CardContent className="p-3 sm:p-4 md:p-6">
-                <ProfileHeader 
-                  profile={riderProfile} 
-                  editing={editing}
-                  onAvatarUpdate={handleAvatarUpdate}
-                />
+                <ProfileHeader profile={riderProfile} onAvatarUpdate={handleAvatarUpdate} />
               </CardContent>
             </Card>
 
@@ -129,14 +86,10 @@ const RiderProfilePage = () => {
 
           {/* Right Column - Tabs */}
           <div className="lg:col-span-2">
-            <ProfileTabs 
-              editing={editing} 
-              profile={riderProfile} 
-              recentReviews={recentReviews} 
-              achievements={achievements}
-              onAddBankDetails={addBankDetails}
+            <ProfileTabs
+              profile={riderProfile}
+              recentReviews={recentReviews}
               onSaveProfile={handleSaveProfile}
-              onPersonalDraftChange={handleDraftChange}
             />
           </div>
         </div>

@@ -159,7 +159,7 @@ const CustomerWalletPage = () => {
         </div>
 
         {/* Balance Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Available Balance</CardTitle>
@@ -181,18 +181,6 @@ const CustomerWalletPage = () => {
                 {formatAmount(wallet?.bonus_balance || 0)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">Promotional credits</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Carbon Credits</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold">
-                {(wallet?.carbon_credits || 0).toFixed(1)} kg
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">CO₂ saved</p>
             </CardContent>
           </Card>
 
@@ -251,7 +239,7 @@ const CustomerWalletPage = () => {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="w-full">
                 <TabsTrigger value="all" className="text-xs sm:text-sm">All</TabsTrigger>
                 <TabsTrigger value="payment" className="text-xs sm:text-sm">Payments</TabsTrigger>
                 <TabsTrigger value="refund" className="text-xs sm:text-sm">Refunds</TabsTrigger>

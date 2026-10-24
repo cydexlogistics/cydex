@@ -47,6 +47,8 @@ const OffersStrip = ({ role }: { role: Exclude<PromoAudience, 'all'> }) => {
   if (offers.length === 0) return null;
 
   const conditionsOf = (o: MyPromotion) => [
+    o.partner_vendor_names?.length ? `orders from ${o.partner_vendor_names.join(', ')}` : null,
+    o.email_domains?.length ? `for ${o.email_domains.map((d) => `@${d}`).join(', ')} emails` : null,
     o.max_distance_km != null ? `deliveries up to ${Number(o.max_distance_km)} km` : null,
     o.vehicle_types?.length ? o.vehicle_types.map(labelOf).join(' or ') : null,
   ].filter(Boolean).join(', ');

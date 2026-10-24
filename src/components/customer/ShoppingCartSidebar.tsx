@@ -66,7 +66,12 @@ export const ShoppingCartSidebar: React.FC<ShoppingCartSidebarProps> = ({
                       <h3 className="font-medium line-clamp-1">{item.name}</h3>
                       <p className="text-xs text-muted-foreground">{item.vendor_name}</p>
                       <div className="flex items-center justify-between mt-1">
-                        <span className="font-semibold">₦{item.price.toLocaleString()}</span>
+                        <span>
+                          <span className="font-semibold">₦{item.price.toLocaleString()}</span>
+                          {item.list_price != null && item.list_price > item.price && (
+                            <span className="ml-1.5 text-xs text-muted-foreground line-through">₦{item.list_price.toLocaleString()}</span>
+                          )}
+                        </span>
                         
                         <div className="flex items-center">
                           <Button 

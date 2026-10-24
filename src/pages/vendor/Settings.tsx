@@ -6,10 +6,10 @@ import VendorRatings from '@/components/vendor/settings/VendorRatings';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ReferralCard from '@/components/referrals/ReferralCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +25,6 @@ import {
   CreditCard,
   Store,
   Package,
-  Settings as SettingsIcon,
   Camera,
   FileText,
   HelpCircle,
@@ -36,6 +35,10 @@ import { useVendorSettings } from '@/hooks/useVendorSettings';
 import SingleAddressField from '@/components/address/SingleAddressField';
 import { useSearchParams } from 'react-router-dom';
 import StoreHoursCard from '@/components/vendor/hours/StoreHoursCard';
+import ChangePasswordCard from '@/components/account/ChangePasswordCard';
+import TwoFactorComingSoon from '@/components/account/TwoFactorComingSoon';
+import { isValidPhone } from '@/lib/phone';
+import { cn } from '@/lib/utils';
 
 const VendorSettingsPage = () => {
   // e.g. /vendor/settings?tab=ratings (the dashboard's Rating card links here)
@@ -52,7 +55,7 @@ const VendorSettingsPage = () => {
     fetchRecentActivity
   } = useVendorSettings();
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [touched, setTouched] = useState({ name: false, phone: false });
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
@@ -92,23 +95,44 @@ const VendorSettingsPage = () => {
     }
   }, [profile?.id, fetchVendorStats, fetchRecentActivity]);
 
+  // What's saved, to tell whether the form has changed
+  const savedValues = {
+    name: profile?.name || '',
+    phone: profile?.phone || '',
+    description: settings?.description || '',
+  };
+  const formErrors = {
+    name: profileData.name.trim().length < 2 ? 'Enter your store name.' : null,
+    phone: !profileData.phone.trim() ? 'Enter a phone number. Customers and riders use it to reach you.'
+      : !isValidPhone(profileData.phone) ? 'Enter a valid phone number, e.g. 08012345678.' : null,
+  };
+  const formChanged = profileData.name.trim() !== savedValues.name.trim()
+    || profileData.phone.trim() !== savedValues.phone.trim()
+    || profileData.description.trim() !== savedValues.description.trim();
+  const formValid = !formErrors.name && !formErrors.phone;
+  // Missing details show their error straight away; others once edited
+  const showError = (field: 'name' | 'phone') =>
+    (touched[field] || !savedValues[field]) ? formErrors[field] : null;
+
   const handleSave = async () => {
     if (!profile || !settings) return;
-    
+    setTouched({ name: true, phone: true });
+    if (!formValid || !formChanged) return;
+
     try {
       // Update profile data (the store address saves on its own via the address picker)
       await updateProfile({
-        name: profileData.name,
-        phone: profileData.phone
+        name: profileData.name.trim(),
+        phone: profileData.phone.trim()
       });
 
       // Update settings data
       // Business category and licence live in the verification (see the Verification card)
       await updateSettings({
-        description: profileData.description
+        description: profileData.description.trim()
       });
 
-      setIsEditing(false);
+      setTouched({ name: false, phone: false });
     } catch (error) {
       // Error handled in hooks
     }
@@ -142,27 +166,6 @@ const VendorSettingsPage = () => {
     }
   };
 
-  const handleSecurityChange = async (key: string, value: boolean | number) => {
-    if (!localSettings) return;
-    
-    const updatedSettings = {
-      ...localSettings.security_settings,
-      [key]: value
-    };
-    
-    try {
-      await updateSettings({
-        security_settings: updatedSettings
-      });
-      setLocalSettings(prev => ({
-        ...prev,
-        security_settings: updatedSettings
-      }));
-    } catch (error) {
-      // Error handled in hook
-    }
-  };
-
   if (loading || !profile || !settings) {
     return (
       <DashboardLayout userRole="VENDOR">
@@ -183,25 +186,11 @@ const VendorSettingsPage = () => {
   return (
     <DashboardLayout userRole="VENDOR">
       <div className="p-3 sm:p-4 md:p-6 max-w-full mx-auto space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">Settings</h1>
-            <p className="text-sm sm:text-base text-gray-600">
-              Manage your store settings and profile information
-            </p>
-          </div>
-          <Button 
-            onClick={() => setIsEditing(true)} 
-            disabled={isEditing || saving}
-            className="w-full sm:w-auto text-xs sm:text-sm"
-          >
-            {saving ? (
-              <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-            ) : (
-              <SettingsIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-            )}
-            Edit Profile
-          </Button>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold">Settings</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Manage your store settings and profile information
+          </p>
         </div>
 
         <Card>
@@ -211,12 +200,13 @@ const VendorSettingsPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue={tabParam ?? 'account'} className="w-full">
-              <TabsList className="mb-3 sm:mb-4 w-full grid grid-cols-5 sm:w-auto sm:flex">
+              <TabsList className="mb-3 sm:mb-4 w-full sm:w-auto">
                 <TabsTrigger value="account" className="text-xs sm:text-sm">Account</TabsTrigger>
                 <TabsTrigger value="hours" className="text-xs sm:text-sm">Hours</TabsTrigger>
                 <TabsTrigger value="ratings" className="text-xs sm:text-sm">Ratings</TabsTrigger>
                 <TabsTrigger value="security" className="text-xs sm:text-sm">Security</TabsTrigger>
                 <TabsTrigger value="preferences" className="text-xs sm:text-sm">Preferences</TabsTrigger>
+                <TabsTrigger value="referrals" className="text-xs sm:text-sm">Referrals</TabsTrigger>
               </TabsList>
 
               <TabsContent value="account" className="mt-3 sm:mt-4">
@@ -229,21 +219,18 @@ const VendorSettingsPage = () => {
                   </div>
 
                   <div className="lg:w-2/3 space-y-3 sm:space-y-4">
-                    <div className="space-y-1 sm:space-y-2">
-                      <Label htmlFor="name" className="text-red-600 font-medium text-sm sm:text-base">Store Name * (Required)</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="name" className="text-sm sm:text-base">Store name</Label>
                       <Input
                         id="name"
-                        placeholder="Your Store Name (Required)"
+                        placeholder="Your store name"
                         value={profileData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
-                        disabled={!isEditing}
-                        className={`text-sm sm:text-base ${!profileData.name ? 'border-red-500 bg-red-50' : ''}`}
+                        onBlur={() => setTouched((t) => ({ ...t, name: true }))}
+                        aria-invalid={!!showError('name')}
+                        className={cn('text-sm sm:text-base', showError('name') && 'border-destructive focus-visible:ring-destructive')}
                       />
-                      {!profileData.name && (
-                        <p className="text-red-500 text-sm font-medium">
-                          ⚠️ Store name is required for order management
-                        </p>
-                      )}
+                      {showError('name') && <p className="text-xs text-destructive">{showError('name')}</p>}
                     </div>
                     
                     <FormField
@@ -255,21 +242,20 @@ const VendorSettingsPage = () => {
                       disabled={true} // Email should not be editable
                     />
                     
-                    <div className="space-y-1 sm:space-y-2">
-                      <Label htmlFor="phone" className="text-red-600 font-medium text-sm sm:text-base">Phone Number * (Required)</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="phone" className="text-sm sm:text-base">Phone number</Label>
                       <Input
                         id="phone"
-                        placeholder="Your Phone Number (Required)"
+                        type="tel"
+                        inputMode="tel"
+                        placeholder="e.g. 08012345678"
                         value={profileData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
-                        disabled={!isEditing}
-                        className={`text-sm sm:text-base ${!profileData.phone ? 'border-red-500 bg-red-50' : ''}`}
+                        onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
+                        aria-invalid={!!showError('phone')}
+                        className={cn('text-sm sm:text-base', showError('phone') && 'border-destructive focus-visible:ring-destructive')}
                       />
-                      {!profileData.phone && (
-                        <p className="text-red-500 text-sm font-medium">
-                          ⚠️ Phone number is required for order communication
-                        </p>
-                      )}
+                      {showError('phone') && <p className="text-xs text-destructive">{showError('phone')}</p>}
                     </div>
                     
                     <SingleAddressField
@@ -286,27 +272,18 @@ const VendorSettingsPage = () => {
                       placeholder="Your Store Description"
                       value={profileData.description}
                       onChange={(value) => handleInputChange('description', value)}
-                      disabled={!isEditing}
+                      disabled={false}
                       isTextarea
                     />
                     
                   </div>
                 </div>
 
-                {isEditing && (
                   <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-0 mt-4 sm:mt-6">
-                    <Button 
-                      variant="secondary" 
-                      onClick={() => setIsEditing(false)} 
-                      className="w-full sm:w-auto sm:mr-2 text-xs sm:text-sm"
-                      disabled={saving}
-                    >
-                      Cancel
-                    </Button>
                     <Button 
                       onClick={handleSave}
                       className="w-full sm:w-auto text-xs sm:text-sm"
-                      disabled={saving}
+                      disabled={saving || !formChanged || !formValid}
                     >
                       {saving ? (
                         <>
@@ -314,11 +291,10 @@ const VendorSettingsPage = () => {
                           Saving...
                         </>
                       ) : (
-                        'Save Changes'
+                        'Save changes'
                       )}
                     </Button>
                   </div>
-                )}
               </TabsContent>
 
               <TabsContent value="hours" className="mt-3 sm:mt-4">
@@ -331,44 +307,8 @@ const VendorSettingsPage = () => {
 
               <TabsContent value="security" className="mt-3 sm:mt-4">
                 <div className="space-y-3 sm:space-y-4">
-                  <SecurityCard
-                    title="Password"
-                    description="Change your password to keep your account secure."
-                    action={<Button className="text-xs sm:text-sm" disabled>Change Password</Button>}
-                  />
-
-                  <SecurityCard
-                    title="Two-Factor Authentication"
-                    description="Add an extra layer of security to your account."
-                    action={
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-sm sm:text-base">Enable Two-Factor Authentication</span>
-                        <Switch 
-                          id="2fa" 
-                          checked={localSettings?.security_settings?.two_factor_enabled || false}
-                          onCheckedChange={(checked) => handleSecurityChange('two_factor_enabled', checked)}
-                        />
-                      </div>
-                    }
-                  />
-
-                  <SecurityCard
-                    title="Session Timeout"
-                    description="Automatically log out after period of inactivity."
-                    action={
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          value={localSettings?.security_settings?.session_timeout / 60 || 60}
-                          onChange={(e) => handleSecurityChange('session_timeout', parseInt(e.target.value) * 60)}
-                          className="w-20"
-                          min="5"
-                          max="480"
-                        />
-                        <span className="text-sm">minutes</span>
-                      </div>
-                    }
-                  />
+                  <ChangePasswordCard />
+                  <TwoFactorComingSoon />
                 </div>
               </TabsContent>
 
@@ -383,6 +323,10 @@ const VendorSettingsPage = () => {
                     <Button className="text-xs sm:text-sm" disabled>Change Theme</Button>
                   </PreferenceCard>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="referrals" className="mt-3 sm:mt-4">
+                <ReferralCard />
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -506,17 +450,6 @@ const FormField = ({
   </div>
 );
 
-const SecurityCard = ({ title, description, action }: { title: string; description: string; action: React.ReactNode }) => (
-  <Card className="shadow-none">
-    <CardHeader className="pb-2 sm:pb-4">
-      <CardTitle className="text-sm sm:text-base">{title}</CardTitle>
-      <CardDescription className="text-xs sm:text-sm">{description}</CardDescription>
-    </CardHeader>
-    <CardContent>
-      {action}
-    </CardContent>
-  </Card>
-);
 
 const PreferenceCard = ({ title, description, children }: { title: string; description: string; children: React.ReactNode }) => (
   <Card className="shadow-none">

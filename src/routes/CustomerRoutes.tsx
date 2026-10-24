@@ -6,6 +6,7 @@ import NewOrder from '../pages/customer/NewOrder';
 import Orders from '../pages/customer/Orders';
 import OrderDetail from '../pages/customer/OrderDetail';
 import Wallet from '../pages/customer/Wallet';
+import Rewards from '../pages/customer/Rewards';
 // import Recycling from '../pages/customer/Recycling';
 import Profile from '../pages/customer/Profile';
 import OrderConfirmation from '../pages/customer/OrderConfirmation';
@@ -67,6 +68,15 @@ const CustomerRoutes = () => {
             <Wallet />
           </ProtectedRoute>
         } 
+      />
+
+      <Route
+        path="/rewards"
+        element={
+          <ProtectedRoute allowedRoles={['CUSTOMER']}>
+            <Rewards />
+          </ProtectedRoute>
+        }
       />
 
       {/* <Route 

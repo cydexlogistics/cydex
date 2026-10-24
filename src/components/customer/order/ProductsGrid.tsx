@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/customer/ProductCard';
-import { stockLimit } from '@/lib/products';
+import { hasDiscount, salePrice, stockLimit } from '@/lib/products';
 import type { CartItem } from '@/hooks/useCart';
 import { Product } from '@/hooks/useProducts';
 
@@ -70,7 +70,8 @@ export const ProductsGrid: React.FC<ProductsGridProps> = ({
               addToCart={() => addToCart({
                 id: product.id,
                 name: product.name,
-                price: product.price,
+                price: salePrice(product),
+                list_price: hasDiscount(product) ? Number(product.price) : null,
                 vendor_id: product.vendor_id,
                 vendor_name: product.vendor?.name || 'Unknown Vendor',
                 max_quantity: stockLimit(product)

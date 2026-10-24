@@ -40,3 +40,21 @@ export const useVehicleTypes = (includeInactive = false) => {
     },
   };
 };
+
+// How close to a pickup the signed-in rider must be to see new orders, from
+// their vehicle type (Admin -> Riders & vehicles); 5 km until it's known
+export const useRiderSeeOrdersKm = () => {
+  const { byKey } = useVehicleTypes(true);
+  const { data: vehicle } = useQuery({
+    queryKey: ['my-rider-vehicle-type'],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return null;
+      const { data } = await supabase.from('rider_profiles').select('vehicle_type').eq('id', auth.user.id).maybeSingle();
+      return data?.vehicle_type ?? null;
+    },
+  });
+  const type = byKey(vehicle) ?? byKey('bicycle');
+  return Number(type?.see_orders_km ?? 5);
+};

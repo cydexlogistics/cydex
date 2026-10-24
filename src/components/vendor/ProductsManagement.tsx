@@ -17,6 +17,7 @@ import { Switch } from '@/components/ui/switch';
 import { useNavigate } from 'react-router-dom';
 import { useConfirm } from '@/contexts/ConfirmContext';
 import PagedList from '@/components/ui/paged-list';
+import { discountLabel, salePrice } from '@/lib/products';
 
 const ProductsManagement = () => {
   const confirm = useConfirm();
@@ -165,6 +166,9 @@ const ProductsManagement = () => {
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <h3 className="font-medium text-sm">{product.name}</h3>
                     {getStatusBadge(product.status)}
+                    {discountLabel(product) && (
+                      <Badge className="bg-red-600 text-white hover:bg-red-600">{discountLabel(product)}</Badge>
+                    )}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     <p className="line-clamp-1">{product.description}</p>
@@ -173,7 +177,10 @@ const ProductsManagement = () => {
                       <span className="whitespace-nowrap">
                         {product.track_stock ? `Stock: ${product.stock_quantity ?? 0}` : 'Stock not tracked'}
                       </span>
-                      <span className="whitespace-nowrap">Price: {formatCurrency(product.price)}</span>
+                      <span className="whitespace-nowrap">
+                        Price: {formatCurrency(salePrice(product))}
+                        {discountLabel(product) && <span className="ml-1 line-through">{formatCurrency(product.price)}</span>}
+                      </span>
                     </div>
                   </div>
                 </div>

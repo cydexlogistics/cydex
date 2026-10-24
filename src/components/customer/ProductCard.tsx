@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Star, Plus } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
 import { useVendorRatings } from '@/hooks/useVendorRatings';
-import { isAvailable, stockLabel } from '@/lib/products';
+import { discountLabel, isAvailable, salePrice, stockLabel } from '@/lib/products';
 import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
@@ -27,6 +27,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) 
 
   const available = isAvailable(product);
   const stock = stockLabel(product);
+  const discount = discountLabel(product);
   const vendorRating = getRatingForVendor(product.vendor_id);
   const displayRating = vendorRating.average_rating > 0 ? vendorRating.average_rating : 4.5; // Fallback rating
 
@@ -46,12 +47,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) 
             {stock}
           </span>
         )}
+        {available && discount && (
+          <span className="absolute left-1.5 top-1.5 rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white sm:text-xs">
+            {discount}
+          </span>
+        )}
       </div>
       
       <CardContent className="p-1.5 xs:p-2 sm:p-3 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-1">
           <h3 className="font-medium line-clamp-1 text-xs sm:text-sm flex-1 mr-1 leading-tight">{product.name}</h3>
-          <span className="font-bold text-xs sm:text-sm text-primary whitespace-nowrap">₦{product.price.toLocaleString()}</span>
+          <span className="flex flex-col items-end leading-tight">
+            <span className="font-bold text-xs sm:text-sm text-primary whitespace-nowrap">₦{salePrice(product).toLocaleString()}</span>
+            {discount && (
+              <span className="text-[10px] sm:text-xs text-muted-foreground line-through whitespace-nowrap">₦{Number(product.price).toLocaleString()}</span>
+            )}
+          </span>
         </div>
         
         {available && stock && <p className="text-xs text-muted-foreground mb-1 hidden xs:block">{stock}</p>}

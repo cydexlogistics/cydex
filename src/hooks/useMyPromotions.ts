@@ -19,6 +19,11 @@ export interface MyPromotion {
   uses_left: number | null;
   /** Places left for people who haven't used it yet (null: no limit) */
   places_left: number | null;
+  /** Vendor partnership: only on orders from these vendors (null: any) */
+  partner_vendor_ids: string[] | null;
+  partner_vendor_names: string[] | null;
+  /** Only for emails at these domains (null: anyone) */
+  email_domains: string[] | null;
 }
 
 export const MY_PROMOTIONS_KEY = 'my-promotions';

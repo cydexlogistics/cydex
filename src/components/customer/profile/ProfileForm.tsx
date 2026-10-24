@@ -1,88 +1,72 @@
-
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-interface ProfileData {
-  name: string;
-  email: string;
-  phone: string;
-}
+type Field = 'name' | 'phone';
 
 interface ProfileFormProps {
-  profileData: ProfileData;
-  isEditing: boolean;
-  handleInputChange: (field: string, value: string) => void;
-  handleSave: () => void;
-  setIsEditing: (editing: boolean) => void;
+  values: { name: string; email: string; phone: string };
+  errors: Record<Field, string | null>;
+  /** Which fields to show errors for (touched, or missing when loaded) */
+  showErrors: Record<Field, boolean>;
+  onChange: (field: Field, value: string) => void;
+  onBlur: (field: Field) => void;
+  onSave: () => void;
+  canSave: boolean;
+  saving: boolean;
 }
 
-const ProfileForm = ({ 
-  profileData, 
-  isEditing, 
-  handleInputChange, 
-  handleSave, 
-  setIsEditing 
-}: ProfileFormProps) => {
+// Always editable; "Save changes" is enabled once something changes and the
+// values are valid. Errors show under the fields.
+const ProfileForm = ({ values, errors, showErrors, onChange, onBlur, onSave, canSave, saving }: ProfileFormProps) => {
+  const error = (field: Field) => (showErrors[field] ? errors[field] : null);
+
   return (
-    <div className="md:w-2/3 space-y-4">
-      <div className="space-y-1">
-        <Label htmlFor="name" className="text-red-600 font-medium">
-          Full Name * (Required)
-        </Label>
-        <Input 
-          id="name" 
-          placeholder="Your Full Name (Required)" 
-          value={profileData.name}
-          onChange={(e) => handleInputChange('name', e.target.value)}
-          disabled={!isEditing}
-          className={!profileData.name ? 'border-red-500 bg-red-50' : ''}
+    <form noValidate onSubmit={(e) => { e.preventDefault(); onSave(); }} className="md:w-2/3 space-y-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="name">Full name</Label>
+        <Input
+          id="name"
+          placeholder="Your full name"
+          value={values.name}
+          onChange={(e) => onChange('name', e.target.value)}
+          onBlur={() => onBlur('name')}
+          aria-invalid={!!error('name')}
+          className={cn(error('name') && 'border-destructive focus-visible:ring-destructive')}
         />
-        {!profileData.name && (
-          <p className="text-red-500 text-sm font-medium">
-            ⚠️ Full name is required for order processing
-          </p>
-        )}
+        {error('name') && <p className="text-xs text-destructive">{error('name')}</p>}
       </div>
-      <div className="space-y-1">
-        <Label htmlFor="email">Email Address</Label>
-        <Input 
-          id="email" 
-          placeholder="Your Email" 
-          value={profileData.email}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-          disabled={!isEditing} 
-        />
+      <div className="space-y-1.5">
+        <Label htmlFor="email">Email address</Label>
+        <Input id="email" value={values.email} disabled className="bg-muted" />
+        <p className="text-xs text-muted-foreground">Your login email. Contact support to change it.</p>
       </div>
-      <div className="space-y-1">
-        <Label htmlFor="phone" className="text-red-600 font-medium">
-          Phone Number * (Required)
-        </Label>
-        <Input 
-          id="phone" 
-          placeholder="Your Phone Number (Required)"
-          value={profileData.phone}
-          onChange={(e) => handleInputChange('phone', e.target.value)}
-          disabled={!isEditing}
-          className={!profileData.phone ? 'border-red-500 bg-red-50' : ''}
+      <div className="space-y-1.5">
+        <Label htmlFor="phone">Phone number</Label>
+        <Input
+          id="phone"
+          type="tel"
+          inputMode="tel"
+          placeholder="e.g. 08012345678"
+          value={values.phone}
+          onChange={(e) => onChange('phone', e.target.value)}
+          onBlur={() => onBlur('phone')}
+          aria-invalid={!!error('phone')}
+          className={cn(error('phone') && 'border-destructive focus-visible:ring-destructive')}
         />
-        {!profileData.phone && (
-          <p className="text-red-500 text-sm font-medium">
-            ⚠️ Phone number is required for order communication
-          </p>
-        )}
+        {error('phone') && <p className="text-xs text-destructive">{error('phone')}</p>}
       </div>
 
-      {isEditing && (
-        <div className="flex justify-end mt-4">
-          <Button variant="secondary" onClick={() => setIsEditing(false)} className="mr-2">
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>Save Changes</Button>
-        </div>
-      )}
-    </div>
+      <div className="flex justify-end pt-2">
+        <Button type="submit" disabled={!canSave || saving}>
+          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Save changes
+        </Button>
+      </div>
+    </form>
   );
 };
 

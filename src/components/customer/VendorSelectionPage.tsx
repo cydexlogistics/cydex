@@ -77,7 +77,7 @@ export const VendorSelectionPage: React.FC<VendorSelectionPageProps> = ({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             type="text"
-            placeholder="Search vendors or cuisine types..."
+            placeholder="Search vendors or categories..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -92,7 +92,7 @@ export const VendorSelectionPage: React.FC<VendorSelectionPageProps> = ({
             onClick={() => setSelectedCategory(null)}
             className="text-xs"
           >
-            All Cuisines
+            All Vendors
           </Button>
           <Button
             variant={verifiedOnly ? "default" : "outline"}

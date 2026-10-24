@@ -804,6 +804,8 @@ export type Database = {
       }
       vehicle_types: {
         Row: {
+          see_orders_km: number
+          alert_orders_km: number
           key: string
           name: string
           customer_label: string | null
@@ -817,6 +819,8 @@ export type Database = {
           created_at: string
         }
         Insert: {
+          see_orders_km?: number
+          alert_orders_km?: number
           key: string
           name: string
           customer_label?: string | null
@@ -830,6 +834,8 @@ export type Database = {
           created_at?: string
         }
         Update: {
+          see_orders_km?: number
+          alert_orders_km?: number
           key?: string
           name?: string
           customer_label?: string | null
@@ -942,6 +948,9 @@ export type Database = {
       }
       promotions: {
         Row: {
+          email_domains: string[] | null
+          partner_vendor_ids: string[] | null
+          user_id: string | null
           id: string
           name: string
           code: string | null
@@ -963,6 +972,9 @@ export type Database = {
           created_at: string
         }
         Insert: {
+          email_domains?: string[] | null
+          partner_vendor_ids?: string[] | null
+          user_id?: string | null
           id?: string
           name: string
           code?: string | null
@@ -984,6 +996,9 @@ export type Database = {
           created_at?: string
         }
         Update: {
+          email_domains?: string[] | null
+          partner_vendor_ids?: string[] | null
+          user_id?: string | null
           id?: string
           name?: string
           code?: string | null
@@ -1165,6 +1180,7 @@ export type Database = {
       }
       order_items: {
         Row: {
+          list_price: number | null
           carbon_impact: number | null
           created_at: string
           id: string
@@ -1179,6 +1195,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          list_price?: number | null
           carbon_impact?: number | null
           created_at?: string
           id?: string
@@ -1193,6 +1210,7 @@ export type Database = {
           unit_price: number
         }
         Update: {
+          list_price?: number | null
           carbon_impact?: number | null
           created_at?: string
           id?: string
@@ -1671,6 +1689,8 @@ export type Database = {
       }
       products: {
         Row: {
+          discount_type: string | null
+          discount_value: number | null
           carbon_impact: number | null
           category: string | null
           created_at: string | null
@@ -1687,6 +1707,8 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          discount_type?: string | null
+          discount_value?: number | null
           carbon_impact?: number | null
           category?: string | null
           created_at?: string | null
@@ -1703,6 +1725,8 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          discount_type?: string | null
+          discount_value?: number | null
           carbon_impact?: number | null
           category?: string | null
           created_at?: string | null
@@ -1730,6 +1754,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          referral_code: string | null
           suspension_reason: string | null
           avatar: string | null
           carbon_credits: number | null
@@ -1751,6 +1776,7 @@ export type Database = {
           verified: boolean | null
         }
         Insert: {
+          referral_code?: string | null
           suspension_reason?: string | null
           avatar?: string | null
           carbon_credits?: number | null
@@ -1772,6 +1798,7 @@ export type Database = {
           verified?: boolean | null
         }
         Update: {
+          referral_code?: string | null
           suspension_reason?: string | null
           avatar?: string | null
           carbon_credits?: number | null
@@ -2069,8 +2096,60 @@ export type Database = {
           },
         ]
       }
+      referral_programs: {
+        Row: { role: string; reward_amount: number; orders_needed: number; rider_requests_needed: number | null; is_active: boolean; updated_at: string }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          id: string; referrer_id: string; referred_id: string; role: string; code: string; status: string
+          reward_amount: number | null; rewarded_at: string | null; created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      vendor_partners: {
+        Row: {
+          vendor_id: string; vendor_commission_rate: number | null; rider_request_commission_rate: number | null
+          note: string | null; is_active: boolean; created_at: string; updated_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      rewards: {
+        Row: {
+          id: string; title: string; description: string | null; audience: string; kind: string; metric: string
+          target: number; reward_type: string; reward_amount: number | null; promo_discount_type: string | null
+          promo_discount_value: number | null; promo_applies_to: string | null; promo_valid_days: number; promo_uses: number
+          icon: string; color: string; starts_at: string; ends_at: string | null; is_active: boolean
+          created_by: string | null; created_at: string; updated_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      reward_grants: {
+        Row: {
+          id: string; reward_id: string; user_id: string; period_key: string; progress: number | null
+          wallet_amount: number; promotion_id: string | null; order_id: string | null; earned_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      rider_online_sessions: {
+        Row: { id: string; rider_id: string; started_at: string; ended_at: string | null }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       rider_profiles: {
         Row: {
+          daily_delivery_goal: number
           online_since: string | null
           auto_offline_at: string | null
           bank_details: Json | null
@@ -2091,6 +2170,7 @@ export type Database = {
           verification_status: string | null
         }
         Insert: {
+          daily_delivery_goal?: number
           online_since?: string | null
           auto_offline_at?: string | null
           bank_details?: Json | null
@@ -2111,6 +2191,7 @@ export type Database = {
           verification_status?: string | null
         }
         Update: {
+          daily_delivery_goal?: number
           online_since?: string | null
           auto_offline_at?: string | null
           bank_details?: Json | null
@@ -3020,6 +3101,7 @@ export type Database = {
         Args: {
           p_name: string; p_rate_per_km: number; p_avg_speed_kmh: number; p_max_distance_km: number
           p_key?: string; p_customer_label?: string; p_needs_details?: boolean; p_needs_registration?: boolean; p_is_active?: boolean
+          p_see_orders_km?: number; p_alert_orders_km?: number
         }
         Returns: string
       }
@@ -3052,6 +3134,7 @@ export type Database = {
           id: string; name: string; code: string | null; discount_type: string; discount_value: number; applies_to: string
           vendor_id: string | null; vendor_name: string | null; max_distance_km: number | null; vehicle_types: string[] | null
           ends_at: string; uses_left: number | null; places_left: number | null
+          partner_vendor_ids: string[] | null; partner_vendor_names: string[] | null; email_domains: string[] | null
         }[]
       }
       admin_create_business_category: {
@@ -3148,6 +3231,7 @@ export type Database = {
           p_starts_at: string; p_ends_at: string; p_audience?: string; p_id?: string; p_code?: string; p_vendor_id?: string
           p_cost_bearer?: string; p_max_distance_km?: number; p_vehicle_types?: string[]
           p_max_users?: number; p_max_uses_per_user?: number; p_is_active?: boolean; p_show_in_offers?: boolean
+          p_email_domains?: string[]; p_partner_vendor_ids?: string[]
         }
         Returns: string
       }
@@ -3160,6 +3244,7 @@ export type Database = {
           state: string; uses: number; total_discount: number
           audience: string; max_users: number | null; max_uses_per_user: number | null; users: number
           show_in_offers: boolean
+          email_domains: string[] | null; partner_vendor_ids: string[] | null; partner_vendor_names: string[] | null
         }[]
       }
       admin_earnings: {
@@ -3177,6 +3262,98 @@ export type Database = {
       }
       vendor_dashboard_stats: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      my_rewards: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string; title: string; description: string | null; kind: string; metric: string; target: number
+          icon: string; color: string; prize: string; reward_type: string; reward_amount: number | null
+          starts_at: string; ends_at: string | null; period_ends_at: string | null; progress: number | null
+          earned: boolean; earned_at: string | null; times_earned: number; best_minutes: number | null; running: boolean
+        }[]
+      }
+      admin_save_reward: {
+        Args: {
+          p_title: string; p_audience: string; p_metric: string; p_target: number; p_reward_type: string
+          p_id?: string | null; p_description?: string | null; p_kind?: string; p_reward_amount?: number | null
+          p_promo_discount_type?: string | null; p_promo_discount_value?: number | null; p_promo_applies_to?: string | null
+          p_promo_valid_days?: number; p_promo_uses?: number; p_icon?: string; p_color?: string
+          p_starts_at?: string | null; p_ends_at?: string | null; p_is_active?: boolean
+        }
+        Returns: string
+      }
+      admin_rewards: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string; title: string; description: string | null; audience: string; kind: string; metric: string
+          target: number; reward_type: string; reward_amount: number | null; promo_discount_type: string | null
+          promo_discount_value: number | null; promo_applies_to: string | null; promo_valid_days: number; promo_uses: number
+          icon: string; color: string; starts_at: string; ends_at: string | null; is_active: boolean; created_at: string
+          prize: string; state: string; times_earned: number; people: number; paid_out: number
+        }[]
+      }
+      admin_reward_grants: {
+        Args: { p_from?: string | null; p_to?: string | null; p_limit?: number; p_offset?: number }
+        Returns: {
+          id: string; earned_at: string; user_id: string; user_name: string | null; user_role: string | null
+          reward_id: string; reward_title: string; prize: string; wallet_amount: number; promotion_id: string | null
+          total_count: number; total_paid: number; total_promotions: number
+        }[]
+      }
+      my_reward_history: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          id: string; reward_id: string; title: string; description: string | null; kind: string; metric: string
+          target: number; icon: string; color: string; prize: string; progress: number | null; earned_at: string; total_count: number
+        }[]
+      }
+      check_referral_code: {
+        Args: { p_code: string; p_role: string }
+        Returns: string | null
+      }
+      apply_referral_code: {
+        Args: { p_code: string }
+        Returns: undefined
+      }
+      my_referrals: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      admin_save_referral_program: {
+        Args: { p_role: string; p_reward_amount: number; p_orders_needed: number; p_rider_requests_needed?: number | null; p_is_active?: boolean }
+        Returns: undefined
+      }
+      admin_referrals: {
+        Args: { p_role?: string | null; p_status?: string | null; p_limit?: number; p_offset?: number }
+        Returns: {
+          id: string; created_at: string; role: string; code: string; status: string; reward_amount: number | null
+          rewarded_at: string | null; referrer_id: string; referrer_name: string | null; referrer_email: string | null
+          referred_id: string; referred_name: string | null; referred_email: string | null; orders: number
+          rider_requests: number; total_count: number; total_rewarded: number; total_paid: number
+        }[]
+      }
+      admin_vendor_partners: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          vendor_id: string; vendor_name: string | null; vendor_email: string | null; vendor_commission_rate: number | null
+          rider_request_commission_rate: number | null; note: string | null; is_active: boolean; created_at: string
+          standard_vendor_commission_rate: number; standard_rider_request_commission_rate: number; promotions: number
+        }[]
+      }
+      admin_save_vendor_partner: {
+        Args: {
+          p_vendor_id: string; p_vendor_commission_rate?: number | null; p_rider_request_commission_rate?: number | null
+          p_note?: string | null; p_is_active?: boolean
+        }
+        Returns: undefined
+      }
+      admin_remove_vendor_partner: {
+        Args: { p_vendor_id: string }
+        Returns: undefined
+      }
+      admin_active_users: {
+        Args: { p_from?: string; p_to?: string }
         Returns: Json
       }
       admin_dashboard_stats: {

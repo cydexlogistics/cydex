@@ -4,13 +4,14 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Clock, Leaf, Phone, Navigation, RefreshCw, AlertCircle } from 'lucide-react';
+import { MapPin, Clock, Phone, Navigation, RefreshCw, AlertCircle } from 'lucide-react';
 import { useRiderData } from '@/hooks/useRiderData';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'sonner';
 import OrderStatusBadge from '@/components/orders/OrderStatusBadge';
 import RiderDeliveryActions from '@/components/rider/RiderDeliveryActions';
 import { orderStatusForDelivery } from '@/lib/orderStatus';
+import RiderChallenges from '@/components/rider/RiderChallenges';
 
 const CurrentDeliveriesPage = () => {
   const { user } = useAuth();
@@ -104,6 +105,8 @@ const CurrentDeliveriesPage = () => {
           </div>
         </div>
 
+        <RiderChallenges refreshKey={currentDeliveries.map((d) => d.id).join()} />
+
         {currentDeliveries.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
@@ -176,10 +179,6 @@ const CurrentDeliveriesPage = () => {
                         <div className="text-sm">
                           <span className="font-medium">Your earning: </span>
                           <span>₦{Number(delivery.rider_earning ?? 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center text-sm bg-green-50 text-green-700 px-2 py-1 rounded w-fit">
-                          <Leaf className="h-4 w-4 mr-1 flex-shrink-0" />
-                          <span>{Number(delivery.carbon_saved || 0).toFixed(1)} kg CO₂ saved</span>
                         </div>
                       </div>
                     </div>

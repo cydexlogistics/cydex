@@ -15,6 +15,7 @@ import { Shield, LogOut, User as UserIcon, MessageSquare, BarChart, Sun, Moon, M
 import { User } from "@/types/auth.types";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
+import { getAccountLink } from "@/components/layout/navigationLinks";
 
 interface UserDropdownProps {
   user: User;
@@ -31,11 +32,8 @@ const UserDropdown = ({ user, onLogoutClick }: UserDropdownProps) => {
     }
   };
 
-  const goToProfile = () => {
-    if (user) {
-      navigate(`/${user.role.toLowerCase()}/profile`);
-    }
-  };
+  // Profile, or Settings for vendors (admins have neither)
+  const account = user ? getAccountLink(user.role) : null;
 
   const handleMessages = () => {
     toast.info('Messages feature coming soon!');
@@ -93,10 +91,12 @@ const UserDropdown = ({ user, onLogoutClick }: UserDropdownProps) => {
           <BarChart className="mr-2 h-4 w-4" />
           <span>Dashboard</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={goToProfile}>
-          <UserIcon className="mr-2 h-4 w-4" />
-          <span>Profile</span>
-        </DropdownMenuItem>
+        {account && (
+          <DropdownMenuItem onClick={() => navigate(account.href)}>
+            <UserIcon className="mr-2 h-4 w-4" />
+            <span>{account.label}</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={handleMessages} className="opacity-60">
           <MessageSquare className="mr-2 h-4 w-4" />
           <span>Messages</span>

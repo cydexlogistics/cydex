@@ -2,7 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PERIOD_LABELS, type Period, type PeriodPreset } from '@/lib/adminPeriod';
 
-// All time / this month / last month / last 3 or 6 months / custom dates
+// Today / last 7 or 14 days / this or last month / last 3 or 6 months / all time / custom dates
 const PeriodFilter = ({ value, onChange }: { value: Period; onChange: (p: Period) => void }) => (
   <div className="flex flex-col gap-2 xs:flex-row xs:items-center">
     <Select value={value.preset} onValueChange={(v) => onChange({ ...value, preset: v as PeriodPreset })}>
