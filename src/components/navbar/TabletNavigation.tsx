@@ -24,7 +24,7 @@ const TabletNavigation = () => {
             <Link to="/">Home</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/how-it-works">How It Works</Link>
+            <Link to="/#how-it-works">How It Works</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link to="/about">About Us</Link>

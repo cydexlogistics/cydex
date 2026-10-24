@@ -135,6 +135,11 @@ export default {
 						opacity: '1',
 					},
 				},
+				// Landing page strips that scroll forever (the content is doubled)
+				'marquee': {
+					from: { transform: 'translateX(0)' },
+					to: { transform: 'translateX(-50%)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -144,6 +149,7 @@ export default {
 				'pulse-soft': 'pulse-soft 3s infinite ease-in-out',
 				'float': 'float 3s infinite ease-in-out',
 				'scale': 'scale 0.5s ease-out',
+				'marquee': 'marquee 40s linear infinite',
 			},
 		},
 	},

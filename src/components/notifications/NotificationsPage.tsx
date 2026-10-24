@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import {
-  Bell, BellRing, Bike, CheckCheck, CircleCheck, Megaphone, CreditCard, Landmark, MapPin, Package, PartyPopper, ShieldCheck, Trophy, Truck, Undo2, UserPlus, XCircle,
+  Bell, BellRing, Bike, CheckCheck, CircleCheck, Megaphone, CreditCard, Landmark, MapPin, Package, PartyPopper, ShieldCheck, Trophy, Truck, Undo2, UserPlus, XCircle, Inbox,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -39,12 +39,14 @@ export const ICONS: Record<string, React.ElementType> = {
   verification_request: ShieldCheck,
   reward: Trophy,
   referral: UserPlus,
+  contact_message: Inbox,
 };
 
 // Admin notifications that aren't about one order
 const ADMIN_LINKS: Record<string, string> = {
   payout_request: '/admin/payments?tab=payouts',
   verification_request: '/admin/verifications',
+  contact_message: '/admin/messages',
 };
 
 // Where tapping an order notification goes, per role

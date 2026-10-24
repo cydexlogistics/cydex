@@ -1,20 +1,13 @@
-import React, { useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
+import SiteLayout from "@/components/site/SiteLayout";
+import { CONTACT_EMAIL } from "@/lib/site";
 import { motion } from "framer-motion";
 
 const PrivacyPolicy = () => {
-  // Scroll to top on page load
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
+    <SiteLayout>
       
       {/* Hero Section */}
-      <section className="pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
+      <section className="pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 bg-gradient-to-b from-primary-light to-background dark:from-[#0F1A0C] relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 z-0">
           <div className="absolute top-1/4 -right-20 w-96 h-96 bg-primary opacity-10 rounded-full filter blur-3xl"></div>
@@ -46,7 +39,7 @@ const PrivacyPolicy = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-6 sm:mb-8"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8"
           >
             Last updated: May 30, 2025
           </motion.p>
@@ -54,12 +47,12 @@ const PrivacyPolicy = () => {
       </section>
       
       {/* Privacy Policy Content */}
-      <section className="py-12 sm:py-16 md:py-20 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-4xl mx-auto">
             
             <div className="mb-8">
-              <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
                 Cydex is committed to providing secure, efficient, and eco-conscious logistics services. This Privacy Policy explains how we collect, use, protect, and share your information when you engage with our services.
               </p>
             </div>
@@ -67,8 +60,8 @@ const PrivacyPolicy = () => {
             <div className="space-y-8">
               {/* Section 1 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">1. Information We Collect</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">1. Information We Collect</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>
                     When you use the Cydex services, certain information is collected for processes such as registering your account, providing you products/services you request and conducting payment processes.
                   </p>
@@ -80,8 +73,8 @@ const PrivacyPolicy = () => {
 
               {/* Section 2 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">2. How We Use Your Information</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">2. How We Use Your Information</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>User information that Cydex collects is mainly used for the following purposes:</p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>To provide services to users</li>
@@ -101,8 +94,8 @@ const PrivacyPolicy = () => {
 
               {/* Section 3 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">3. Information Sharing with Third Parties</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">3. Information Sharing with Third Parties</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>
                     We may share your data with trusted partners such as payment processors and logistics providers to fulfill our services. All partners are contractually obligated to protect your data. In this context, your information may be shared with our business partners and service providers which support us within the scope of the supply of goods/services.
                   </p>
@@ -117,8 +110,8 @@ const PrivacyPolicy = () => {
 
               {/* Section 4 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">4. Storing and Protecting Your Information</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">4. Storing and Protecting Your Information</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>
                     We retain personal data for a period of 12 months after the last interaction, unless a longer retention period is required by law. If a special period is stipulated in the legislation for us to store your information, this period is respected.
                   </p>
@@ -133,13 +126,13 @@ const PrivacyPolicy = () => {
 
               {/* Section 5 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">5. Keeping Your Information Accurate and Up To Date</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">5. Keeping Your Information Accurate and Up To Date</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>
                     It is the User's responsibility to keep the information provided to Cydex accurate and up to date. The information requested from you must be conveyed accurately and updated if there is any change.
                   </p>
                   <p>
-                    You also have the right to access, correct, or delete your personal data held by Cydex. To exercise these rights, please contact us at <a href="mailto:cydexlogistics@gmail.com" className="text-primary hover:underline">cydexlogistics@gmail.com</a> or directly via the web and mobile apps.
+                    You also have the right to access, correct, or delete your personal data held by Cydex. To exercise these rights, please contact us at <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">{CONTACT_EMAIL}</a> or directly via the web and mobile apps.
                   </p>
                   <p>
                     When you provide information to Cydex on behalf of someone else, you undertake that you have the right to share this information with Cydex and you are authorized to do so.
@@ -149,8 +142,8 @@ const PrivacyPolicy = () => {
 
               {/* Section 6 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">6. Redirecting to Third Parties</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">6. Redirecting to Third Parties</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>
                     Cydex may redirect to other links that are not operated by Cydex. During your visit to any of these links, you are subject to the privacy policies and terms of use of the third party that you visit. Cydex is not responsible for the policies and practices of these third parties.
                   </p>
@@ -159,8 +152,8 @@ const PrivacyPolicy = () => {
 
               {/* Section 7 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">7. Changes to Application, Website and This Policy</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">7. Changes to Application, Website and This Policy</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>
                     Cydex, reserves the right to change, suspend or stop all provided products and services, information, images and other items without prior notice.
                   </p>
@@ -172,8 +165,8 @@ const PrivacyPolicy = () => {
 
               {/* Section 8 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">8. Responsibility</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">8. Responsibility</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>
                     Cydex is not responsible for any direct or indirect damages and expenses that may occur as a result of any errors, interruptions, delays, viruses, line and/or system failures that may occur during the providing of our services electronically.
                   </p>
@@ -182,11 +175,11 @@ const PrivacyPolicy = () => {
 
               {/* Section 9 */}
               <section>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-900">9. Contact Us</h2>
-                <div className="text-gray-600 space-y-4">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">9. Contact Us</h2>
+                <div className="text-muted-foreground space-y-4">
                   <p>For any questions or requests related to this Privacy Policy, contact us:</p>
-                  <div className="bg-gray-50 p-6 rounded-lg mt-4">
-                    <p><strong>Email:</strong> <a href="mailto:cydexlogistics@gmail.com" className="text-primary hover:underline">cydexlogistics@gmail.com</a></p>
+                  <div className="bg-muted/50 p-6 rounded-lg mt-4">
+                    <p><strong>Email:</strong> <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">{CONTACT_EMAIL}</a></p>
                     <p><strong>Phone:</strong> +2348028985352</p>
                     
                     <div className="mt-4">
@@ -205,8 +198,7 @@ const PrivacyPolicy = () => {
         </div>
       </section>
       
-      <FooterSection />
-    </div>
+    </SiteLayout>
   );
 };
 

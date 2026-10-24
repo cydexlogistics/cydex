@@ -227,7 +227,7 @@ For orders a vendor's customer placed with them directly (by phone, WhatsApp or 
    - If it covers the whole amount, the request goes live immediately.
    - Otherwise the rest is paid **by card** (the squad-checkout function charges only that part), and the request goes live when Squad confirms.
 4. **Live = `ready_for_pickup`.** Nearby riders are notified, and a rider accepts it like any order. They see "A package from the vendor" with the vendor's description instead of an item list, and the customer's phone and directions.
-5. **Delivery code:** the recipient is **emailed** the delivery code as soon as the request is paid, with a short introduction to Cydex and a link to usecydex.com. The **vendor** sees the code too and can pass it on. The rider enters it on arrival to complete the delivery. Pickup works as normal, with the rider's pickup code entered by the vendor.
+5. **Delivery code:** the recipient is **emailed** the delivery code as soon as the request is paid, with a short introduction to Cydex and a link to usecydex.com.ng. The **vendor** sees the code too and can pass it on. The rider enters it on arrival to complete the delivery. Pickup works as normal, with the rider's pickup code entered by the vendor.
 6. **Money:** on delivery, the rider gets the usual 85% of the delivery fee. Cydex keeps the other 15% plus the commission. Nothing is credited to the vendor.
 
 | Example (₦1,000 delivery fee) | |
@@ -400,7 +400,11 @@ Created by the database (`notify_order_events` trigger, `welcome_new_user` trigg
 
 Emails are queued in `email_outbox` by the database and sent by the `send-emails` Edge Function, through [Brevo](https://www.brevo.com). Until that's set up (see below), emails stay queued and nothing is lost; notifications in the app work regardless.
 
-Every email uses one Cydex template (logo header, heading, a highlighted box for codes and amounts, a button, and a footer with usecydex.com). Emails sent: welcome, payment confirmed, refund, **announcements** (admin broadcasts), **delivery code** (to the recipient of a rider request or Cydex Express delivery), and the verification emails in [VERIFICATION.md](VERIFICATION.md#emails).
+Every email uses one Cydex template (logo header, heading, a highlighted box for codes and amounts, a button, and a footer with usecydex.com.ng). Emails sent: welcome, payment confirmed, refund, **announcements** (admin broadcasts), **delivery code** (to the recipient of a rider request or Cydex Express delivery), and the verification emails in [VERIFICATION.md](VERIFICATION.md#emails).
+
+**Website contact form and newsletter** (migration [`20261026000000_contact_and_newsletter.sql`](../supabase/migrations/20261026000000_contact_and_newsletter.sql)):
+- The Contact page's form calls `submit_contact_message` (no account needed). The message is saved in `contact_messages` and emailed to the Cydex inbox (`contact_inbox()`: hello@usecydex.com.ng, or `app_config.contact_inbox` if set) with **Reply-To** set to the sender, so the team can answer straight from their inbox. Limited to 3 messages an hour from one email and 60 an hour in total. Admins are notified, and handle messages under **Admin → Messages** (unresolved, in progress or resolved, with an internal note; `admin_contact_messages`, `admin_set_contact_message_status`).
+- The footer's newsletter form calls `subscribe_newsletter`, which saves the email in `newsletter_subscribers` (one row per email). Nothing is sent yet; admins see the list (and can download it) under **Admin → Messages → Newsletter**.
 
 ## Setup still needed
 

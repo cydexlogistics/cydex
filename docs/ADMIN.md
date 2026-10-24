@@ -21,6 +21,7 @@ Before an action runs, the admin is asked **"Are you sure…?"**. Actions that a
 | **Promotions** | Two tabs. **General:** discounts and coupon codes for customers, vendors and riders, with limits, optionally only for some email domains. **Vendor partnerships:** partner vendors with their own commission rates, and promotions for customers ordering from them. |
 | **Rewards** | Two tabs. **Rewards:** achievements for customers, vendors and riders, and daily or weekly challenges for riders, each with a wallet bonus or a personal offer. **Referrals:** the referral reward and goal for each kind of account, and every referral. See below. |
 | **Broadcasts** | Announcements to customers, vendors or riders, as a notification, an email or both. |
+| **Messages** | Messages from the website's contact form: reply by email, mark each one unresolved, in progress or resolved, and keep an internal note. A **Newsletter** tab lists sign-ups, with a CSV download. Admins are notified of each new message, and unresolved ones show in the Overview's To do list. |
 | **Notifications** | The admin's own notifications (withdrawals to approve, verifications to review), with a bell on mobile. |
 | **Emails** | Emails the app sends. Retry failed ones. |
 | **Activity log** | Who did what, newest first. |

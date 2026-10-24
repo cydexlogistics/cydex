@@ -8,7 +8,7 @@ const DesktopNavigation = () => {
       <Link to="/" className="nav-link text-sm lg:text-base">
         Home
       </Link>
-      <Link to="/how-it-works" className="nav-link text-sm lg:text-base">
+      <Link to="/#how-it-works" className="nav-link text-sm lg:text-base">
         How It Works
       </Link>
       <Link to="/about" className="nav-link text-sm lg:text-base">

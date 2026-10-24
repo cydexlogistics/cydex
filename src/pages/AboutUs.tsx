@@ -1,335 +1,169 @@
-import React, { useEffect } from "react";
-import { motion } from "framer-motion";
-import Navbar from "@/components/Navbar";
-import FooterSection from "@/components/FooterSection";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { Bike, Leaf, Lightbulb, Users, ArrowRight } from "lucide-react";
-import { TracingBeam } from "@/components/ui/tracing-beam";
+import { useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowRight, Footprints, HandCoins, Heart, KeyRound, Leaf, MapPinned, Rocket, Sparkles, Sprout, Wrench } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import SiteLayout from '@/components/site/SiteLayout';
+import { Eyebrow, Reveal, SectionHeading, Stagger, StaggerItem } from '@/components/site/motion';
 
-const AboutUs = () => {
-  const navigate = useNavigate();
-  
-  // Scroll to top on page load
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+const JOURNEY = [
+  {
+    when: '2023', icon: Sprout, title: 'Cydex is founded',
+    text: 'It started with a simple observation: most deliveries in our cities are short trips, yet they are usually made with motorbikes and cars. We asked what delivery would look like if it started with the smallest vehicle that could do the job.',
+  },
+  {
+    when: 'Building', icon: Wrench, title: 'From idea to platform',
+    text: 'We spoke to local vendors and riders and built the pieces a delivery service needs: ordering, a vendor dashboard, a rider app, wallets, secure payments and code-checked handovers.',
+  },
+  {
+    when: 'Today', icon: Rocket, title: 'Delivering, the green way',
+    text: 'Customers order from vendors near them and send packages with Cydex Express. Businesses request riders for their own orders. Riders deliver on foot, by bicycle, by e-bike, and by motorbike only for longer trips.',
+  },
+  {
+    when: 'Next', icon: MapPinned, title: 'More places, more people',
+    text: 'We are growing area by area, bringing on more vendors and riders, and improving how trips are planned and grouped so each delivery travels less.',
+  },
+];
 
+const VALUES = [
+  { icon: Leaf, title: 'Planet first', text: 'We default to walking, bicycles and e-bikes, and only use motorbikes when the distance needs it.' },
+  { icon: MapPinned, title: 'Local first', text: 'We connect you with businesses near you, which keeps trips short and money in the neighbourhood.' },
+  { icon: HandCoins, title: 'Fair to riders', text: 'Riders keep most of every delivery fee and are paid as soon as each delivery is done.' },
+  { icon: KeyRound, title: 'Trust at every handover', text: 'Pickup and delivery codes, verified vendors and riders, and refunds when things go wrong.' },
+  { icon: Sparkles, title: 'Simple to use', text: 'Clear prices before you pay, updates at every step, and one app for customers, vendors and riders.' },
+  { icon: Heart, title: 'Built in Nigeria', text: 'Made for how our cities work: campuses, estates, busy roads and the businesses that serve them.' },
+];
+
+// The journey, with a line that fills in as you scroll
+const Journey = () => {
+  const ref = useRef<HTMLOListElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 75%', 'end 60%'] });
+  const height = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      {/* Hero Section - Mobile Optimized */}
-      <section className="pt-20 sm:pt-24 md:pt-32 pb-12 sm:pb-16 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden">
-        {/* Background Elements - Responsive */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/4 -right-20 w-72 sm:w-96 h-72 sm:h-96 bg-primary opacity-10 rounded-full filter blur-3xl"></div>
-          <div className="absolute -bottom-20 -left-20 w-72 sm:w-96 h-72 sm:h-96 bg-primary opacity-10 rounded-full filter blur-3xl"></div>
-          <img 
-            src="https://images.unsplash.com/photo-1501854140801-50d01698950b" 
-            alt="Green landscape" 
-            className="object-cover w-full h-full opacity-10"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
-        </div>
-        
-        <div className="container mx-auto px-4 sm:px-6 text-center lg:text-left relative z-10">
-          <div className="max-w-3xl mx-auto lg:mx-0">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-block py-1 px-3 sm:px-4 rounded-full bg-primary/10 mb-3 sm:mb-4"
-            >
-              <p className="text-primary font-semibold text-sm">
-                Our Story & Mission
-              </p>
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight"
-            >
-              Redefining <span className="text-primary drop-shadow-md">Sustainable</span> Logistics
-            </motion.h1>
-            
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto lg:mx-0"
-            >
-              Since 2020, Cydex has been on a mission to transform the logistics industry by creating eco-friendly delivery solutions that don't compromise on speed or reliability.
-            </motion.p>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 sm:gap-4"
-            >
-              <Button 
-                className="primary-button hover:scale-105 w-full sm:w-auto" 
-                onClick={() => navigate("/auth?tab=register")}
-                size="lg"
-              >
-                Join Our Movement
-                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="secondary-button hover:scale-105 w-full sm:w-auto"
-                size="lg"
-                onClick={() => {
-                  const storySection = document.querySelector('.py-20.bg-background');
-                  if (storySection) {
-                    storySection.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-              >
-                Read Our Story
-              </Button>
-            </motion.div>
+    <ol ref={ref} className="relative mx-auto max-w-3xl space-y-10 pl-12 sm:pl-16">
+      <span aria-hidden className="absolute bottom-2 left-[1.15rem] top-2 w-0.5 rounded-full bg-border sm:left-[1.65rem]" />
+      <motion.span aria-hidden style={{ height }} className="absolute left-[1.15rem] top-2 w-0.5 rounded-full bg-primary sm:left-[1.65rem]" />
+      {JOURNEY.map(({ when, icon: Icon, title, text }, i) => (
+        <Reveal as="li" key={title} delay={i * 0.05} className="relative">
+          <span className="absolute -left-12 top-0 flex h-10 w-10 items-center justify-center rounded-full border-4 border-background bg-primary text-black shadow sm:-left-16 sm:h-14 sm:w-14">
+            <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
+          </span>
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+            <p className="font-clash text-sm font-semibold uppercase tracking-wider text-[#3F8500] dark:text-primary">{when}</p>
+            <h3 className="mt-1 font-clash text-xl font-semibold text-foreground sm:text-2xl">{title}</h3>
+            <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{text}</p>
           </div>
-          
-          {/* Decorative Elements */}
-          <div className="hidden lg:block absolute -right-20 top-40 opacity-30">
-            <Leaf className="w-40 h-40 text-primary" />
-          </div>
-        </div>
-      </section>
-      
-      {/* Our Story Section - Mobile Optimized */}
-      <section className="py-12 sm:py-16 md:py-20 bg-background">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Our Story</h2>
-              <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
-                Cydex was born out of a simple observation: while the world was embracing e-commerce and on-demand deliveries, the environmental impact of this convenience was being ignored.
-              </p>
-              <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
-                In 2020, our founders, a group of environmental scientists and tech entrepreneurs, joined forces with a mission to transform the logistics industry. They envisioned a platform where sustainability and efficiency could coexist.
-              </p>
-              <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
-                Starting with just three electric bikes in a single neighborhood, Cydex has grown into a comprehensive eco-friendly delivery network spanning multiple cities, with thousands of riders and partnered businesses.
-              </p>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Today, we're proud to have saved over 1.5 million kg of CO₂ emissions through our zero-emission delivery network.
-              </p>
-            </div>
-            
-            <div className="relative mt-8 lg:mt-0">
-              <div className="hidden sm:block absolute -top-4 sm:-top-6 -right-4 sm:-right-6 bg-primary/20 w-full h-full rounded-xl sm:rounded-2xl transform rotate-3 z-0"></div>
-              <div className="glass rounded-xl sm:rounded-2xl overflow-hidden relative z-10">
-                <img 
-                  src="https://images.unsplash.com/photo-1487887235947-a955ef187fcc" 
-                  alt="Eco-friendly delivery drowe" 
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-          </div>
-          
-          {/* Timeline with TracingBeam */}
-          <div className="mt-12 sm:mt-16 md:mt-20">
-            <h3 className="text-xl sm:text-2xl font-bold mb-8 sm:mb-10 text-center">Our Journey</h3>
-            
-            <TracingBeam className="px-4">
-              <div className="max-w-3xl pl-5 mx-auto space-y-12 md:space-y-16">
-                <TimelineItem 
-                  year="2020"
-                  title="Cydex Founded"
-                  description="Cydex was founded with a mission to create sustainable deliveries"
-                />
-                <TimelineItem 
-                  year="2021"
-                  title="Expansion & Innovation"
-                  description="Launched carbon credit system and expanded to 5 major cities"
-                />
-                <TimelineItem 
-                  year="2022"
-                  title="Technology Advancements"
-                  description="Introduced AI-powered route optimization and sustainable packaging"
-                />
-                <TimelineItem 
-                  year="2023-Present"
-                  title="Nationwide Presence"
-                  description="Nationwide expansion with over 10,000 riders and 1,000+ partnered businesses"
-                />
-              </div>
-            </TracingBeam>
-          </div>
-        </div>
-      </section>
-      
-      {/* Our Mission & Values - Mobile Optimized */}
-      <section className="py-12 sm:py-16 md:py-20 bg-muted/30 dark:bg-muted/20">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Our Mission & Values</h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto">
-              At Cydex, we're driven by more than just making deliveries. We're committed to transforming logistics through sustainable practices and innovative technology.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            <ValueCard
-              icon={<Leaf className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />}
-              title="Sustainability"
-              description="We prioritize green logistics in every aspect of our operations, from zero-emission transportation to eco-friendly packaging solutions."
-            />
-            <ValueCard
-              icon={<Lightbulb className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />}
-              title="Innovation"
-              description="Our AI-powered route optimization, carbon tracking, and sustainable packaging technologies push the boundaries of what's possible in green logistics."
-            />
-            <ValueCard
-              icon={<Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />}
-              title="Community"
-              description="We're building a global community of eco-conscious customers, riders, and businesses, rewarding everyone for making sustainable choices."
-            />
-          </div>
-        </div>
-      </section>
-      
-      {/* Meet the Team - Mobile Optimized */}
-      <section className="py-12 sm:py-16 md:py-20 bg-background">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Meet Our Team</h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto">
-              The passionate individuals behind Cydex are united by a common mission to revolutionize the delivery industry through sustainability.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            <TeamMember
-              image="/team/david.jpeg"
-              name="Akinrinola David Akinyele"
-              role="CEO & Co-Founder"
-            />
-            <TeamMember
-              image="/team/tobi.jpeg"
-              name="Tobiloba Olugbemi"
-              role="CTO & Co-Founder"
-            />
-            <TeamMember
-              image="/team/grace.jpeg"
-              name="Grace David"
-              role="Sustainability Director & Co-Founder"
-            />
-          </div>
-        </div>
-      </section>
-      
-      {/* Our Partners - Mobile Optimized */}
-      <section className="py-12 sm:py-16 md:py-20 bg-muted/30 dark:bg-muted/20">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Our Partners & Certifications</h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto">
-              We collaborate with leading environmental organizations and industry partners to maximize our positive impact.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 items-center justify-items-center">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <PartnerCard key={i} index={i} />
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* CTA Section - Mobile Optimized */}
-      <section className="py-12 sm:py-16 md:py-20 bg-primary/10">
-        <div className="container mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
-            Join Us in Making a Difference
-          </h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto mb-8 sm:mb-10">
-            Be part of our mission to create a sustainable future for deliveries.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
-            <Button 
-              className="primary-button hover:scale-105 w-full sm:w-auto" 
-              onClick={() => navigate("/auth?tab=register")}
-            >
-              Sign Up
-              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="secondary-button hover:scale-105 w-full sm:w-auto"
-              onClick={() => navigate("/contact")}
-            >
-              Become a Partner
-            </Button>
-          </div>
-        </div>
-      </section>
-      
-      <FooterSection />
-    </div>
+        </Reveal>
+      ))}
+    </ol>
   );
 };
 
-// Helper Components
-const TimelineItem = ({ 
-  year, 
-  title, 
-  description
-}: { 
-  year: string; 
-  title: string;
-  description: string; 
-}) => (
-  <div className="relative pl-0 group">
-    <div className="bg-card p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-sm font-medium text-primary">{year}</span>
+const AboutUs = () => (
+  <SiteLayout>
+    {/* Intro */}
+    <section className="relative overflow-hidden bg-gradient-to-b from-primary-light to-background pb-16 pt-28 dark:from-[#0F1A0C] sm:pt-36">
+      <div className="container mx-auto grid max-w-screen-xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
+        <div className="space-y-6 text-center lg:text-left">
+          <Reveal><Eyebrow>About Cydex</Eyebrow></Reveal>
+          <Reveal delay={0.05}>
+            <h1 className="font-clash text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              Local delivery that's <span className="text-primary">kinder to the planet</span>
+            </h1>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="mx-auto max-w-xl text-base text-muted-foreground sm:text-lg lg:mx-0">
+              Cydex is a Nigerian delivery company founded in 2023. We connect people with the businesses around them,
+              and deliver with the smallest vehicle that can do the job: on foot, by bicycle and e-bike first.
+            </p>
+          </Reveal>
+        </div>
+        {/* Three riders, one for each way we deliver */}
+        <div className="relative mx-auto grid w-full max-w-md grid-cols-2 gap-4">
+          {[
+            { src: '/landing/rider-walking.jpg', label: 'On foot', icon: Footprints, className: 'row-span-2 aspect-[3/5]' },
+            { src: '/landing/rider-bicycle.jpg', label: 'Bicycle', icon: Leaf, className: 'aspect-square' },
+            { src: '/landing/rider-ebike.jpg', label: 'E-bike', icon: Sparkles, className: 'aspect-square' },
+          ].map(({ src, label, icon: Icon, className }, i) => (
+            <motion.figure
+              key={label}
+              initial={{ opacity: 0, y: 40, rotate: i === 0 ? -4 : 4 }}
+              animate={{ opacity: 1, y: 0, rotate: 0 }}
+              transition={{ duration: 0.8, delay: 0.15 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ scale: 1.03 }}
+              className={`relative overflow-hidden rounded-3xl border-4 border-background shadow-xl ${className}`}
+            >
+              <img src={src} alt={`A Cydex rider delivering ${label.toLowerCase()}`} className="h-full w-full object-cover" />
+              <figcaption className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
+                <Icon className="h-3.5 w-3.5 text-primary" /> {label}
+              </figcaption>
+            </motion.figure>
+          ))}
+        </div>
       </div>
-      <h4 className="text-lg font-semibold mb-2 text-foreground">{title}</h4>
-      <p className="text-sm sm:text-base text-muted-foreground">{description}</p>
-    </div>
-  </div>
-);
+    </section>
 
-const ValueCard = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => (
-  <div className="bg-card rounded-xl p-6 sm:p-8 shadow-md border border-border hover:shadow-lg transition-shadow">
-    <div className="bg-primary/10 p-3 sm:p-4 rounded-full inline-block mb-4 sm:mb-6">
-      {icon}
-    </div>
-    <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4">{title}</h3>
-    <p className="text-sm sm:text-base text-muted-foreground">{description}</p>
-  </div>
-);
+    {/* Mission */}
+    <section className="py-20 sm:py-24">
+      <div className="container mx-auto max-w-4xl px-4 text-center sm:px-6">
+        <Reveal>
+          <p className="font-clash text-2xl font-medium leading-snug text-foreground sm:text-3xl lg:text-4xl">
+            “Our mission is to make everyday delivery <span className="text-primary">cleaner, fairer and more local</span>,
+            without making it slower or harder to use.”
+          </p>
+        </Reveal>
+      </div>
+    </section>
 
-const TeamMember = ({ image, name, role }: { image: string; name: string; role: string }) => (
-  <div className="text-center">
-      <div className="relative mb-3 sm:mb-4 mx-auto w-28 h-28 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-lg border-4 border-background">
-      <img 
-        src={image}
-        alt={name}
-        className="w-full h-full object-cover"
-      />
-    </div>
-    <h3 className="text-base sm:text-xl font-bold mb-1">{name}</h3>
-    <p className="text-sm sm:text-base text-primary font-medium">{role}</p>
-  </div>
-);
+    {/* Journey */}
+    <section className="bg-muted/40 py-20 sm:py-28">
+      <div className="container mx-auto max-w-screen-xl px-4 sm:px-6">
+        <SectionHeading eyebrow="Our journey" title="Where we've come from" intro="We're a young company, and we're honest about it. Here's where we are." />
+        <Journey />
+      </div>
+    </section>
 
-const PartnerCard = ({ index }: { index: number }) => (
-  <div className="bg-card p-4 sm:p-6 rounded-lg sm:rounded-xl shadow-md w-full max-w-[140px] sm:max-w-[180px] h-[80px] sm:h-[100px] flex items-center justify-center">
-    <div className="bg-muted w-full h-10 sm:h-12 rounded flex items-center justify-center">
-      <span className="text-xs sm:text-sm text-muted-foreground font-medium">Partner {index}</span>
-    </div>
-  </div>
+    {/* Values */}
+    <section className="py-20 sm:py-28">
+      <div className="container mx-auto max-w-screen-xl px-4 sm:px-6">
+        <SectionHeading eyebrow="What we stand for" title="Our values" />
+        <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {VALUES.map(({ icon: Icon, title, text }) => (
+            <StaggerItem key={title}>
+              <motion.div
+                whileHover={{ y: -6 }}
+                className="group h-full rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-lg"
+              >
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-[#3F8500] transition-all group-hover:rotate-6 group-hover:bg-primary group-hover:text-black dark:text-primary">
+                  <Icon className="h-6 w-6" />
+                </span>
+                <h3 className="mt-5 font-clash text-xl font-semibold text-foreground">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text}</p>
+              </motion.div>
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </div>
+    </section>
+
+    {/* Join */}
+    <section className="px-4 pb-20 sm:px-6 sm:pb-28">
+      <Reveal>
+        <div className="mx-auto flex max-w-screen-xl flex-col items-center gap-6 rounded-[2.5rem] bg-[#0F1A0C] px-6 py-14 text-center text-white sm:px-12">
+          <h2 className="max-w-2xl font-clash text-3xl font-semibold leading-tight sm:text-4xl">Be part of greener delivery</h2>
+          <p className="max-w-xl text-white/70">Order, sell or ride with Cydex. Or tell us how we can work together.</p>
+          <div className="flex flex-col gap-3 xs:flex-row">
+            <Button asChild size="lg" className="rounded-full px-7 text-black hover:bg-primary-hover">
+              <Link to="/auth?tab=register">Join Cydex <ArrowRight className="ml-1 h-4 w-4" /></Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="rounded-full border-white/20 bg-transparent px-7 text-white hover:bg-white/10 hover:text-white">
+              <Link to="/contact">Contact us</Link>
+            </Button>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  </SiteLayout>
 );
 
 export default AboutUs;

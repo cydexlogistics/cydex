@@ -1,7 +1,7 @@
 
 import { 
   Bell, Bike, Boxes, Home, Package, Wallet, Recycle, User, Settings, Users, ShieldCheck, Navigation,
-  Banknote, Mail, ScrollText, Shield, SlidersHorizontal, Star, TicketPercent, Zap, Megaphone, Trophy } from 'lucide-react';
+  Banknote, Mail, ScrollText, Shield, SlidersHorizontal, Star, TicketPercent, Zap, Megaphone, Trophy, Inbox } from 'lucide-react';
 
 interface SidebarLink {
   name: string;
@@ -59,6 +59,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
         { name: 'Promotions', href: '/admin/promotions', icon: TicketPercent },
         { name: 'Rewards', href: '/admin/rewards', icon: Trophy },
         { name: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
+        { name: 'Messages', href: '/admin/messages', icon: Inbox },
         { name: 'Notifications', href: '/admin/notifications', icon: Bell },
         { name: 'Emails', href: '/admin/emails', icon: Mail },
         { name: 'Activity log', href: '/admin/activity', icon: ScrollText },

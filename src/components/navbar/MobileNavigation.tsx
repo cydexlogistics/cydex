@@ -37,7 +37,7 @@ const MobileNavigation = ({
         <Link to="/" className="p-2 hover:bg-muted rounded-md text-foreground" onClick={onClose}>
           Home
         </Link>
-        <Link to="/how-it-works" className="p-2 hover:bg-muted rounded-md text-foreground" onClick={onClose}>
+        <Link to="/#how-it-works" className="p-2 hover:bg-muted rounded-md text-foreground" onClick={onClose}>
           How It Works
         </Link>
         <Link to="/about" className="p-2 hover:bg-muted rounded-md text-foreground" onClick={onClose}>

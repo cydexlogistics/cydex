@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useInstallApp } from '@/hooks/useInstallApp';
 import { isIos } from '@/lib/pwa';
+import { SITE_DOMAIN } from '@/lib/site';
 
 type Device = 'android' | 'iphone' | 'computer';
 
@@ -60,7 +61,7 @@ const InstallInstructions = ({ className }: { className?: string }) => {
 
         <TabsContent value="android" className="mt-4">
           <ol className="space-y-3 text-sm">
-            <Step n={1}>Open <B>usecydex.com</B> in <B>Chrome</B> (Edge and Samsung Internet work too).</Step>
+            <Step n={1}>Open <B>{SITE_DOMAIN}</B> in <B>Chrome</B> (Edge and Samsung Internet work too).</Step>
             <Step n={2}>
               Tap <B>Install</B> on the banner at the bottom of the screen. No banner? Tap the menu{' '}
               <MoreVertical className="inline h-4 w-4" aria-label="three dots" /> at the top right.
@@ -72,7 +73,7 @@ const InstallInstructions = ({ className }: { className?: string }) => {
 
         <TabsContent value="iphone" className="mt-4">
           <ol className="space-y-3 text-sm">
-            <Step n={1}>Open <B>usecydex.com</B> in <B>Safari</B>. It has to be Safari; other browsers on iPhone can't install apps.</Step>
+            <Step n={1}>Open <B>{SITE_DOMAIN}</B> in <B>Safari</B>. It has to be Safari; other browsers on iPhone can't install apps.</Step>
             <Step n={2}>Tap <Share className="inline h-4 w-4" aria-label="Share" /> <B>Share</B> in the toolbar at the bottom.</Step>
             <Step n={3}>Scroll down and choose <PlusSquare className="inline h-4 w-4" aria-hidden /> <B>Add to Home Screen</B>, then tap <B>Add</B>.</Step>
             <Step n={4}>Open Cydex from your Home Screen and log in. Allow notifications when asked, so you get order alerts.</Step>
@@ -81,7 +82,7 @@ const InstallInstructions = ({ className }: { className?: string }) => {
 
         <TabsContent value="computer" className="mt-4">
           <ol className="space-y-3 text-sm">
-            <Step n={1}>Open <B>usecydex.com</B> in <B>Chrome</B> or <B>Edge</B>.</Step>
+            <Step n={1}>Open <B>{SITE_DOMAIN}</B> in <B>Chrome</B> or <B>Edge</B>.</Step>
             <Step n={2}>
               Click the install icon <Download className="inline h-4 w-4" aria-label="install" /> at the right of the address bar
               (or the browser menu, then <B>Install Cydex</B>).

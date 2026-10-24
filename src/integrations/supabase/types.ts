@@ -2120,6 +2120,22 @@ export type Database = {
         Update: never
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          id: string; name: string; email: string; phone: string | null; topic: string; message: string
+          profile_id: string | null; status: string; admin_note: string | null; status_updated_at: string | null
+          status_updated_by: string | null; created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: { email: string; source: string; subscribed_at: string }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       rewards: {
         Row: {
           id: string; title: string; description: string | null; audience: string; kind: string; metric: string
@@ -3350,6 +3366,26 @@ export type Database = {
       }
       admin_remove_vendor_partner: {
         Args: { p_vendor_id: string }
+        Returns: undefined
+      }
+      submit_contact_message: {
+        Args: { p_name: string; p_email: string; p_message: string; p_topic?: string; p_phone?: string }
+        Returns: undefined
+      }
+      subscribe_newsletter: {
+        Args: { p_email: string; p_source?: string }
+        Returns: boolean
+      }
+      admin_contact_messages: {
+        Args: { p_status?: string; p_search?: string; p_limit?: number; p_offset?: number }
+        Returns: {
+          id: string; created_at: string; name: string; email: string; phone: string | null; topic: string; message: string
+          status: string; admin_note: string | null; status_updated_at: string | null; status_updated_by_name: string | null
+          sender_role: string | null; total_count: number; unresolved_count: number; in_progress_count: number; resolved_count: number
+        }[]
+      }
+      admin_set_contact_message_status: {
+        Args: { p_id: string; p_status: string; p_note?: string }
         Returns: undefined
       }
       admin_active_users: {

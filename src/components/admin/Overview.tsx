@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   AlertTriangle, ArrowRightLeft, Banknote, Bell, Bike, CheckCircle2, ChevronRight, Clock, Landmark, Mail, Package,
-  ShieldCheck, Store, Truck, UserCheck, Wallet,
+  Inbox, ShieldCheck, Store, Truck, UserCheck, Wallet,
 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
@@ -111,6 +111,16 @@ const Overview = () => {
     },
   });
 
+  // Website messages nobody has picked up yet
+  const { data: unresolvedMessages = 0 } = useQuery({
+    queryKey: ['admin-unresolved-messages'],
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { count } = await supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('status', 'unresolved');
+      return count ?? 0;
+    },
+  });
+
   const s = stats;
   const revenue = Number(s?.revenue.total ?? 0);
   const share = (part: number) => (revenue > 0 ? Math.round((part / revenue) * 100) : 0);
@@ -130,6 +140,10 @@ const Overview = () => {
     s.pending_payouts.count > 0 && {
       icon: Landmark, to: '/admin/payments?tab=payouts',
       text: `You have ${plural(s.pending_payouts.count, 'withdrawal request')} waiting for approval (${nairaWhole(s.pending_payouts.amount)})`,
+    },
+    unresolvedMessages > 0 && {
+      icon: Inbox, to: '/admin/messages',
+      text: `${plural(unresolvedMessages, 'website message')} waiting for a reply`,
     },
     attention.length > 0 && {
       icon: AlertTriangle, to: '#attention',

@@ -32,7 +32,7 @@ Everything needed to go live (accounts, environment variables, Supabase settings
 - [ ] **Set the Squad webhook URL.** In the Squad dashboard, set the webhook to `https://<project-ref>.supabase.co/functions/v1/squad-webhook` (the project ref is in Supabase → Project Settings → General, and in `VITE_SUPABASE_URL`). Without it, a payment is only confirmed if the customer returns to the confirmation page after paying.
 - [ ] **Finish email setup: verify Cydex's domain in Brevo.** App emails are live on dev and production (15 October 2026): Brevo key, cron secret and the every-minute sender are set on both, and `send-emails` sends through Brevo only.
   - For now they come from a temporary Gmail sender (set in `EMAIL_FROM`), which Brevo must have verified. Mail from a Gmail address sent through Brevo often lands in spam.
-  - Once `usecydex.com` is verified in Brevo, switch the sender on both projects: `npx supabase secrets set EMAIL_FROM="Cydex <hello@usecydex.com>" --project-ref <ref>`.
+  - Once `usecydex.com.ng` is verified in Brevo, switch the sender on both projects: `npx supabase secrets set EMAIL_FROM="Cydex <hello@usecydex.com.ng>" --project-ref <ref>`.
   - Login emails (sign-up confirmation, password reset) are separate: Supabase Auth → SMTP settings. See [DEPLOYMENT_CHECKLIST.md → Emails (Brevo)](DEPLOYMENT_CHECKLIST.md#4-emails-brevo).
 
 ## Customers
