@@ -76,8 +76,9 @@ Paid always equals Vendor got + Rider got + Cydex total. Refunded orders aren't 
 Vendors and riders can't request less than **₦3,000** at a time (`app_config.min_payout_amount`).
 
 1. A vendor, rider or customer asks to withdraw. `request_payout` takes the money out of their wallet and records a **pending** request. They're told it's waiting for approval, and all admins get a notification.
-2. An admin opens **Money → Withdrawals**:
-   - **Approve:** `squad-payout` (`action: 'approve'`) sends the Squad transfer. Two admins can't send the same one twice. If Squad rejects the transfer, the money goes back to the wallet.
+2. An admin opens **Money → Withdrawals**. The **Send withdrawals by** switch at the top decides how they're paid (`app_config.payout_method`, migration [`20261030100000_manual_payouts.sql`](../supabase/migrations/20261030100000_manual_payouts.sql)):
+   - **Manual bank transfer** (the default until Squad enables transfers for Cydex's account): **Pay manually** shows the amount to send and their bank details, with copy buttons. Send it from Cydex's bank account, tick "I've sent it", optionally add the bank's transfer reference and a note, and **Mark as paid** (`admin_mark_payout_paid`). It becomes **Paid** right away, they're told it's been sent, and it shows "Paid by manual bank transfer" with the reference. Squad transfers are refused while this is on.
+   - **Squad** — **Approve:** `squad-payout` (`action: 'approve'`) sends the Squad transfer. Two admins can't send the same one twice. If Squad rejects the transfer, the money goes back to the wallet.
    - **Reject** (with a reason): `admin_reject_payout`. The request becomes `cancelled`, the money goes back, and they're told why.
    - **Check status:** asks Squad about a transfer that's still processing. You rarely need it, because of the automatic check below.
 3. **Finishing is automatic.** If Squad confirms the transfer straight away, it's marked **Paid** on approval. Otherwise a scheduled job (`payout-status-sweep`, every 10 minutes) checks every withdrawal still "sent" with Squad. Each one becomes **Paid**, or **Failed** with the money returned, and the rider or vendor is notified. Only paid withdrawals count towards withdrawal-fee revenue.

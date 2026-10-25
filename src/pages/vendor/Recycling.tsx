@@ -15,6 +15,7 @@ import {
   TrendingUp, Users, Truck, Award, DollarSign, Plus, Loader2, RefreshCw
 } from 'lucide-react';
 import { useVendorRecycling } from '@/hooks/useVendorRecycling';
+import { nigerianDate } from '@/lib/nigerianTime';
 
 const VendorRecyclingPage = () => {
   const { 
@@ -33,7 +34,7 @@ const VendorRecyclingPage = () => {
     material_type: '',
     weight_kg: '',
     partner_name: '',
-    activity_date: new Date().toISOString().split('T')[0]
+    activity_date: nigerianDate()
   });
 
   const handleAddActivity = async () => {
@@ -54,7 +55,7 @@ const VendorRecyclingPage = () => {
         material_type: '',
         weight_kg: '',
         partner_name: '',
-        activity_date: new Date().toISOString().split('T')[0]
+        activity_date: nigerianDate()
       });
       setShowAddActivityDialog(false);
     } catch (error) {

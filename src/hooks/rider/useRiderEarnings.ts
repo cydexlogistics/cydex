@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { nigerianDate, nigerianMonthStart, nigerianWeekStart } from '@/lib/nigerianTime';
 
 export interface RiderEarnings {
   delivery_fee: number;
@@ -52,7 +53,8 @@ export const useRiderEarnings = () => {
     try {
       console.log('[RiderEarnings] Fetching today\'s earnings for rider:', user.id);
       
-      const today = new Date().toISOString().split('T')[0];
+      // In Nigerian time, like earnings_date
+      const today = nigerianDate();
       
       const operation = async () => {
         const { data, error } = await supabase
@@ -91,9 +93,8 @@ export const useRiderEarnings = () => {
     try {
       console.log('[RiderEarnings] Fetching weekly earnings for rider:', user.id);
       
-      const today = new Date();
-      const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-      const weekStart = startOfWeek.toISOString().split('T')[0];
+      // Since Sunday, in Nigerian time
+      const weekStart = nigerianWeekStart();
       
       const operation = async () => {
         const { data, error } = await supabase
@@ -132,9 +133,8 @@ export const useRiderEarnings = () => {
     try {
       console.log('[RiderEarnings] Fetching monthly earnings for rider:', user.id);
       
-      const today = new Date();
-      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-      const monthStartStr = monthStart.toISOString().split('T')[0];
+      // Since the 1st, in Nigerian time
+      const monthStartStr = nigerianMonthStart();
       
       const operation = async () => {
         const { data, error } = await supabase

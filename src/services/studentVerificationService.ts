@@ -1,5 +1,6 @@
 // Phase 2: Student Verification Service
 import { supabase } from "@/integrations/supabase/client";
+import { nigerianDate } from '@/lib/nigerianTime';
 
 export interface StudentSubscription {
   id: string;
@@ -28,7 +29,7 @@ export const checkActiveSubscription = async (userId: string): Promise<StudentSu
     .select('*')
     .eq('student_id', userId)
     .eq('status', 'active')
-    .gte('end_date', new Date().toISOString().split('T')[0])
+    .gte('end_date', nigerianDate())
     .single();
 
   if (error) {
@@ -53,8 +54,8 @@ export const createStudentSubscription = async (
     .insert({
       student_id: userId,
       status: 'active',
-      start_date: startDate.toISOString().split('T')[0],
-      end_date: endDate.toISOString().split('T')[0],
+      start_date: nigerianDate(startDate),
+      end_date: nigerianDate(endDate),
       payment_reference: paymentReference
     })
     .select()

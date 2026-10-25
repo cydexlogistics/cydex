@@ -359,6 +359,8 @@ Created in **Admin → Promotions → New promotion**. Switch each promotion off
 | WD-07 | As the admin, **Approve** it in **Money → Withdrawals**. | The transfer is sent. It becomes **Paid** when the bank confirms, without the admin doing anything more. |
 | WD-08 | As the admin, **Reject** a request with a reason. | The full amount goes back to the wallet. The person is told why. |
 | WD-09 | Before any delivery is completed, check a vendor's and rider's wallet. | Nothing is credited until the order is **Delivered**. |
+| WD-10 | With **Send withdrawals by** on **Manual bank transfer**, open a pending withdrawal and tap **Pay manually**. Copy the amount and account number, send the money from your bank, tick "I've sent it", add the reference and **Mark as paid**. | It shows **Paid** with "Paid by manual bank transfer · Ref …". The person is notified it's been sent, and their wallet doesn't get the money back. |
+| WD-11 | Switch to **Squad** and back. | Each switch asks to confirm and is in the Activity log. While on Manual, Squad is never used. |
 
 ---
 

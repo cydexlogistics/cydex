@@ -149,6 +149,11 @@ Deno.serve(async (req) => {
 
     if (body.action === 'approve') {
       if (!isAdmin) return json({ error: 'Only admins can approve withdrawals' }, 403);
+      // While withdrawals are paid by hand (Admin -> Money -> Withdrawals), Squad isn't used
+      const { data: method } = await db.rpc('payout_method');
+      if (method !== 'squad') {
+        return json({ error: 'Withdrawals are set to be paid manually. Send the money yourself and mark it paid, or switch to Squad.' }, 409);
+      }
       const id = String(body.payout_id ?? '');
       // Claim it, so two admins can't both send it
       const { data: claimed } = await db.from(t.payouts)

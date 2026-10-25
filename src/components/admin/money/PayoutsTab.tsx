@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { Check, Landmark, Loader2, RefreshCw, X } from 'lucide-react';
+import { Banknote, Check, Copy, Landmark, Loader2, RefreshCw, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SimplePagination from '@/components/ui/simple-pagination';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +19,7 @@ import { invokeFunction } from '@/lib/edgeFunctions';
 import { formatNaira } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
 import ReasonDialog from '../ReasonDialog';
+import { useConfirm } from '@/contexts/ConfirmContext';
 import { PAGE_SIZE } from '@/lib/pagination';
 
 const STATUS: Record<string, { label: string; className: string }> = {
@@ -25,7 +30,16 @@ const STATUS: Record<string, { label: string; className: string }> = {
   cancelled: { label: 'Rejected (money returned)', className: 'bg-muted text-muted-foreground' },
 };
 
-type Payout = { role: string; id: string; owner_name: string | null; owner_email: string | null; bank_name: string | null; account_number: string | null; account_name: string | null; amount: number; fee: number | null; net_amount: number | null; status: string; failure_reason: string | null; created_at: string; processed_at: string | null };
+type Payout = { role: string; id: string; owner_name: string | null; owner_email: string | null; bank_name: string | null; account_number: string | null; account_name: string | null; amount: number; fee: number | null; net_amount: number | null; status: string; failure_reason: string | null; transfer_reference: string | null; created_at: string; processed_at: string | null };
+
+const copy = async (text: string, what: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success(`${what} copied`);
+  } catch {
+    toast.error(`Could not copy the ${what.toLowerCase()}`);
+  }
+};
 
 // Withdrawals: money leaves the wallet when requested; nothing is sent until an admin approves
 const PayoutsTab = () => {
@@ -34,6 +48,20 @@ const PayoutsTab = () => {
   const [page, setPage] = useState(1);
   const [approving, setApproving] = useState<Payout | null>(null);
   const [rejecting, setRejecting] = useState<Payout | null>(null);
+  // Paid by hand from Cydex's bank account, while Squad transfers aren't enabled
+  const [paying, setPaying] = useState<Payout | null>(null);
+  const [reference, setReference] = useState('');
+  const [note, setNote] = useState('');
+  const [sent, setSent] = useState(false);
+  const confirm = useConfirm();
+  const { data: method = 'manual' } = useQuery({
+    queryKey: ['payout-method'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('payout_method');
+      if (error) throw error;
+      return data as 'manual' | 'squad';
+    },
+  });
   const [busy, setBusy] = useState<string | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
@@ -78,6 +106,41 @@ const PayoutsTab = () => {
     }
   };
 
+  const openManual = (p: Payout) => {
+    setReference('');
+    setNote('');
+    setSent(false);
+    setPaying(p);
+  };
+
+  const markPaid = async () => {
+    if (!paying) return;
+    setBusy(paying.id);
+    const { error } = await supabase.rpc('admin_mark_payout_paid', {
+      p_role: paying.role, p_id: paying.id, p_reference: reference.trim() || undefined, p_note: note.trim() || undefined,
+    });
+    setBusy(null);
+    if (error) return toast.error(errorMessage(error, 'Could not mark it paid'));
+    toast.success(`Marked ${formatNaira(Number(paying.net_amount ?? paying.amount))} to ${paying.owner_name ?? 'them'} as paid`);
+    setPaying(null);
+    refresh();
+  };
+
+  const switchMethod = async (next: 'manual' | 'squad') => {
+    if (next === method) return;
+    if (!(await confirm({
+      title: next === 'squad' ? 'Send withdrawals through Squad?' : 'Pay withdrawals manually?',
+      description: next === 'squad'
+        ? "Approve will send the money through Squad straight away. Only switch once Squad has enabled transfers for Cydex's account."
+        : "You'll send each withdrawal from Cydex's bank account yourself, then mark it paid here. Squad won't be used.",
+      confirmLabel: 'Yes, switch',
+    }))) return;
+    const { error } = await supabase.rpc('admin_set_payout_method', { p_method: next });
+    if (error) return toast.error(errorMessage(error, 'Could not switch'));
+    toast.success(next === 'squad' ? 'Withdrawals now go through Squad' : 'Withdrawals are now paid manually');
+    queryClient.invalidateQueries({ queryKey: ['payout-method'] });
+  };
+
   const check = async (p: Payout) => {
     setBusy(p.id);
     try {
@@ -100,6 +163,31 @@ const PayoutsTab = () => {
           withdrawal{feeStats.count === 1 ? '' : 's'}. Squad's own transfer charge (₦8–₦40 each) comes out of this.
         </p>
       )}
+      <div className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm">
+          <p className="font-medium">Send withdrawals by</p>
+          <p className="text-muted-foreground">
+            {method === 'manual'
+              ? "You transfer the money from Cydex's bank account, then mark it paid here."
+              : 'Approve sends the money through Squad straight away.'}
+          </p>
+        </div>
+        <div role="radiogroup" aria-label="Send withdrawals by" className="flex shrink-0 gap-1 rounded-full bg-muted p-1">
+          {(['manual', 'squad'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={method === m}
+              onClick={() => switchMethod(m)}
+              className={cn('rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
+                method === m ? 'bg-primary text-black' : 'text-muted-foreground hover:text-foreground')}
+            >
+              {m === 'manual' ? 'Manual bank transfer' : 'Squad'}
+            </button>
+          ))}
+        </div>
+      </div>
       <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
         <SelectTrigger className="xs:w-60" aria-label="Status"><SelectValue /></SelectTrigger>
         <SelectContent>
@@ -133,6 +221,9 @@ const PayoutsTab = () => {
                       {p.processed_at && ` · Closed ${format(new Date(p.processed_at), 'd MMM, HH:mm')}`}
                     </p>
                     {p.failure_reason && <p className="text-xs text-destructive">{p.failure_reason}</p>}
+                    {p.status === 'completed' && p.transfer_reference?.startsWith('MANUAL-') && (
+                      <p className="text-xs text-muted-foreground">Paid by manual bank transfer · Ref {p.transfer_reference.slice(7)}</p>
+                    )}
                   </div>
                   <div className="flex items-center justify-between gap-3 md:flex-col md:items-end">
                     <div className="text-right">
@@ -149,9 +240,15 @@ const PayoutsTab = () => {
                           <Button size="sm" variant="outline" disabled={busy === p.id} onClick={() => setRejecting(p)}>
                             <X className="mr-1 h-4 w-4" /> Reject
                           </Button>
-                          <Button size="sm" disabled={busy === p.id} onClick={() => setApproving(p)}>
-                            <Check className="mr-1 h-4 w-4" /> Approve
-                          </Button>
+                          {method === 'manual' ? (
+                            <Button size="sm" disabled={busy === p.id} onClick={() => openManual(p)}>
+                              <Banknote className="mr-1 h-4 w-4" /> Pay manually
+                            </Button>
+                          ) : (
+                            <Button size="sm" disabled={busy === p.id} onClick={() => setApproving(p)}>
+                              <Check className="mr-1 h-4 w-4" /> Approve
+                            </Button>
+                          )}
                         </>
                       )}
                       {p.status === 'processing' && (
@@ -191,6 +288,62 @@ const PayoutsTab = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!paying} onOpenChange={(o) => !o && !busy && setPaying(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pay {paying?.owner_name ?? 'them'} manually</DialogTitle>
+            <DialogDescription>Send this from Cydex's bank account, then confirm below. They're told it's been sent.</DialogDescription>
+          </DialogHeader>
+          {paying && (
+            <div className="space-y-4">
+              <div className="space-y-2 rounded-lg bg-muted p-3 text-sm">
+                {[
+                  ['Amount to send', formatNaira(Number(paying.net_amount ?? paying.amount)), String(Number(paying.net_amount ?? paying.amount))],
+                  ['Account number', paying.account_number ?? '–', paying.account_number ?? ''],
+                  ['Account name', paying.account_name ?? '–', paying.account_name ?? ''],
+                  ['Bank', paying.bank_name ?? '–', ''],
+                ].map(([label, value, copyValue]) => (
+                  <div key={label} className="flex items-center justify-between gap-2">
+                    <span className="text-muted-foreground">{label}</span>
+                    <span className="flex items-center gap-1 font-semibold">
+                      {value}
+                      {copyValue && (
+                        <button type="button" aria-label={`Copy ${label.toLowerCase()}`} onClick={() => copy(copyValue, label)} className="rounded p-1 hover:bg-background">
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {Number(paying.fee) > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  They asked for {formatNaira(Number(paying.amount))}; the {formatNaira(Number(paying.fee))} withdrawal fee stays with Cydex.
+                </p>
+              )}
+              <div className="space-y-1.5">
+                <Label htmlFor="mp-ref">Transfer reference (optional)</Label>
+                <Input id="mp-ref" value={reference} maxLength={100} onChange={(e) => setReference(e.target.value)} placeholder="From your bank's receipt" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="mp-note">Note (optional)</Label>
+                <Input id="mp-note" value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Paid from the GTBank business account" />
+              </div>
+              <label className="flex items-start gap-2 text-sm">
+                <Checkbox checked={sent} onCheckedChange={(v) => setSent(v === true)} className="mt-0.5" />
+                <span>I've sent {formatNaira(Number(paying.net_amount ?? paying.amount))} to this account</span>
+              </label>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setPaying(null)} disabled={!!busy}>Back</Button>
+            <Button onClick={markPaid} disabled={!sent || !!busy} className="text-black">
+              {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Mark as paid
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ReasonDialog
         open={!!rejecting}

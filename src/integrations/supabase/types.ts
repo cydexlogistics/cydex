@@ -3388,6 +3388,18 @@ export type Database = {
         Args: { p_id: string; p_status: string; p_note?: string }
         Returns: undefined
       }
+      payout_method: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      admin_set_payout_method: {
+        Args: { p_method: string }
+        Returns: undefined
+      }
+      admin_mark_payout_paid: {
+        Args: { p_role: string; p_id: string; p_reference?: string; p_note?: string }
+        Returns: undefined
+      }
       admin_active_users: {
         Args: { p_from?: string; p_to?: string }
         Returns: Json
