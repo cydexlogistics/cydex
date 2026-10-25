@@ -12,7 +12,7 @@ The same status names are used for customers, vendors and riders. Each screen ju
 |---|---|---|---|---|
 | 1 | `pending` | Pending | Order placed. Until it's paid, only the customer can see it. | Customer (checkout) |
 | 2 | `accepted` | Accepted | The vendor has accepted the paid order and is preparing it. **Both handover codes are created now.** | Vendor |
-| 3 | `ready_for_pickup` | Ready for pickup | Ready to collect. Online riders whose vehicle covers the trip are notified if they're within their vehicle type's alert distance of the pickup, and it appears in Available Orders for those within its see-orders distance (both 5 km to start with). | Vendor |
+| 3 | `ready_for_pickup` | Ready for pickup | Ready to collect. Riders whose vehicle covers the trip are notified (in the app and by push) if they're within their vehicle type's alert distance of the pickup: online riders from their live location, and offline riders from where they last were (or their saved address), at most once every 10 minutes, telling them to go online to accept, and it appears in Available Orders for those within its see-orders distance (both 5 km to start with). | Vendor |
 | 4 | `rider_assigned` | Rider assigned | A rider has accepted it. | Rider |
 | 5 | `picking_up` | Rider heading to vendor | The rider is on the way to the vendor. | Rider |
 | 6 | `out_for_delivery` | Out for delivery | The vendor handed it over, confirmed with the rider's **pickup code**. | Vendor (with code) |
@@ -382,7 +382,7 @@ Created by the database (`notify_order_events` trigger, `welcome_new_user` trigg
 | Account created | Welcome + **email** | Welcome + **email** | Welcome + **email** |
 | Payment confirmed | Payment confirmed + **email** | New order | |
 | `accepted` | Order accepted | | |
-| `ready_for_pickup` | Order ready | | Order nearby (online riders within their vehicle type's alert distance of the pickup, whose vehicle covers the trip) |
+| `ready_for_pickup` | Order ready | | Order nearby (riders within their vehicle type's alert distance of the pickup, whose vehicle covers the trip; offline riders too, at most once every 10 minutes, see [Statuses](#statuses)) |
 | `rider_assigned` | Rider assigned | | |
 | `picking_up` | Rider heading to vendor | | |
 | `out_for_delivery` | Order on its way | Order picked up | |

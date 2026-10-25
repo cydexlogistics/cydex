@@ -259,6 +259,7 @@ Use Campus Mart, with money in the vendor wallet for some scenarios.
 | RD-11 | In **Admin → Riders & vehicles**, set Walking to see orders within 1 km and be alerted within 0.5 km. As a walking rider 2 km from a vendor, have an order made ready. | The rider gets no alert and doesn't see the order. Available Orders says "pickups within 1 km of you". Move within 0.5 km: the next order alerts them. |
 | RD-12 | Try to set an alert distance bigger than the see-orders distance. | It can't be saved. |
 | RD-13 | On a phone, open pages whose tabs don't fit the screen (rider Profile, customer Profile, admin Money, vendor Settings, customer Wallet). | The tabs scroll sideways; none are squashed or cut off. |
+| RD-14 | Go offline (close the app) while near a vendor. Have an order made ready there, then two more within 10 minutes. | You get one push "Orders waiting near you … Go online in Cydex to accept it" for the first, and nothing more for 10 minutes. Online riders get every alert. A rider on a delivery gets none. |
 
 ---
 
