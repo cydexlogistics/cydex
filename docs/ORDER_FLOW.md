@@ -86,12 +86,7 @@ Migration [`20261013100000_ordering.sql`](../supabase/migrations/20261013100000_
 - Example: 2.4 km by bicycle at ₦200 per km = ₦480 + ₦500 = **₦980**.
 - The rider's share (85%) is of the whole fee, including the charge.
 
-**Distance is by road** for every priced trip: customer orders (store to customer), Cydex Express (pickup to drop-off) and each leg of a rider request or batch. It also decides which delivery modes can go that far. Migration [`20261027100000_road_distance.sql`](../supabase/migrations/20261027100000_road_distance.sql).
-- Road distances come from Google's Routes API (driving, without live traffic), looked up **once per pair of points** by the `route-distances` Edge Function and stored in `route_distances`. Every later quote and order between the same two points reuses it, so Google is only asked about new pairs.
-- How it fits together: every priced distance goes through `trip_distance_m`, which uses the stored road distance, or the straight line if there isn't one yet (and adds that leg to the quote's `missing_routes`). When a quote lists missing legs, the app calls `route-distances` once and fetches the quote again.
-- **Fallback:** if Google isn't set up (`GOOGLE_ROUTES_API_KEY`), fails, or takes more than 6 seconds, nothing is stored and the trip is priced by straight line, as before. A failed leg isn't retried again in the same session.
-- Safeguards: only signed-in users can trigger lookups (up to 150 an hour each, 10 per request); points must be in Nigeria and under 80 km apart; a road distance is never taken as shorter than the straight line. Directions are stored separately (A to B isn't B to A).
-- **Still straight-line:** which vendors a customer sees (so a vendor just inside range may turn out too far by road at checkout), and how close riders must be to see or be alerted to orders. These compare many points at once.
+**Distance is a straight line** between the two points (pickup and drop-off), for every priced trip. Road distance from Google's Routes API was tried in October 2026 and removed because each lookup cost too much.
 
 ### How far each mode goes
 

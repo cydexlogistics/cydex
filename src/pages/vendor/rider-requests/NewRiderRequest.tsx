@@ -31,7 +31,6 @@ import { NO_RIDERS_MESSAGE, type DeliveryMode } from '@/lib/deliveryModes';
 import { isValidEmail, isValidPhone } from '@/lib/phone';
 import { formatNaira } from '@/lib/pricing';
 import type { PickedLocation } from '@/lib/googleMaps';
-import { withRoadDistances } from '@/lib/roadDistance';
 
 interface Stop {
   id: number;
@@ -95,8 +94,7 @@ const NewRiderRequest = () => {
   const { data: quote, isFetching: quoting } = useQuery({
     queryKey: ['rider-request-quote', mode, vehicle, batch ? null : coupon, ...stops.map((s) => `${s.location?.latitude},${s.location?.longitude}`)],
     enabled: allLocated,
-    // Priced by road distance (looked up once if new)
-    queryFn: () => withRoadDistances(async () => {
+    queryFn: async () => {
       const { data, error } = batch
         ? await supabase.rpc('batch_quote', {
           p_stops: stops.map((s) => ({ latitude: s.location!.latitude, longitude: s.location!.longitude })),
@@ -108,7 +106,7 @@ const NewRiderRequest = () => {
         });
       if (error) throw error;
       return data as unknown as Quote;
-    }),
+    },
   });
   const maxStops = quote?.max_stops ?? 5;
 

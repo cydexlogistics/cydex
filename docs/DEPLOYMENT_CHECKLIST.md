@@ -115,7 +115,6 @@ Supabase dashboard → **Edge Functions → Secrets**, or `supabase secrets set 
 | [ ] `VAPID_PUBLIC_KEY` | From `npx web-push generate-vapid-keys` | `send-push` |
 | [ ] `VAPID_PRIVATE_KEY` | Same command (keep it secret) | `send-push` |
 | [ ] `VAPID_SUBJECT` | `mailto:hello@your-domain` | `send-push` |
-| [ ] `GOOGLE_ROUTES_API_KEY` | A **server** key with only the Routes API enabled (section 6) | `route-distances` (optional: without it, delivery fees use straight-line distance) |
 
 Generate **new** VAPID keys for production. Phones that allowed notifications on the test project have to allow them again.
 
@@ -175,8 +174,7 @@ The database queues emails in `email_outbox` (welcome, payment confirmed, refund
   - Websites: `https://usecydex.app/*` and `https://www.usecydex.app/*`, plus your Vercel preview addresses if you use them (and `http://localhost:8080/*` for a separate dev key)
   - APIs: only the three above
 - [ ] Put it in `VITE_GOOGLE_MAPS_API_KEY` (section 7).
-- [ ] For road distances: enable the **Routes API** and create a **second key** for the server. Restrict it to the Routes API only, with no website restriction (it's used by the `route-distances` Edge Function, not the browser). Set it as the `GOOGLE_ROUTES_API_KEY` function secret on each project, and deploy `route-distances`.
-- [ ] Set a **budget alert** in Google Cloud billing, so a spike doesn't go unnoticed. Optionally cap the Routes API's daily requests (APIs & Services → Routes API → Quotas).
+- [ ] Set a **budget alert** in Google Cloud billing, so a spike doesn't go unnoticed.
 
 ---
 

@@ -259,8 +259,6 @@ Use Campus Mart, with money in the vendor wallet for some scenarios.
 | RD-11 | In **Admin → Riders & vehicles**, set Walking to see orders within 1 km and be alerted within 0.5 km. As a walking rider 2 km from a vendor, have an order made ready. | The rider gets no alert and doesn't see the order. Available Orders says "pickups within 1 km of you". Move within 0.5 km: the next order alerts them. |
 | RD-12 | Try to set an alert distance bigger than the see-orders distance. | It can't be saved. |
 | RD-13 | On a phone, open pages whose tabs don't fit the screen (rider Profile, customer Profile, admin Money, vendor Settings, customer Wallet). | The tabs scroll sideways; none are squashed or cut off. |
-| RD-14 | Place an order where the road is clearly longer than a straight line (e.g. across a river or around an estate). Compare the distance shown at checkout with a map app's driving distance. | They roughly match; the fee is worked out on that distance. The vendor sees the same distance on the order. |
-| RD-15 | With `GOOGLE_ROUTES_API_KEY` removed (dev only), check out again with a new address. | Checkout still works, priced by straight line. |
 
 ---
 
