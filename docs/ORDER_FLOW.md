@@ -86,6 +86,13 @@ Migration [`20261013100000_ordering.sql`](../supabase/migrations/20261013100000_
 - Example: 2.4 km by bicycle at ₦200 per km = ₦480 + ₦500 = **₦980**.
 - The rider's share (85%) is of the whole fee, including the charge.
 
+**Distance is by road** for every priced trip: customer orders (store to customer), Cydex Express (pickup to drop-off) and each leg of a rider request or batch. It also decides which delivery modes can go that far. Migration [`20261027100000_road_distance.sql`](../supabase/migrations/20261027100000_road_distance.sql).
+- Road distances come from Google's Routes API (driving, without live traffic), looked up **once per pair of points** by the `route-distances` Edge Function and stored in `route_distances`. Every later quote and order between the same two points reuses it, so Google is only asked about new pairs.
+- How it fits together: every priced distance goes through `trip_distance_m`, which uses the stored road distance, or the straight line if there isn't one yet (and adds that leg to the quote's `missing_routes`). When a quote lists missing legs, the app calls `route-distances` once and fetches the quote again.
+- **Fallback:** if Google isn't set up (`GOOGLE_ROUTES_API_KEY`), fails, or takes more than 6 seconds, nothing is stored and the trip is priced by straight line, as before. A failed leg isn't retried again in the same session.
+- Safeguards: only signed-in users can trigger lookups (up to 150 an hour each, 10 per request); points must be in Nigeria and under 80 km apart; a road distance is never taken as shorter than the straight line. Directions are stored separately (A to B isn't B to A).
+- **Still straight-line:** which vendors a customer sees (so a vendor just inside range may turn out too far by road at checkout), and how close riders must be to see or be alerted to orders. These compare many points at once.
+
 ### How far each mode goes
 
 Migration [`20261014000000_delivery_distances.sql`](../supabase/migrations/20261014000000_delivery_distances.sql). Each vehicle type has its own **longest trip** (pickup to drop-off), set in **Admin → Riders & vehicles**. They all start at 5 km, which was the limit for everything before.
@@ -227,7 +234,7 @@ For orders a vendor's customer placed with them directly (by phone, WhatsApp or 
    - If it covers the whole amount, the request goes live immediately.
    - Otherwise the rest is paid **by card** (the squad-checkout function charges only that part), and the request goes live when Squad confirms.
 4. **Live = `ready_for_pickup`.** Nearby riders are notified, and a rider accepts it like any order. They see "A package from the vendor" with the vendor's description instead of an item list, and the customer's phone and directions.
-5. **Delivery code:** the recipient is **emailed** the delivery code as soon as the request is paid, with a short introduction to Cydex and a link to usecydex.com.ng. The **vendor** sees the code too and can pass it on. The rider enters it on arrival to complete the delivery. Pickup works as normal, with the rider's pickup code entered by the vendor.
+5. **Delivery code:** the recipient is **emailed** the delivery code as soon as the request is paid, with a short introduction to Cydex and a link to usecydex.app. The **vendor** sees the code too and can pass it on. The rider enters it on arrival to complete the delivery. Pickup works as normal, with the rider's pickup code entered by the vendor.
 6. **Money:** on delivery, the rider gets the usual 85% of the delivery fee. Cydex keeps the other 15% plus the commission. Nothing is credited to the vendor.
 
 | Example (₦1,000 delivery fee) | |
@@ -400,10 +407,10 @@ Created by the database (`notify_order_events` trigger, `welcome_new_user` trigg
 
 Emails are queued in `email_outbox` by the database and sent by the `send-emails` Edge Function, through [Brevo](https://www.brevo.com). Until that's set up (see below), emails stay queued and nothing is lost; notifications in the app work regardless.
 
-Every email uses one Cydex template (logo header, heading, a highlighted box for codes and amounts, a button, and a footer with usecydex.com.ng). Emails sent: welcome, payment confirmed, refund, **announcements** (admin broadcasts), **delivery code** (to the recipient of a rider request or Cydex Express delivery), and the verification emails in [VERIFICATION.md](VERIFICATION.md#emails).
+Every email uses one Cydex template (logo header, heading, a highlighted box for codes and amounts, a button, and a footer with usecydex.app). Emails sent: welcome, payment confirmed, refund, **announcements** (admin broadcasts), **delivery code** (to the recipient of a rider request or Cydex Express delivery), and the verification emails in [VERIFICATION.md](VERIFICATION.md#emails).
 
 **Website contact form and newsletter** (migration [`20261026000000_contact_and_newsletter.sql`](../supabase/migrations/20261026000000_contact_and_newsletter.sql)):
-- The Contact page's form calls `submit_contact_message` (no account needed). The message is saved in `contact_messages` and emailed to the Cydex inbox (`contact_inbox()`: hello@usecydex.com.ng, or `app_config.contact_inbox` if set) with **Reply-To** set to the sender, so the team can answer straight from their inbox. Limited to 3 messages an hour from one email and 60 an hour in total. Admins are notified, and handle messages under **Admin → Messages** (unresolved, in progress or resolved, with an internal note; `admin_contact_messages`, `admin_set_contact_message_status`).
+- The Contact page's form calls `submit_contact_message` (no account needed). The message is saved in `contact_messages` and emailed to the Cydex inbox (`contact_inbox()`: hello@usecydex.app, or `app_config.contact_inbox` if set) with **Reply-To** set to the sender, so the team can answer straight from their inbox. Limited to 3 messages an hour from one email and 60 an hour in total. Admins are notified, and handle messages under **Admin → Messages** (unresolved, in progress or resolved, with an internal note; `admin_contact_messages`, `admin_set_contact_message_status`).
 - The footer's newsletter form calls `subscribe_newsletter`, which saves the email in `newsletter_subscribers` (one row per email). Nothing is sent yet; admins see the list (and can download it) under **Admin → Messages → Newsletter**.
 
 ## Setup still needed

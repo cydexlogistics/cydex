@@ -1,5 +1,5 @@
-// The public website's address and contact email, in one place.
-// Temporarily usecydex.com.ng until we move back to usecydex.com.
-export const SITE_DOMAIN = 'usecydex.com.ng';
+// The public website's address and contact email, in one place
+// (the email sender has its own copy: supabase/functions/send-emails SITE).
+export const SITE_DOMAIN = 'usecydex.app';
 export const SITE_URL = `https://${SITE_DOMAIN}`;
-export const CONTACT_EMAIL = 'hello@usecydex.com.ng';
+export const CONTACT_EMAIL = 'hello@usecydex.app';

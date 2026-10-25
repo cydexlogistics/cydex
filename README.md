@@ -125,9 +125,9 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 ## Contact
 
-- Email: hello@usecydex.com.ng
+- Email: hello@usecydex.app
 - Phone: +2348028985352
-- Website: [https://usecydex.com.ng](https://usecydex.com.ng)
+- Website: [https://usecydex.app](https://usecydex.app)
 - X: [https://x.com/cydexlogistics](https://x.com/cydexlogistics)
 - Instagram: [https://www.instagram.com/cydexlogistics](https://www.instagram.com/cydexlogistics)
 - LinkedIn: [https://www.linkedin.com/company/cydexlogistics](https://www.linkedin.com/company/cydexlogistics)

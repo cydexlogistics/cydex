@@ -188,7 +188,7 @@ Use Ngozi (sender), Bisi (recipient, no account) and a rider.
 | EX-03 | Check the price. | Delivery fee + a Service Charge of 15% of the delivery fee. A ₦900 fee totals ₦1,035. |
 | EX-04 | Leave the recipient's email empty, or enter an invalid one. | The booking button stays disabled, with a note saying what's missing. |
 | EX-05 | Fill everything in with Bisi's details and book. | A confirmation asks "Are you sure…?". After paying, the delivery shows in **Orders** as **Cydex Express**, with tracking. |
-| EX-06 | Check Bisi's inbox. | An email with the 4-digit delivery code, who sent it, and an invitation to try Cydex with a link to usecydex.com.ng. |
+| EX-06 | Check Bisi's inbox. | An email with the 4-digit delivery code, who sent it, and an invitation to try Cydex with a link to usecydex.app. |
 | EX-07 | As Ngozi, open the delivery. | She sees the same delivery code, with a note to share it with Bisi. |
 | EX-08 | As the rider, accept it and tap **Head to pickup**. | The rider sees "Pick up from Ngozi (Cydex Express)" with her address and phone, and a pickup code. |
 | EX-09 | As Ngozi, tap **Enter pickup code** and enter the rider's code. | Status **Out for delivery**. |
@@ -259,6 +259,8 @@ Use Campus Mart, with money in the vendor wallet for some scenarios.
 | RD-11 | In **Admin → Riders & vehicles**, set Walking to see orders within 1 km and be alerted within 0.5 km. As a walking rider 2 km from a vendor, have an order made ready. | The rider gets no alert and doesn't see the order. Available Orders says "pickups within 1 km of you". Move within 0.5 km: the next order alerts them. |
 | RD-12 | Try to set an alert distance bigger than the see-orders distance. | It can't be saved. |
 | RD-13 | On a phone, open pages whose tabs don't fit the screen (rider Profile, customer Profile, admin Money, vendor Settings, customer Wallet). | The tabs scroll sideways; none are squashed or cut off. |
+| RD-14 | Place an order where the road is clearly longer than a straight line (e.g. across a river or around an estate). Compare the distance shown at checkout with a map app's driving distance. | They roughly match; the fee is worked out on that distance. The vendor sees the same distance on the order. |
+| RD-15 | With `GOOGLE_ROUTES_API_KEY` removed (dev only), check out again with a new address. | Checkout still works, priced by straight line. |
 
 ---
 
@@ -466,7 +468,7 @@ Each customer and rider has a code on the **Referrals** tab of their Profile; ve
 | NT-08 | Leave three notifications unread with the app installed. | The app's icon shows **3**. With ten or more it shows **9**. Reading them clears it. |
 | NT-09 | With the app open, receive a notification. | A pop-up and a short chime. New orders (vendors), nearby orders (riders) and "Your rider is around" (customers) get a longer chime. |
 | NT-10 | Turn the phone's connection off and open the app. | A "You're offline" page with **Try again**. |
-| NT-11 | Open any Cydex email. | The same layout every time: green Cydex header, heading, the message, a highlighted box for codes or amounts, a button, and a footer with usecydex.com.ng. |
+| NT-11 | Open any Cydex email. | The same layout every time: green Cydex header, heading, the message, a highlighted box for codes or amounts, a button, and a footer with usecydex.app. |
 | NT-12 | Switch the app to dark mode and go through the main pages. | All text is readable. Nothing is dark-on-dark or light-on-light. |
 
 
@@ -474,7 +476,7 @@ Each customer and rider has a code on the **Referrals** tab of their Profile; ve
 
 | ID | Steps | What should happen |
 |---|---|---|
-| WS-01 | On the website, open **Contact us**, pick a topic, fill in the form and send it. | A "Message sent" confirmation. Within a minute or two, hello@usecydex.com.ng gets the message; replying goes to the sender's email. |
+| WS-01 | On the website, open **Contact us**, pick a topic, fill in the form and send it. | A "Message sent" confirmation. Within a minute or two, hello@usecydex.app gets the message; replying goes to the sender's email. |
 | WS-02 | Send the contact form with a wrong email, no name or a very short message; then send 4 messages from one email within an hour. | Each field says what's wrong. The fourth message is refused with "try again in a little while". |
 | WS-03 | Enter an email in the footer's **Stay in the loop** box. Then enter the same email again. | "You're subscribed", then "You're already on our list". |
 | WS-04 | Open the website in dark mode (or switch the theme), on a phone and a computer: home, About, FAQ, Contact, Privacy. | Everything is readable, with no white blocks or invisible text. Animations play as you scroll. |

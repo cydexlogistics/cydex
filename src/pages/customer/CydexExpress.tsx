@@ -29,6 +29,7 @@ import { invokeFunction } from '@/lib/edgeFunctions';
 import type { PickedLocation } from '@/lib/googleMaps';
 import { isValidEmail, isValidPhone } from '@/lib/phone';
 import { formatNaira } from '@/lib/pricing';
+import { withRoadDistances } from '@/lib/roadDistance';
 
 interface ExpressQuote {
   status: 'ok' | 'no_location' | 'out_of_range';
@@ -127,14 +128,17 @@ const CydexExpress = () => {
     placeholderData: (previous) => previous,
     refetchInterval: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('express_quote', {
-        p_pickup: pickup.location as unknown as Json,
-        p_dropoff: dropoff.location as unknown as Json,
-        p_vehicle_type: mode ?? undefined,
-        p_coupon_code: coupon ?? undefined,
+      // Priced by road distance (looked up once if new)
+      return withRoadDistances(async () => {
+        const { data, error } = await supabase.rpc('express_quote', {
+          p_pickup: pickup.location as unknown as Json,
+          p_dropoff: dropoff.location as unknown as Json,
+          p_vehicle_type: mode ?? undefined,
+          p_coupon_code: coupon ?? undefined,
+        });
+        if (error) throw error;
+        return data as unknown as ExpressQuote;
       });
-      if (error) throw error;
-      return data as unknown as ExpressQuote;
     },
   });
 

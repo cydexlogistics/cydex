@@ -3,7 +3,7 @@
 // contact messages). Meant to run every minute from pg_cron.
 // Secrets:
 //   BREVO_API_KEY      from brevo.com (SMTP & API -> API Keys)
-//   EMAIL_FROM         e.g. "Cydex <hello@usecydex.com.ng>" (a sender verified in Brevo)
+//   EMAIL_FROM         e.g. "Cydex <hello@usecydex.app>" (a sender verified in Brevo)
 //   EMAIL_CRON_SECRET  any long random string; callers send it as x-cron-secret
 import { adminClient } from '../_shared/squad.ts';
 
@@ -15,7 +15,7 @@ const naira = (n: unknown) =>
 const escape = (s: unknown) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-const SITE = 'https://usecydex.com.ng';
+const SITE = 'https://usecydex.app';
 // Where "open the app" buttons go (the marketing site until APP_URL is the live app)
 const appUrl = () => {
   const url = (Deno.env.get('APP_URL') ?? '').replace(/\/$/, '');
@@ -212,7 +212,7 @@ function render(template: string, d: Record<string, unknown>): string {
         <tr><td style="background:#FFFFFF;border-top:1px solid #E6EADF;border-radius:0 0 14px 14px;padding:18px 28px 22px;">
           <p style="margin:0 0 6px;font-size:14px;line-height:20px;color:#4B5B45;">The Cydex team</p>
           <p style="margin:0;font-size:13px;line-height:19px;color:#7A8774;">
-            <a href="${SITE}" style="color:#3F8500;text-decoration:none;font-weight:bold;">usecydex.com.ng</a>
+            <a href="${SITE}" style="color:#3F8500;text-decoration:none;font-weight:bold;">usecydex.app</a>
             &nbsp;·&nbsp; Delivery by bike, on foot and e-bike
           </p>
         </td></tr>
@@ -226,7 +226,7 @@ function render(template: string, d: Record<string, unknown>): string {
 </html>`;
 }
 
-// "Cydex <hello@usecydex.com.ng>" -> { name: 'Cydex', email: 'hello@usecydex.com.ng' }
+// "Cydex <hello@usecydex.app>" -> { name: 'Cydex', email: 'hello@usecydex.app' }
 const parseFrom = (from: string) => {
   const m = from.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
   return m ? { name: m[1] || 'Cydex', email: m[2] } : { name: 'Cydex', email: from.trim() };

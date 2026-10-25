@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { DeliveryMode } from '@/lib/deliveryModes';
+import { withRoadDistances } from '@/lib/roadDistance';
 
 export type QuoteStatus = 'ok' | 'no_address' | 'no_store' | 'out_of_range';
 
@@ -67,15 +68,18 @@ export const useOrderQuote = (
     // Riders come and go: keep the "is anyone free" answer fresh while checkout is open
     refetchInterval: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('checkout_quote', {
-        p_vendor_id: vendorId!,
-        p_address_id: addressId!,
-        p_items: items,
-        p_vehicle_type: vehicleType ?? undefined,
-        p_coupon_code: couponCode?.trim() || undefined,
+      // Priced by road distance (looked up once if new)
+      const row = await withRoadDistances(async () => {
+        const { data, error } = await supabase.rpc('checkout_quote', {
+          p_vendor_id: vendorId!,
+          p_address_id: addressId!,
+          p_items: items,
+          p_vehicle_type: vehicleType ?? undefined,
+          p_coupon_code: couponCode?.trim() || undefined,
+        });
+        if (error) throw error;
+        return data as Record<string, unknown> | null;
       });
-      if (error) throw error;
-      const row = data as Record<string, unknown> | null;
       if (!row) throw new Error('No quote returned');
       return {
         status: row.status as QuoteStatus,
