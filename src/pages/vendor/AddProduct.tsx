@@ -430,6 +430,12 @@ const AddProduct = () => {
                     </div>
                   </FormItem>
 
+                  <div>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Cydex receives a 10% commission on each order, which is included in the price you set. You receive the rest directly to your wallet.
+                    </p>
+                  </div>
+
                   <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-2 pt-4 border-t">
                     <Button
                       type="button"

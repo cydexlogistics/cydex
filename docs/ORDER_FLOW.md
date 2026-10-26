@@ -343,7 +343,7 @@ Admins set rewards under **Admin → Rewards** ([ADMIN.md → Rewards](ADMIN.md#
 
 ### Referrals
 
-Every customer, vendor and rider has a referral code (`profiles.referral_code`, like `CX7KQ2MP`) on the **Referrals** tab of their Profile (vendors: Settings), with buttons to copy the code or a sign-up link (`/auth?ref=CODE&role=…`, which opens Sign up with the code filled in). Migration [`20261025000000_referrals.sql`](../supabase/migrations/20261025000000_referrals.sql).
+Every customer, vendor and rider has a referral code (`profiles.referral_code`, like `CX7KQ2MP`) on the **Referrals** tab of their Profile (vendors: Settings), with buttons to copy the code or a sign-up link (`/auth?ref=CODE&role=…`, which opens Sign up with the code filled in; the person still picks Customer, Vendor or Rider themselves). Migration [`20261025000000_referrals.sql`](../supabase/migrations/20261025000000_referrals.sql).
 
 | Kind of account | Referrer gets | Once the new account has |
 |---|---|---|
