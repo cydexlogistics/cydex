@@ -214,7 +214,7 @@ const PayoutsTab = () => {
                     </p>
                     <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Landmark className="h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate">{p.bank_name ?? 'No bank'} · {p.account_number ?? '–'} · {p.account_name ?? '–'}</span>
+                      <span className="min-w-0 truncate">{p.bank_name ?? 'No bank'} · {p.account_number ?? '–'} · {p.account_name ?? '–'}</span>
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Requested {format(new Date(p.created_at), 'd MMM yyyy, HH:mm')}

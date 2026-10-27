@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (name: string, email: string, password: string, role: UserRole, referralCode?: string) => {
     setLoading(true);
     try {
-      await handleRegister(name, email, password, role, referralCode);
+      return await handleRegister(name, email, password, role, referralCode);
     } finally {
       setLoading(false);
     }

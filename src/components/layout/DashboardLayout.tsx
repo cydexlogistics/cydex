@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import RiderLocationGate from '@/components/rider/location/RiderLocationGate';
 import { useNotificationsRealtime } from '@/hooks/useNotifications';
 import RiderRatingPrompt from '@/components/customer/ratings/RiderRatingPrompt';
 import PushPrompt from '@/components/notifications/PushPrompt';
+import BottomTabBar, { showsBottomTabBar } from './BottomTabBar';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -45,6 +46,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const handleMobileMenuClose = useMemo(() => () => {
     setIsMobileMenuOpen(false);
   }, []);
+
+  // Installed app (customers, vendors, riders): bottom tab bar instead of the
+  // menu button. The class sets --bottom-nav (index.css) so page content,
+  // floating buttons and toasts sit above the bar.
+  const hasTabBar = showsBottomTabBar(userRole);
+  useEffect(() => {
+    document.documentElement.classList.toggle('has-bottom-nav', hasTabBar);
+    return () => document.documentElement.classList.remove('has-bottom-nav');
+  }, [hasTabBar]);
 
   // Show loading state while auth is being determined
   if (loading) {
@@ -84,6 +94,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         user={user}
         userRole={userRole}
         handleLogout={handleLogout}
+        hideMenuButton={hasTabBar}
       />
 
       {/* Mobile Menu */}
@@ -96,18 +107,31 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         userRoleTitle={userRoleTitle}
       />
 
-      {/* Main Content */}
+      {/* Main Content. min-w-0 so wide content (tab bars, tables) scrolls or wraps
+          inside the page instead of stretching it past the screen */}
       <main className={cn(
-        "flex-1 transition-all duration-300 ease-in-out",
+        "min-w-0 flex-1 transition-all duration-300 ease-in-out",
         isSidebarOpen ? "lg:ml-64" : "lg:ml-20",
-        "pt-16 lg:pt-0"
+        "pt-16 lg:pt-0",
+        // Room for the bottom tab bar (0 when there isn't one)
+        "pb-[var(--bottom-nav)]"
       )}>
         {userRole === 'CUSTOMER' && <DeliveryAddressBar />}
         {userRole === 'RIDER' && <RiderLocationBar />}
-        {/* Vendors are asked to turn on push so they don't miss orders (a reminder, never a block) */}
+        {/* Vendors and riders are asked to turn on push so they don't miss orders (a reminder, never a block).
+            Riders get new-order alerts even while offline, but only on a device with push on. */}
         {userRole === 'VENDOR' && <PushPrompt tone="warning" className="m-2 sm:m-4 md:mx-6" />}
+        {userRole === 'RIDER' && (
+          <PushPrompt
+            tone="warning"
+            title="Turn on push notifications to hear about orders near you, even when you're offline"
+            className="m-2 sm:m-4 md:mx-6"
+          />
+        )}
         {children}
       </main>
+
+      {hasTabBar && <BottomTabBar userRole={userRole} onMore={() => setIsMobileMenuOpen(true)} />}
 
       {/* Customers without a saved address and vendors without a store location are asked to add one */}
       {(userRole === 'CUSTOMER' || userRole === 'VENDOR') && <AddressOnboarding role={userRole} />}

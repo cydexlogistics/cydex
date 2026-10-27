@@ -39,8 +39,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   return (
     <div className="lg:hidden fixed inset-0 z-40">
       <div className="absolute inset-0 bg-black/50 dark:bg-black/70" onClick={onClose}></div>
-      <div className="absolute inset-y-0 left-0 w-64 bg-background shadow-lg">
-        <div className="p-4 border-b flex items-center justify-between">
+      <div className="absolute inset-y-0 left-0 flex w-64 flex-col bg-background shadow-lg">
+        <div className="p-4 border-b flex shrink-0 items-center justify-between">
           <Link to="/" className="text-xl font-bold" onClick={onClose}>
             <span className="text-primary">Cy</span>dex
           </Link>
@@ -48,7 +48,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="px-2 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-4">
           <div className="mb-6 px-4 py-3 bg-muted rounded-lg">
             <div className="flex items-center mb-2">
               <Avatar className="h-10 w-10">

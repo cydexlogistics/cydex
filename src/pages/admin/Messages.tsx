@@ -255,7 +255,7 @@ const NewsletterTab = () => {
             <ul className="divide-y">
               {rows.map((r) => (
                 <li key={r.email} className="flex items-center justify-between gap-3 p-3 text-sm sm:px-4">
-                  <a href={`mailto:${r.email}`} className="truncate font-medium hover:underline">{r.email}</a>
+                  <a href={`mailto:${r.email}`} className="min-w-0 truncate font-medium hover:underline">{r.email}</a>
                   <span className="shrink-0 text-xs text-muted-foreground">{format(new Date(r.subscribed_at), 'd MMM yyyy')}</span>
                 </li>
               ))}

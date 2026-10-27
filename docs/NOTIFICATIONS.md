@@ -16,6 +16,7 @@ Every user has two switches. Customers find them in Profile → Preferences, ven
 - **In-app notifications are always on.**
 - **Notifications page:** the page for each role shows **Allow push notifications** until push is on for that device.
 - **Vendors:** see a reminder banner on every dashboard page until push is on: "Turn on push notifications so you don't miss customer orders". It's a reminder, never a block.
+- **Riders:** the same banner: "Turn on push notifications to hear about orders near you, even when you're offline". New-order alerts reach riders who are offline too (see [ORDER_FLOW.md → Statuses](ORDER_FLOW.md#statuses)), but only on devices with push on.
 
 ## Where push works
 

@@ -134,3 +134,17 @@
     @apply bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-muted text-black dark:text-foreground font-medium py-3 px-6 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white dark:focus:ring-muted focus:ring-opacity-50 border border-gray-100 dark:border-border;
   }
 }
+
+/* Bottom tab bar (installed app, below lg): its height, so page content,
+   floating buttons and toasts can sit above it. 0 when there's no bar. */
+:root {
+  --bottom-nav: 0px;
+}
+@media (max-width: 1023.98px) {
+  html.has-bottom-nav {
+    --bottom-nav: calc(4rem + 1px + env(safe-area-inset-bottom)); /* bar + its top border */
+  }
+  html.has-bottom-nav [data-sonner-toaster][data-y-position='bottom'] {
+    bottom: calc(var(--bottom-nav) + 12px) !important;
+  }
+}

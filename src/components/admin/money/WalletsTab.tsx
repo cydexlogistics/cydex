@@ -65,7 +65,7 @@ const WalletsTab = () => {
                 <li key={`${w.role}-${w.profile_id}`} className="flex items-center gap-3 p-3 sm:px-4">
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-2 font-medium">
-                      <span className="truncate">{w.name ?? 'Unnamed'}</span>
+                      <span className="min-w-0 truncate">{w.name ?? 'Unnamed'}</span>
                       <Badge variant="outline" className="capitalize">{w.role}</Badge>
                     </p>
                     <p className="truncate text-xs text-muted-foreground">{w.email}</p>

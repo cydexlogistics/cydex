@@ -459,8 +459,9 @@ const EarningsPage = () => {
                 : 'What you earn for deliveries in progress shows here until they\'re delivered.'}
             </p>
             <div className="border-t pt-2 flex justify-between items-center">
-              <span className="font-bold text-sm">Total Earned</span>
-              <span className="text-base font-bold">{formatCurrency(walletBalance.total_earned)}</span>
+              {/* The two rows above: available plus pending */}
+              <span className="font-bold text-sm">Total Balance</span>
+              <span className="text-base font-bold">{formatCurrency(walletBalance.available_balance + (pending?.amount ?? 0))}</span>
             </div>
             <div className="pt-2">
               <Dialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>

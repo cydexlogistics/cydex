@@ -659,8 +659,8 @@ const TransactionCard = ({
 }: any) => (
   <div className="bg-card border-border border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
     <div className="flex items-start justify-between gap-3 sm:gap-4">
-      <div className="flex items-start gap-3">
-        <div className={`p-1.5 sm:p-2 rounded-full ${
+      <div className="flex min-w-0 flex-1 items-start gap-3">
+        <div className={`shrink-0 p-1.5 sm:p-2 rounded-full ${
           transaction.status === 'failed' ? 'bg-red-100' :
           transaction.type === 'sale' ? 'bg-green-100' :
           transaction.type === 'payout' ? 'bg-blue-100' : 
@@ -676,7 +676,7 @@ const TransactionCard = ({
               {transaction.description || `${transaction.type} transaction`}
             </span>
             <span className="hidden sm:inline-block text-gray-300">•</span>
-            <span className="text-xs sm:text-sm text-gray-600">{transaction.transaction_id}</span>
+            <span className="truncate text-xs sm:text-sm text-gray-600">{transaction.transaction_id}</span>
           </div>
           
           <div className="mt-1 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
@@ -688,8 +688,8 @@ const TransactionCard = ({
         </div>
       </div>
       
-      <div className="text-right">
-        <span className={`font-bold text-sm sm:text-base ${
+      <div className="shrink-0 text-right">
+        <span className={`whitespace-nowrap font-bold text-sm sm:text-base ${
           transaction.type === 'sale' || transaction.type === 'reward' ? 'text-green-600' :
           transaction.type === 'payout' ? 'text-blue-600' :
           'text-amber-600'

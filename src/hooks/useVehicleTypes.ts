@@ -33,7 +33,7 @@ export const useVehicleTypes = (includeInactive = false) => {
     byKey,
     /** The rider-facing name, e.g. "Walking" */
     nameOf: (key: string | null | undefined) => byKey(key)?.name ?? (key ? key.replace(/_/g, ' ') : ''),
-    /** What customers see, e.g. "Cydex Dashers" for walking */
+    /** What customers see, e.g. "EcoChampions" for walking */
     labelOf: (key: string | null | undefined) => {
       const t = byKey(key);
       return t ? t.customer_label || t.name : key ? key.replace(/_/g, ' ') : '';

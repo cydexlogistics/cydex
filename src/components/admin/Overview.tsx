@@ -254,10 +254,10 @@ const Overview = () => {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-2">
-            <div>
+          <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2 space-y-0 pb-2">
+            <div className="min-w-0">
               <CardTitle className="text-base">{chart === 'money' ? 'Transactions and revenue' : 'Paid orders'}</CardTitle>
               <CardDescription>{s?.bucket === 'month' ? 'Per month' : 'Per day'}</CardDescription>
             </div>

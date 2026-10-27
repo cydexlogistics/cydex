@@ -190,7 +190,7 @@ export function UserManagementReal() {
                   <li key={u.id} className="flex items-start gap-3 p-3 sm:px-4">
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <p className="flex flex-wrap items-center gap-2 font-medium">
-                        <span className="truncate">{u.name || 'Unnamed'}</span>
+                        <span className="min-w-0 truncate">{u.name || 'Unnamed'}</span>
                         <Badge variant="outline" className="capitalize">{u.role}</Badge>
                         {isMe && <Badge variant="secondary">You</Badge>}
                         {u.role === 'admin' && !u.joined && <Badge variant="outline">Invited</Badge>}

@@ -13,6 +13,7 @@ import { Product } from '@/hooks/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useVendorRatings } from '@/hooks/useVendorRatings';
 import { ShoppingCartSidebar } from '@/components/customer/ShoppingCartSidebar';
+import ProductImage from '@/components/customer/ProductImage';
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -178,9 +179,10 @@ const ProductDetails = () => {
           {/* Product Image */}
           <Card className="overflow-hidden">
             <div className="relative aspect-square">
-              <img 
-                src={product.image_url || '/placeholder.svg'} 
+              <ProductImage
+                src={product.image_url}
                 alt={product.name}
+                vendorId={product.vendor_id}
                 className="w-full h-full object-cover"
               />
             </div>

@@ -99,7 +99,7 @@ Each save adds a new `pricing_config` row (`admin_update_pricing`), with who cha
 
 Migration [`20261013000000_vehicles_categories_hours.sql`](../supabase/migrations/20261013000000_vehicles_categories_hours.sql).
 
-- **Vehicle types:** Walking (customers see "Cydex Dashers"), Bicycle, Petrol bike and Electric bike to start with. Add more or edit them. For each one:
+- **Vehicle types:** Walking (customers see "EcoChampions"), Bicycle, Petrol bike and Electric bike to start with. Add more or edit them. For each one:
   - **Price per km**, used for the delivery fee.
   - **Longest trip**, pickup to drop-off, in km (5 to start with). Riders with this vehicle only see deliveries up to this distance, customers can only pick it for trips this short, and customers see vendors as far away as the longest trip of any active type. See [ORDER_FLOW.md → How far each mode goes](ORDER_FLOW.md#how-far-each-mode-goes).
   - **Average speed**, used for delivery time estimates until the type has 5 real deliveries.

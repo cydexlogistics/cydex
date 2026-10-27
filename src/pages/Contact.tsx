@@ -27,7 +27,7 @@ const CHANNELS = [
   { icon: Mail, title: 'Email us', value: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` },
   { icon: Phone, title: 'Call us', value: '+234 802 898 5352', href: `tel:${PHONE}` },
   { icon: MessageCircle, title: 'WhatsApp', value: 'Chat with us', href: `https://wa.me/${PHONE.replace('+', '')}` },
-  { icon: MapPin, title: 'Where we are', value: 'Lagos, Nigeria', href: null },
+  { icon: MapPin, title: 'Where we are', value: 'Ibadan, Nigeria', href: null },
 ];
 
 const SOCIALS = [

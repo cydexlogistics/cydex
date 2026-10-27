@@ -170,7 +170,7 @@ const ReferralsAdmin = () => {
                   <li key={r.id} className="flex items-start gap-3 p-3 sm:px-4">
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                        <span className="truncate">{r.referred_name ?? 'New user'}</span>
+                        <span className="min-w-0 truncate">{r.referred_name ?? 'New user'}</span>
                         <Badge variant="outline" className="capitalize">{r.role}</Badge>
                       </p>
                       <p className="truncate text-xs text-muted-foreground">

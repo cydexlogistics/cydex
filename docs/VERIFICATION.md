@@ -12,7 +12,7 @@ Every vendor and rider, new or existing, goes through onboarding before using th
 |---|---|
 | **Store name** (what customers see; saved as their profile name) | **Phone number** |
 | **Phone number** | **Home address** (pin-drop) |
-| **Store logo and banner** (also editable in Settings → Account) | **Vehicle type**, from the admin's list (walking, bicycle, petrol bike, electric bike). Walking needs nothing else. The others need the **colour** and a **photo of the vehicle**, and, where the admin requires it, the **registration number** and a **registration document** |
+| **Store logo** (and an optional banner; both editable in Settings → Account) | **Vehicle type**, from the admin's list (walking, bicycle, petrol bike, electric bike). Walking needs nothing else. The others need the **colour** and a **photo of the vehicle**, and, where the admin requires it, the **registration number** and a **registration document** |
 | **Business category** (from the admin's list: Restaurant or Shop) | **Government ID:** National ID, passport, voter's card or driver's licence, plus a photo or scan |
 | **Opening hours** for each day and **preparation time** (also in Settings → Hours) | |
 | **Registered business?** If yes, a **business licence** upload | |

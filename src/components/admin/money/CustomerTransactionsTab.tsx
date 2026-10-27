@@ -56,7 +56,7 @@ const CustomerTransactionsTab = () => {
                 <li key={t.id} className="flex items-center gap-3 p-3 sm:px-4">
                   <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                      <span className="truncate">{t.customer?.name ?? 'Customer'}</span>
+                      <span className="min-w-0 truncate">{t.customer?.name ?? 'Customer'}</span>
                       <Badge variant="outline" className="capitalize">{t.type}</Badge>
                       {t.status !== 'completed' && <Badge variant="secondary" className="capitalize">{t.status}</Badge>}
                     </p>

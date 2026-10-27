@@ -8,8 +8,9 @@ import { cn } from '@/lib/utils';
 import { pushHelpText } from './NotificationSettingsCard';
 
 // "Allow push notifications" when this device isn't receiving them yet.
-// tone="warning" is the vendor banner (they shouldn't miss orders).
-const PushPrompt = ({ tone = 'info', className }: { tone?: 'info' | 'warning'; className?: string }) => {
+// tone="warning" is the banner for vendors and riders (they shouldn't miss orders);
+// title replaces the default heading.
+const PushPrompt = ({ tone = 'info', title, className }: { tone?: 'info' | 'warning'; title?: string; className?: string }) => {
   const s = useNotificationSettings();
   const [busy, setBusy] = useState(false);
   if (s.loading || !s.deviceChecked || s.pushOnHere) return null;
@@ -40,7 +41,7 @@ const PushPrompt = ({ tone = 'info', className }: { tone?: 'info' | 'warning'; c
       <BellRing className="h-5 w-5 shrink-0" />
       <div className="flex-1">
         <p className="font-medium">
-          {tone === 'warning' ? "Turn on push notifications so you don't miss customer orders" : 'Allow push notifications'}
+          {title ?? (tone === 'warning' ? "Turn on push notifications so you don't miss customer orders" : 'Allow push notifications')}
         </p>
         <p className={tone === 'warning' ? 'opacity-90' : 'text-muted-foreground'}>{pushHelpText(s.support, s.permission)}</p>
       </div>

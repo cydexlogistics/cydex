@@ -20,6 +20,8 @@ const RiderDashboard = () => {
     availableDeliveries,
     currentDeliveries,
     todaysEarnings,
+    weeklyEarnings,
+    monthlyEarnings,
     acceptDelivery,
     refetch
   } = useRiderData();
@@ -86,7 +88,7 @@ const RiderDashboard = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <RecentDeliveriesCard />
-          <EarningsBreakdownCard todaysEarnings={todaysEarnings} />
+          <EarningsBreakdownCard weeklyEarnings={weeklyEarnings} monthlyEarnings={monthlyEarnings} />
         </div>
       </div>
     </DashboardLayout>

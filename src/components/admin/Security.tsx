@@ -15,7 +15,7 @@ export function Security() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Security Status</CardTitle>
@@ -69,7 +69,7 @@ export function Security() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 className="text-lg font-medium mb-4">Authentication</h3>
               <div className="space-y-4">
@@ -172,7 +172,7 @@ export function Security() {
             </div>
           </div>
           
-          <div className="flex justify-between mt-6">
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-between">
             <Button variant="outline" className="gap-1.5">
               <Shield className="h-4 w-4" />
               Security Audit

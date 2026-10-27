@@ -76,7 +76,7 @@ For how each feature is meant to work, see [ORDER_FLOW.md](ORDER_FLOW.md), [ADMI
 | **Mama Put Kitchen** | Vendor (Restaurant) | A small food seller with no business licence. | Unverified vendor, products, opening hours, orders |
 | **Campus Mart** | Vendor (Shop) | A registered shop that also takes orders on WhatsApp. | Verified vendor, Request Rider, batches, withdrawals |
 | **Sola** | Rider (Bicycle) | Rides full time. | Most deliveries, batches, earnings |
-| **Kemi** | Rider (Walking, shown to customers as "Cydex Dashers") | Delivers on foot between lectures. | Short trips, distance limits, preferred mode |
+| **Kemi** | Rider (Walking, shown to customers as "EcoChampions") | Delivers on foot between lectures. | Short trips, distance limits, preferred mode |
 | **Emeka** | Rider (Petrol bike) | Has a registered motorcycle. | Vehicle documents, longer trips |
 | **Ops admin** | Admin | Runs day-to-day operations. | Verifications, pricing, promotions, broadcasts, support |
 
@@ -88,7 +88,7 @@ For how each feature is meant to work, see [ORDER_FLOW.md](ORDER_FLOW.md), [ADMI
 |---|---|---|
 | SU-01 | Sign up as **Amaka** (customer). | She lands on the customer home page. She gets a welcome notification and a welcome email. |
 | SU-02 | As Amaka, try to see vendors before adding an address. | She's asked to add a delivery address first. After adding one on the map, vendors near it are listed. |
-| SU-03 | Sign up as **Mama Put Kitchen** (vendor). Complete onboarding: store name, phone, logo and banner, category **Restaurant**, opening hours, preparation time, **not** a registered business. | She goes straight to the vendor dashboard. Customers see her store marked **Unverified**. No "we're reviewing" email is sent. |
+| SU-03 | Sign up as **Mama Put Kitchen** (vendor). Complete onboarding: store name, phone, logo (banner optional), category **Restaurant**, opening hours, preparation time, **not** a registered business. | She goes straight to the vendor dashboard. Customers see her store marked **Unverified**. No "we're reviewing" email is sent. |
 | SU-04 | Sign up as **Campus Mart**. Choose category **Shop**, say it's a registered business and upload a licence. | The "Awaiting verification" screen shows. A "We're reviewing your details" email is sent. The admin gets a "verification to review" notification. |
 | SU-05 | As the admin, open **Verifications**, open Campus Mart and **Verify**. | Campus Mart can use the dashboard. Customers see the **Verified** badge. A "You're verified" email is sent. |
 | SU-06 | Sign up as **Kemi** (rider). Choose **Walking**. | No vehicle colour, photo or registration is asked for. Only phone, home address and ID. |
@@ -125,8 +125,8 @@ Start each scenario with items from one open vendor in the cart, and at least on
 | ID | Steps | What should happen |
 |---|---|---|
 | CO-01 | As Amaka, tap **Proceed to Checkout**. | The **Deliver to** dialog opens with her default address selected, a **Preferred delivery mode** list, an estimated delivery time, a coupon field and the price. |
-| CO-02 | Look at the delivery mode list with only Sola (bicycle) online. | **Bicycle** is selected. **Cydex Dashers** and the others say "no rider free right now" and can't be picked. |
-| CO-03 | Bring Kemi (walking) online too. Reopen checkout and choose **Cydex Dashers**. | It can now be picked. The delivery fee and estimated time update for that mode. |
+| CO-02 | Look at the delivery mode list with only Sola (bicycle) online. | **Bicycle** is selected. **EcoChampions** and the others say "no rider free right now" and can't be picked. |
+| CO-03 | Bring Kemi (walking) online too. Reopen checkout and choose **EcoChampions**. | It can now be picked. The delivery fee and estimated time update for that mode. |
 | CO-04 | Check the delivery fee against the distance shown. | Distance × the mode's price per km + ₦500. |
 | CO-05 | Check the estimated delivery time. | A range such as "20–35 min", in steps of 5 minutes. The note says how long the vendor takes to prepare. |
 | CO-06 | Choose a different saved address in the dialog. | The price and time update. The default address in the profile doesn't change. |
@@ -159,7 +159,7 @@ One order, followed through every role. Use Amaka, Mama Put Kitchen and Sola.
 | OR-12 | Sola | Skip **I've arrived** on another order and go straight to **Complete delivery**. | It works. "I've arrived" is optional. |
 | OR-13 | Amaka | Open the delivered order. | She can rate the rider and the vendor, once each. |
 | OR-14 | Admin | Open **Money → Earnings**. | The order's row adds up: customer paid = vendor + rider + Cydex. |
-| OR-15 | Amaka | Choose **Cydex Dashers** at checkout. After the vendor marks it ready, Kemi does nothing for 10 minutes. | For the first 10 minutes only Kemi sees it; Sola doesn't. After 10 minutes Sola is alerted and can accept it. Amaka is told it was offered to other delivery partners. The price doesn't change. |
+| OR-15 | Amaka | Choose **EcoChampions** at checkout. After the vendor marks it ready, Kemi does nothing for 10 minutes. | For the first 10 minutes only Kemi sees it; Sola doesn't. After 10 minutes Sola is alerted and can accept it. Amaka is told it was offered to other delivery partners. The price doesn't change. |
 
 ---
 
@@ -272,7 +272,7 @@ For these scenarios, set: **Walking 1 km, Bicycle 3 km, Petrol bike 6 km**. Use 
 | ID | Steps | What should happen |
 |---|---|---|
 | DS-01 | As the admin, open Riders & vehicles after saving. | Each type shows "trips up to … km". |
-| DS-02 | As Amaka (2 km away), open checkout with Kemi and Sola both online. | **Cydex Dashers** says "only goes up to 1 km" and can't be picked. **Bicycle** can. |
+| DS-02 | As Amaka (2 km away), open checkout with Kemi and Sola both online. | **EcoChampions** says "only goes up to 1 km" and can't be picked. **Bicycle** can. |
 | DS-03 | With only Kemi (walking) online. | The "all our riders are busy" message. A walker doesn't count for a 2 km trip. |
 | DS-04 | Place the order with Bicycle. Vendor marks it ready. | Sola is alerted and sees it. Kemi isn't alerted and doesn't see it. |
 | DS-05 | Leave that order unaccepted for more than 10 minutes. | It's offered to other modes, but Kemi still doesn't see it. Emeka (6 km) does. |
@@ -301,7 +301,7 @@ Created in **Admin → Promotions → New promotion**. Switch each promotion off
 | PR-03 | Type a code that doesn't exist. | "That coupon code isn't valid." The order can still be placed without it. |
 | PR-04 | Create an items discount for Mama Put Kitchen, paid by **the business**. Order from her. | The customer pays less for the items. Mama Put sees "Your promotion discount" on the order, and her commission is worked out on what's left. |
 | PR-05 | Same, paid by **Cydex**. | The customer pays less. Mama Put is paid as if there were no discount. |
-| PR-06 | Create a promotion only for **Cydex Dashers** deliveries up to 1 km. | It only applies when that mode is chosen and the trip is that short. |
+| PR-06 | Create a promotion only for **EcoChampions** deliveries up to 1 km. | It only applies when that mode is chosen and the trip is that short. |
 | PR-02c | Create a coupon **PARTNER** with **Show in "Offers for you"** switched off. | The admin list marks it **Not in offers**. Customers don't see it on their home page or among the codes at checkout. Typing PARTNER at checkout still applies it. |
 | PR-02d | Create an automatic promotion with the switch off. | It isn't under Offers for you, but checkout still shows **Offer applied** and takes the discount off. |
 | PR-07 | Have an automatic promotion and a coupon both available. Open checkout, then tap the coupon. | First the automatic one shows as **Offer applied**, with the coupon listed underneath as an alternative. After tapping the coupon, only the coupon's discount is given. Removing the coupon brings the automatic one back. |

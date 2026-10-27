@@ -302,7 +302,7 @@ const NewOrder = () => {
     <>
       {/* Very visible way into the cart, with the items total */}
       {cartItems.length > 0 && !isCartOpen && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center p-3 sm:p-4">
+        <div className="pointer-events-none fixed inset-x-0 bottom-[var(--bottom-nav)] z-40 flex justify-center p-3 sm:p-4">
           <Button
             size="lg"
             onClick={() => setIsCartOpen(true)}

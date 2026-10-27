@@ -3,8 +3,8 @@
 --   Admins create promotions that take a percentage or a flat amount off
 --   one of: the Service Charge, the delivery fee, or the items bought from
 --   one business. Optional conditions: a coupon code the customer must
---   enter, a maximum delivery distance, delivery modes (e.g. only Cydex
---   Dashers), and a start and end date.
+--   enter, a maximum delivery distance, delivery modes (e.g. only EcoChampions)
+--   , and a start and end date.
 --   One promotion per order: the coupon the customer entered, otherwise the
 --   automatic one that saves them the most.
 --   Who pays for it: Cydex, except an items promotion can be set to come out

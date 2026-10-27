@@ -66,7 +66,7 @@ const RewardsTab = () => {
                 <li key={g.id} className="flex items-center gap-3 p-3 sm:px-4">
                   <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                      <span className="truncate">{g.user_name ?? 'User'}</span>
+                      <span className="min-w-0 truncate">{g.user_name ?? 'User'}</span>
                       {g.user_role && <Badge variant="outline" className="capitalize">{g.user_role}</Badge>}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">{g.reward_title} · {g.prize}</p>

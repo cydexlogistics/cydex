@@ -20,13 +20,16 @@ interface MobileHeaderProps {
   user: UserType | null;
   userRole: string;
   handleLogout: () => void;
+  /** Installed app with the bottom tab bar: its More tab opens the menu instead */
+  hideMenuButton?: boolean;
 }
 
-const MobileHeader: React.FC<MobileHeaderProps> = ({ 
-  onMenuToggle, 
-  user, 
+const MobileHeader: React.FC<MobileHeaderProps> = ({
+  onMenuToggle,
+  user,
   userRole,
-  handleLogout 
+  handleLogout,
+  hideMenuButton = false
 }) => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { cartItems, setIsCartOpen } = useCartContext();
@@ -70,12 +73,15 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
   return (
     <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b border-border px-4 py-3 flex items-center justify-between">
       <div className="flex items-center">
-        <button
-          onClick={onMenuToggle}
-          className="p-2 rounded-md hover:bg-muted mr-2"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        {!hideMenuButton && (
+          <button
+            onClick={onMenuToggle}
+            className="p-2 rounded-md hover:bg-muted mr-2"
+            aria-label="Menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
         <span className="text-xl font-bold flex items-center">
           <img 
             src="/lovable-uploads/525fd30a-476a-4e14-ae55-ec2b11d54013.png" 

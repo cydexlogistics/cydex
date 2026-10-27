@@ -109,10 +109,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="h-full flex flex-col justify-between">
-        <div>
+      {/* Logo and user section stay put; the links scroll when they don't fit */}
+      <div className="h-full flex flex-col">
           {/* Logo and collapse button */}
-          <div className="flex items-center justify-between h-16 px-4 border-b">
+          <div className="flex shrink-0 items-center justify-between h-16 px-4 border-b">
             <Link to="/" className={cn("flex items-center", !(isSidebarOpen || isHovering) && "justify-center w-full")}>
               {(isSidebarOpen || isHovering) ? (
                 <img 
@@ -137,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* Navigation Links */}
-          <nav className="px-2 py-4">
+          <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-4">
             <ul className="space-y-1">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
@@ -169,10 +169,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               })}
             </ul>
           </nav>
-        </div>
 
         {/* User Section */}
-        <div className="border-t p-4">
+        <div className="shrink-0 border-t p-4">
           {(isSidebarOpen || isHovering) ? (
             <div className="flex items-center">
               <Avatar className="h-8 w-8">

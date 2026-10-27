@@ -83,7 +83,7 @@ const AdminEmails = () => {
                 <li key={e.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center">
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <p className="flex flex-wrap items-center gap-2 font-medium">
-                      <span className="truncate">{e.subject}</span>
+                      <span className="min-w-0 truncate">{e.subject}</span>
                       <Badge variant="outline" className={cn('border-transparent', STATUS[e.status]?.className)}>{STATUS[e.status]?.label ?? e.status}</Badge>
                     </p>
                     <p className="truncate text-xs text-muted-foreground">To {e.to_email} · {e.template.replace(/_/g, ' ')}</p>

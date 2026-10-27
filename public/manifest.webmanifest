@@ -55,7 +55,7 @@
   "screenshots": [
     {
       "src": "/screenshots/home-mobile.webp",
-      "sizes": "1080x2340",
+      "sizes": "588x1274",
       "type": "image/webp",
       "form_factor": "narrow",
       "label": "Cydex home"
@@ -69,7 +69,7 @@
     },
     {
       "src": "/screenshots/home-wide.webp",
-      "sizes": "1920x1080",
+      "sizes": "1920x1007",
       "type": "image/webp",
       "form_factor": "wide",
       "label": "Cydex on desktop"

@@ -28,7 +28,7 @@ total          = items total + service charge + delivery fee − any promotion o
 ```
 
 - **Distance** is straight-line, from the vendor's store address to the customer's chosen delivery address, to the nearest 10 m (2 decimal places in km).
-- **The customer picks a delivery mode** (walking shows as "Cydex Dashers", bicycle is the default). Its price per km and its longest trip come from the vehicle type. See [ORDER_FLOW.md → Delivery fee](ORDER_FLOW.md#delivery-fee).
+- **The customer picks a delivery mode** (walking shows as "EcoChampions", bicycle is the default). Its price per km and its longest trip come from the vehicle type. See [ORDER_FLOW.md → Delivery fee](ORDER_FLOW.md#delivery-fee).
 - **A promotion or coupon** can take money off the Service Charge, the delivery fee or the items (one discount per order). See [ORDER_FLOW.md → Promotions and coupons](ORDER_FLOW.md#promotions-and-coupons).
 - **The wallet pays first,** and Squad only the rest.
 - **Every amount is exact**, to the kobo.

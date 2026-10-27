@@ -406,7 +406,7 @@ const AddProduct = () => {
                   </div>
 
                   <FormItem>
-                    <FormLabel className="text-sm sm:text-base">Product Image</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">Product Image <span className="font-normal text-muted-foreground">(optional)</span></FormLabel>
                     <div className="grid grid-cols-1 gap-4">
                       <div className="border-2 border-dashed border-border rounded-md p-4 sm:p-6 flex flex-col items-center justify-center bg-muted/40 hover:bg-muted transition-colors">
                         <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground mb-2" />

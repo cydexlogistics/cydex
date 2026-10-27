@@ -194,12 +194,12 @@ const OrderDetail = () => {
         </p>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           {/* People */}
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-base">People</CardTitle></CardHeader>
-            <CardContent className="grid gap-5 sm:grid-cols-3">
+            <CardContent className="grid grid-cols-1 gap-5 sm:grid-cols-3">
               {isExpress && <Person title="Sender (paid)" icon={User} person={customer}
                 extra={customer?.status === 'suspended' && <Badge variant="destructive">Suspended</Badge>} />}
               {hasRecipient ? (
@@ -286,7 +286,7 @@ const OrderDetail = () => {
           {/* Money */}
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-base">Money</CardTitle></CardHeader>
-            <CardContent className="grid gap-6 md:grid-cols-2">
+            <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   What the {isRequest ? 'vendor' : 'customer'} paid
@@ -432,7 +432,7 @@ const OrderDetail = () => {
                   {admin_actions.map((a, n) => (
                     <li key={n} className="text-sm">
                       <p className="font-medium">{ACTION_LABELS[a.action] ?? a.action.replace(/_/g, ' ')}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="break-words text-xs text-muted-foreground">
                         {a.admin ?? 'Admin'} · {when(a.created_at)}
                         {a.details?.reason ? ` · “${String(a.details.reason)}”` : ''}
                       </p>

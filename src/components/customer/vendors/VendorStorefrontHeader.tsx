@@ -91,7 +91,8 @@ const VendorStorefrontHeader = ({ vendorId, fallbackName, cartCount, onBack, onO
 
   return (
     <div className="overflow-hidden rounded-lg border bg-card">
-      <div className="relative h-28 w-full bg-muted sm:h-40">
+      {/* Banner is optional: plain grey without one */}
+      <div className="relative h-28 w-full bg-gray-200 dark:bg-muted sm:h-40">
         {store?.banner_url && <img src={store.banner_url} alt="" className="h-full w-full object-cover" />}
         <Button
           variant="secondary"
@@ -109,7 +110,8 @@ const VendorStorefrontHeader = ({ vendorId, fallbackName, cartCount, onBack, onO
       </div>
 
       <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-end sm:p-4">
-        <div className="-mt-12 h-20 w-20 shrink-0 overflow-hidden rounded-xl border-4 border-card bg-muted shadow sm:-mt-14 sm:h-24 sm:w-24">
+        {/* Above the banner it overlaps (the banner is positioned, so it would paint over it) */}
+        <div className="relative z-10 -mt-12 h-20 w-20 shrink-0 overflow-hidden rounded-xl border-4 border-card bg-muted shadow sm:-mt-14 sm:h-24 sm:w-24">
           {store?.logo_url ? (
             <img src={store.logo_url} alt={`${name} logo`} className="h-full w-full object-cover" />
           ) : (

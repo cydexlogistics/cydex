@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 const MODES = [
   {
-    name: 'Cydex Dashers', how: 'On foot', icon: Footprints, photo: '/landing/rider-walking.jpg',
+    name: 'EcoChampions', how: 'On foot', icon: Footprints, photo: '/landing/rider-walking.png',
     text: 'For short trips around campus, estates and busy streets. Zero emissions.', badge: 'Zero emissions',
   },
   {

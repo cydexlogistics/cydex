@@ -81,7 +81,7 @@ const AboutUs = () => (
         {/* Three riders, one for each way we deliver */}
         <div className="relative mx-auto grid w-full max-w-md grid-cols-2 gap-4">
           {[
-            { src: '/landing/rider-walking.jpg', label: 'On foot', icon: Footprints, className: 'row-span-2 aspect-[3/5]' },
+            { src: '/landing/rider-walking.png', label: 'On foot', icon: Footprints, className: 'row-span-2 aspect-[3/5]' },
             { src: '/landing/rider-bicycle.jpg', label: 'Bicycle', icon: Leaf, className: 'aspect-square' },
             { src: '/landing/rider-ebike.jpg', label: 'E-bike', icon: Sparkles, className: 'aspect-square' },
           ].map(({ src, label, icon: Icon, className }, i) => (

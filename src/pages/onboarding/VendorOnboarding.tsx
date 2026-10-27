@@ -21,7 +21,7 @@ import { errorMessage } from '@/lib/address';
 import OpeningHoursEditor from '@/components/vendor/hours/OpeningHoursEditor';
 import { DEFAULT_HOURS, hoursProblem, type OpeningHours } from '@/lib/openingHours';
 
-// Vendor onboarding: store name (what customers see), phone, logo and banner,
+// Vendor onboarding: store name (what customers see), phone, logo (banner optional),
 // business category, registered business (+ licence). With a licence the
 // vendor waits for an admin; without one they start trading as unverified.
 const VendorOnboarding = () => {
@@ -87,7 +87,8 @@ const VendorOnboarding = () => {
     setPrefilled(true);
   }, [profile, phoneRow, verification, prefilled]);
 
-  const imagesReady = !!profile?.avatar && !!profile?.store_banner_url;
+  // The banner is optional (stores without one show a grey background)
+  const imagesReady = !!profile?.avatar;
   const hoursError = hoursProblem(hours);
   const prepOk = prepMinutes !== '' && Number(prepMinutes) >= 0 && Number(prepMinutes) <= 240;
   const canSubmit =
@@ -181,7 +182,7 @@ const VendorOnboarding = () => {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Logo and banner*</CardTitle>
+            <CardTitle className="text-base">Logo* and banner</CardTitle>
             <CardDescription>Shown on your store page and in customers' vendor lists.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -226,7 +227,7 @@ const VendorOnboarding = () => {
           {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {registered === 'yes' ? 'Submit for verification' : 'Finish setup'}
         </Button>
-        {!imagesReady && <p className="text-center text-xs text-muted-foreground">Upload your logo and banner to continue.</p>}
+        {!imagesReady && <p className="text-center text-xs text-muted-foreground">Upload your logo to continue.</p>}
       </div>
     </OnboardingLayout>
   );

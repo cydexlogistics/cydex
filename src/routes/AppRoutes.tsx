@@ -4,6 +4,7 @@ import Index from '../pages/Index';
 import Auth from '../pages/Auth';
 import ResetPassword from '../pages/Auth/ResetPassword';
 import SetPassword from '../pages/Auth/SetPassword';
+import CheckEmail from '../pages/Auth/CheckEmail';
 import AdminLogin from '../pages/admin/AdminLogin';
 import NotFound from '../pages/NotFound';
 import AboutUs from '../pages/AboutUs';
@@ -23,6 +24,8 @@ const AppRoutes = () => {
       <Route path="/auth" element={<Auth />} />
       <Route path="/auth/reset-password" element={<ResetPassword />} />
       <Route path="/auth/set-password" element={<SetPassword />} />
+      {/* After sign-up, for all three account types */}
+      <Route path="/auth/check-email" element={<CheckEmail />} />
       {/* How it works is now part of the home page */}
       <Route path="/how-it-works" element={<Navigate to="/#how-it-works" replace />} />
       <Route path="/about" element={<AboutUs />} />

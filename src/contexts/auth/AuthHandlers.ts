@@ -4,6 +4,24 @@ import { toast } from 'sonner';
 import { UserRole } from '@/types/auth.types';
 import { cleanupAuthState, forceRedirectToAuth, forceReload } from './AuthCleanup';
 
+// Supabase only says this once the password is right, so it doesn't reveal
+// which emails have accounts
+export const isEmailNotConfirmed = (error: unknown) => {
+  const e = error as { code?: string; message?: string } | null;
+  return e?.code === 'email_not_confirmed' || /email not confirmed/i.test(e?.message ?? '');
+};
+
+// Sends the sign-up confirmation email again (Supabase allows one a minute per address).
+// The link comes back to the login page.
+export const resendConfirmationEmail = async (email: string) => {
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/auth?confirmed=1` },
+  });
+  if (error) throw error;
+};
+
 export const handleLogin = async (email: string, password: string) => {
   try {
     console.log('Attempting login for:', email);
@@ -25,7 +43,8 @@ export const handleLogin = async (email: string, password: string) => {
     forceReload();
   } catch (error: any) {
     console.error('Login error:', error);
-    toast.error(error.message || 'Login failed');
+    // Unconfirmed email: the login form resends the link and shows the "check your email" page
+    if (!isEmailNotConfirmed(error)) toast.error(error.message || 'Login failed');
     throw error;
   }
 };
@@ -56,12 +75,14 @@ export const handleRegister = async (name: string, email: string, password: stri
 
     console.log('Registration successful for:', email);
     
-    // Check if email confirmation is required
+    // Email confirmation required: the sign-up form shows the "check your email" page
     if (data.user && !data.session) {
-      toast.success('Registration successful! Please check your email to verify your account.');
-    } else if (data.session) {
+      return { needsEmailConfirmation: true };
+    }
+    if (data.session) {
       toast.success('Registration and login successful!');
     }
+    return { needsEmailConfirmation: false };
   } catch (error: any) {
     console.error('Registration error:', error);
     toast.error(error.message || 'Registration failed');

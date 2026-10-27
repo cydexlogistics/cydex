@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import LoadingDisplay from "@/components/ui/LoadingDisplay";
+import { isEmailNotConfirmed, resendConfirmationEmail } from "@/contexts/auth/AuthHandlers";
 
 const LoginForm = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -40,6 +41,13 @@ const LoginForm = () => {
       await login(loginEmail, loginPassword);
     } catch (error) {
       console.error("Login failed:", error);
+      // Never confirmed their email: send the link again and show where to find it
+      if (isEmailNotConfirmed(error)) {
+        const email = loginEmail.trim();
+        // Already sent in the last minute is fine: the earlier email still works
+        await resendConfirmationEmail(email).catch((e) => console.warn("Resend failed:", e));
+        navigate("/auth/check-email", { state: { email, fromLogin: true } });
+      }
     } finally {
       setIsSubmitting(false);
     }

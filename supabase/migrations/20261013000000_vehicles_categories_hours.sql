@@ -1,7 +1,7 @@
 -- ===================================================================
 -- Foundations for the October 2026 update
 --   1. Vehicle types managed by admins (Walking shows to customers as
---      "Cydex Dashers"), each with its own price per km, and rider vehicle
+--      "EcoChampions"), each with its own price per km, and rider vehicle
 --      verification. Delivery fee = km x the vehicle's price per km + a flat
 --      charge (pricing_config.base_rate, now 500): no minimum fare any more.
 --   2. Product categories per business category
@@ -42,7 +42,7 @@ CREATE POLICY "Admins manage vehicle types" ON public.vehicle_types
 
 -- Every type starts at the old ₦200 per km; admins set each one's price
 INSERT INTO public.vehicle_types (key, name, customer_label, needs_details, needs_registration, rate_per_km, avg_speed_kmh, is_active, sort_order) VALUES
-  ('walking', 'Walking', 'Cydex Dashers', false, false, 200, 5, true, 1),
+  ('walking', 'Walking', 'EcoChampions', false, false, 200, 5, true, 1),
   ('bicycle', 'Bicycle', NULL, true, false, 200, 15, true, 2),
   ('petrol_bike', 'Petrol bike', NULL, true, true, 200, 30, true, 3),
   ('electric_bike', 'Electric bike', NULL, true, true, 200, 25, true, 4),

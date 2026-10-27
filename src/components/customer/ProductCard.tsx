@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, Plus } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
+import ProductImage from '@/components/customer/ProductImage';
 import { useVendorRatings } from '@/hooks/useVendorRatings';
 import { discountLabel, isAvailable, salePrice, stockLabel } from '@/lib/products';
 import { cn } from '@/lib/utils';
@@ -34,9 +35,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col group" onClick={handleClick}>
       <div className="relative h-28 xs:h-32 sm:h-40 w-full flex-shrink-0">
-        <img 
-          src={product.image_url || '/placeholder.svg'} 
-          alt={product.name} 
+        <ProductImage
+          src={product.image_url}
+          alt={product.name}
+          vendorId={product.vendor_id}
           className={cn(
             "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
             !available && "opacity-50 grayscale"

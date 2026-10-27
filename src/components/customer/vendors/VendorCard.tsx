@@ -15,7 +15,8 @@ const VendorCard = ({ vendor, onSelect }: { vendor: VendorCardData; onSelect: (v
     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect(vendor)}
     className="group flex h-full cursor-pointer flex-col overflow-hidden transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   >
-    <div className="relative h-20 w-full bg-muted sm:h-24">
+    {/* Banner is optional: plain grey without one */}
+    <div className="relative h-20 w-full bg-gray-200 dark:bg-muted sm:h-24">
       {vendor.banner_url && (
         <img src={vendor.banner_url} alt="" className="h-full w-full object-cover" loading="lazy" />
       )}

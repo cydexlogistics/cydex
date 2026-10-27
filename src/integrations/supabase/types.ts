@@ -3169,6 +3169,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      vendor_business_categories: {
+        Args: { p_vendor_ids: string[] }
+        Returns: { vendor_id: string; category: string | null }[]
+      }
       vendor_hours_info: {
         Args: { p_vendor_ids: string[] }
         Returns: {

@@ -203,7 +203,7 @@ const AdminVehicles = () => {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="vt-label">Name customers see (optional)</Label>
-                <Input id="vt-label" value={draft.customer_label} onChange={(e) => setDraft({ ...draft, customer_label: e.target.value })} placeholder="e.g. Cydex Dashers" />
+                <Input id="vt-label" value={draft.customer_label} onChange={(e) => setDraft({ ...draft, customer_label: e.target.value })} placeholder="e.g. EcoChampions" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">

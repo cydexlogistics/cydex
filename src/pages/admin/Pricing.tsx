@@ -109,7 +109,7 @@ const AdminPricing = () => {
 
   return (
     <AdminPage title="Pricing" icon={SlidersHorizontal} description="The delivery charge, Service Charge and commissions. Orders already placed keep the prices they were charged.">
-      <div className="grid gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader>
             <CardTitle className="text-base">Current prices</CardTitle>
@@ -118,7 +118,7 @@ const AdminPricing = () => {
           <CardContent className="space-y-4">
             {!form ? <div className="h-64 animate-pulse rounded bg-muted" /> : (
               <>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {SHOWN.map((f) => {
                     const n = Number(form[f.key]);
                     const bad = form[f.key] === '' || Number.isNaN(n) || n < f.min || n > f.max;

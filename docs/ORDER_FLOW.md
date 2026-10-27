@@ -101,7 +101,7 @@ Migration [`20261014000000_delivery_distances.sql`](../supabase/migrations/20261
 
 ### Preferred delivery mode
 
-The customer picks a **Preferred delivery mode** from the active vehicle types. Walking shows as **Cydex Dashers**.
+The customer picks a **Preferred delivery mode** from the active vehicle types. Walking shows as **EcoChampions**.
 
 - **Bicycle is the default.** A mode can only be picked while a rider using it is free nearby and it covers the trip; the others show "no rider free right now" or how far they go.
 - **Riders with that vehicle get the order first.** Only they see it in Available Orders and get the "order nearby" alert.
@@ -216,7 +216,7 @@ Migration [`20261001100000_storefront_and_ratings.sql`](../supabase/migrations/2
 
 - **Home** shows three sections for the customer's delivery address (within delivery range, see [How far each mode goes](#how-far-each-mode-goes)): **Vendors nearby** (closest 4), **Popular vendors** (most paid orders in the last 30 days, top 4), and **Other vendors** (everyone else). It also has a **See all vendors** button to the full list.
 - **Vendor cards and the vendor's page** show the store banner and square logo, store name, Verified or Unverified, rating, distance, and the store address (as text; coordinates are never sent).
-- **Logo and banner:** vendors upload them in Settings → Account, into the public `store-images` storage bucket in their own folder. The logo is also their profile photo.
+- **Logo and banner:** the logo is required at onboarding; the banner is optional (a plain grey background without one). Products without an image show the vendor's business category icon in light grey on a grey background. Vendors upload both in Settings → Account, into the public `store-images` storage bucket in their own folder. The logo is also their profile photo.
 - **One vendor per order:** adding an item from a different vendor than the one in the cart opens a dialog with **Keep current cart** or **Start new cart**. Browsing other vendors doesn't empty the cart, and checkout always uses the cart's vendor.
 
 ## Request a rider

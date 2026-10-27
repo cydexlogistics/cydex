@@ -2,7 +2,7 @@
 // (checkout_quote, express_quote, rider_request_quote, batch_quote)
 export interface DeliveryMode {
   key: string;
-  /** What the customer sees, e.g. "Cydex Dashers" for walking */
+  /** What the customer sees, e.g. "EcoChampions" for walking */
   label: string;
   riders: number;
   /** A rider with this vehicle is free near the pickup right now, and the mode covers the trip */

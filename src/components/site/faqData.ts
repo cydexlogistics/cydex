@@ -36,7 +36,7 @@ export const FAQS: FaqItem[] = [
   {
     category: 'ordering',
     q: 'How do I choose how my order is delivered?',
-    a: 'At checkout you pick a delivery mode: Cydex Dashers (on foot), bicycle, e-bike or motorbike. Each one has its own price per km and maximum distance, so only the modes that can cover your trip are offered.',
+    a: 'At checkout you pick a delivery mode: EcoChampions (on foot), bicycle, e-bike or motorbike. Each one has its own price per km and maximum distance, so only the modes that can cover your trip are offered.',
   },
   {
     category: 'ordering',

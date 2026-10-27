@@ -70,7 +70,7 @@ const StoreImagesUpload = () => {
     <div className="w-full space-y-4">
       {/* Banner */}
       <div className="space-y-2">
-        <p className="text-sm font-medium">Store banner</p>
+        <p className="text-sm font-medium">Store banner <span className="font-normal text-muted-foreground">(optional)</span></p>
         <div className="relative h-24 w-full overflow-hidden rounded-lg border bg-muted sm:h-28">
           {images?.store_banner_url ? (
             <img src={images.store_banner_url} alt="Store banner" className="h-full w-full object-cover" />

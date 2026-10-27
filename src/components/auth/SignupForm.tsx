@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { UserRole } from "@/types/auth.types";
 import { toast } from "sonner";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,7 +34,8 @@ const SignupForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const { register } = useAuth();
-  
+  const navigate = useNavigate();
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -71,8 +72,12 @@ const SignupForm = () => {
           return;
         }
       }
-      await register(signupName, signupEmail, signupPassword, role, code || undefined);
-      
+      const result = await register(signupName, signupEmail, signupPassword, role, code || undefined);
+      if (result && result.needsEmailConfirmation) {
+        navigate('/auth/check-email', { state: { email: signupEmail.trim() } });
+        return;
+      }
+
       // Reset form
       setSignupName("");
       setSignupEmail("");

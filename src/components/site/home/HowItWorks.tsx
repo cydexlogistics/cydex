@@ -27,7 +27,7 @@ const FLOWS: Record<Role, { label: string; photo: string; cta: string; to: strin
   },
   vendors: {
     label: 'Vendors',
-    photo: '/landing/rider-walking.jpg',
+    photo: '/landing/rider-walking.png',
     cta: 'Open your store',
     to: '/auth?tab=register&role=vendor',
     steps: [

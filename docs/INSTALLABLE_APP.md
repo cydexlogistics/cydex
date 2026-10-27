@@ -47,7 +47,7 @@ Orders, wallets, products and anything else from Supabase, Google or Squad are *
 - **App changes:** just deploy. Build files have new names each time, and the service worker is never browser-cached.
 - **Changing `sw.js` itself:** bump `VERSION` at the top so old caches are cleared.
 - **New icon:** replace `public/og-tab.png` with a square logo, then regenerate `public/icons/` and `public/splash/` (the sizes are listed in this file and in `index.html`).
-- **Refreshing screenshots:** capture at 1080×2340 for phones and 1920×1080 for wide screens. Keep the sizes in the manifest matching.
+- **Refreshing screenshots:** WebP, ideally 1080×2340 for phones and 1920×1080 for wide screens (the home screenshots are currently 588×1274 and 1920×1007). Chrome skips a screenshot more than 2.3 times as long as it is wide. Keep the sizes in the manifest matching each file exactly.
 
 ## Requirements
 
