@@ -3467,6 +3467,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_user_detail: {
+        Args: { p_profile_id: string }
+        Returns: Json
+      }
       admin_users: {
         Args: { p_search?: string; p_role?: string; p_limit?: number; p_offset?: number }
         Returns: {

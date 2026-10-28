@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminUsers from '../pages/admin/Users';
+import AdminUserDetail from '../pages/admin/UserDetail';
 import AdminOrders from '../pages/admin/Orders';
 import AdminOrderDetail from '../pages/admin/OrderDetail';
 import AdminPayments from '../pages/admin/Payments';
@@ -24,6 +25,7 @@ const PAGES: [string, JSX.Element][] = [
   ['/orders/:id', <AdminOrderDetail />],
   ['/payments', <AdminPayments />],
   ['/users', <AdminUsers />],
+  ['/users/:id', <AdminUserDetail />],
   ['/verifications', <AdminVerifications />],
   ['/reviews', <AdminReviews />],
   ['/pricing', <AdminPricing />],

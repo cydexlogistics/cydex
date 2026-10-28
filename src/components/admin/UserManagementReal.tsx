@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { Loader2, MailPlus, MoreHorizontal, Pencil, RotateCw, Search, ShieldCheck, UserCheck, UserMinus, UserX } from 'lucide-react';
+import { Eye, Loader2, MailPlus, MoreHorizontal, Pencil, RotateCw, Search, ShieldCheck, UserCheck, UserMinus, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
@@ -190,7 +190,7 @@ export function UserManagementReal() {
                   <li key={u.id} className="flex items-start gap-3 p-3 sm:px-4">
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <p className="flex flex-wrap items-center gap-2 font-medium">
-                        <span className="min-w-0 truncate">{u.name || 'Unnamed'}</span>
+                        <Link to={`/admin/users/${u.id}`} className="min-w-0 truncate hover:underline">{u.name || 'Unnamed'}</Link>
                         <Badge variant="outline" className="capitalize">{u.role}</Badge>
                         {isMe && <Badge variant="secondary">You</Badge>}
                         {u.role === 'admin' && !u.joined && <Badge variant="outline">Invited</Badge>}
@@ -217,6 +217,9 @@ export function UserManagementReal() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link to={`/admin/users/${u.id}`}><Eye className="mr-2 h-4 w-4" /> View details</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => openEdit(u)}><Pencil className="mr-2 h-4 w-4" /> Edit name and phone</DropdownMenuItem>
                         {u.role === 'customer' && (suspended ? (
                           <DropdownMenuItem onClick={() => reinstate(u)}><UserCheck className="mr-2 h-4 w-4" /> Reinstate</DropdownMenuItem>
