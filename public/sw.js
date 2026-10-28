@@ -63,9 +63,10 @@ self.addEventListener('fetch', (event) => {
 const URGENT = ['new_order', 'order_nearby', 'assigned_by_admin', 'payout_request', 'verification_request', 'rider_arrived'];
 
 // Unread notifications on the installed app's icon. Phones only take a number
-// (no "9+"), so it's capped at 9; some show just a dot.
+// (no "9+"), so it's capped at 9; some show just a dot. Support chat pushes
+// carry no count and leave the badge as it is.
 const setBadge = (count) => {
-  if (!('setAppBadge' in self.navigator)) return Promise.resolve();
+  if (count === undefined || !('setAppBadge' in self.navigator)) return Promise.resolve();
   const n = Math.min(Number(count) || 0, 9);
   return (n > 0 ? self.navigator.setAppBadge(n) : self.navigator.clearAppBadge()).catch(() => {});
 };

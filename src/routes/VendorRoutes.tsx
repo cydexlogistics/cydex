@@ -4,6 +4,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import VendorOnboarding from '../pages/onboarding/VendorOnboarding';
 import VerificationStatus from '../pages/onboarding/VerificationStatus';
 import Notifications from '../pages/vendor/Notifications';
+import Support from '../pages/vendor/Support';
 import Products from '../pages/vendor/Products';
 import RiderRequests from '../pages/vendor/rider-requests/RiderRequests';
 import NewRiderRequest from '../pages/vendor/rider-requests/NewRiderRequest';
@@ -171,6 +172,14 @@ const VendorRoutes = () => {
             <Notifications />
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path="/support"
+        element={
+          <ProtectedRoute allowedRoles={['VENDOR']}>
+            <Support />
+          </ProtectedRoute>
+        }
       />
     </Routes>
   );

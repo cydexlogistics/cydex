@@ -452,6 +452,13 @@ Each customer and rider has a code on the **Referrals** tab of their Profile; ve
 | AD-12 | In **Users**, invite a second admin. | They get an email, set a password and can log in as an admin. |
 | AD-13 | In **Reviews**, hide a review. | It no longer shows to customers or counts in the rating. |
 | AD-14 | Open any list with more than 10 rows. | 10 rows per page, with Previous and Next. |
+| AD-15 | As a customer, open **Support** and send "My order is late". | The chat shows **Waiting for the team**. Every admin gets a push and, with the app open, a chime. In **Admin → Support** it's listed as **Waiting**, marked **Customer**. |
+| AD-16 | As an admin, **Pick up chat** and reply. | The list shows your full name on the chat. The customer sees "Tobi joined the chat" and "Chatting with Tobi" (first name only), gets a push and a chime. |
+| AD-17 | As a second admin, open the same chat. | You can read it but there's no message box: "Tobi is handling this chat". You can't end or transfer it. |
+| AD-18 | As the first admin, **Transfer** the chat to the second admin. | The second admin gets "Support chat passed to you" and can now reply. The customer sees "You're now chatting with Grace". The first admin can no longer reply. |
+| AD-19 | As the customer, try to start another chat while one is open. | There's no way to: your messages go into the open chat. |
+| AD-20 | As the handling admin, **End chat**. | The customer sees **Chat ended** at the bottom. Their next message starts a new chat, and the old one stays under **Your chats**, read-only. |
+| AD-21 | Do AD-15 to AD-20 as a vendor and as a rider. | Same, with the chat marked **Vendor** or **Rider**. Nothing about the chat appears on anyone's Notifications page. |
 
 ---
 

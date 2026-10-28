@@ -3,6 +3,7 @@ import { Boxes, Bike, Home, MoreHorizontal, Package, Trophy, User, Wallet, Zap }
 import { cn } from '@/lib/utils';
 import { isStandalone } from '@/lib/pwa';
 import { useRiderAvailableCount, useVendorNewOrderCount } from '@/hooks/useTabBarBadges';
+import { useSupportUnread } from '@/hooks/useSupport';
 
 type TabRole = 'CUSTOMER' | 'VENDOR' | 'RIDER';
 
@@ -61,6 +62,8 @@ const BottomTabBar = ({ userRole, onMore }: { userRole: TabRole; onMore: () => v
   const vendorNewOrders = useVendorNewOrderCount(userRole === 'VENDOR');
   const riderAvailable = useRiderAvailableCount(userRole === 'RIDER');
   const counts = { 'vendor-new-orders': vendorNewOrders, 'rider-available': riderAvailable };
+  // Support is in the side menu: replies waiting show on More
+  const supportUnread = useSupportUnread();
 
   const tabs = TABS[userRole];
   const onBar = tabs.some((t) => isActive(t, pathname));
@@ -88,7 +91,10 @@ const BottomTabBar = ({ userRole, onMore }: { userRole: TabRole; onMore: () => v
           );
         })}
         <button type="button" onClick={onMore} aria-label="More" title="More" aria-current={onBar ? undefined : 'page'} className={item(!onBar)}>
-          <MoreHorizontal className="h-6 w-6" strokeWidth={onBar ? 2 : 2.4} />
+          <span className="relative">
+            <MoreHorizontal className="h-6 w-6" strokeWidth={onBar ? 2 : 2.4} />
+            <Badge count={supportUnread} />
+          </span>
         </button>
       </div>
     </nav>

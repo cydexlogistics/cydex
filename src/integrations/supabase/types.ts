@@ -2136,6 +2136,24 @@ export type Database = {
         Update: never
         Relationships: []
       }
+      support_chats: {
+        Row: {
+          id: string; user_id: string; user_role: string; admin_id: string | null; created_at: string; last_message_at: string
+          ended_at: string | null; ended_by: string | null; user_read_at: string; admin_read_at: string | null
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          id: string; chat_id: string; user_id: string; kind: string; sender_id: string | null; from_admin: boolean
+          body: string | null; admin_id: string | null; created_at: string; push_sent_at: string | null
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       rewards: {
         Row: {
           id: string; title: string; description: string | null; audience: string; kind: string; metric: string
@@ -3391,6 +3409,61 @@ export type Database = {
       admin_set_contact_message_status: {
         Args: { p_id: string; p_status: string; p_note?: string }
         Returns: undefined
+      }
+      support_send_message: {
+        Args: { p_body: string }
+        Returns: string
+      }
+      my_support_chats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string; created_at: string; last_message_at: string; ended_at: string | null; status: string
+          admin_name: string | null; last_message: string | null; unread_count: number
+        }[]
+      }
+      support_chat_messages: {
+        Args: { p_chat_id: string }
+        Returns: {
+          id: string; kind: string; from_admin: boolean; mine: boolean; sender_name: string | null
+          admin_name: string | null; body: string | null; created_at: string
+        }[]
+      }
+      support_mark_read: {
+        Args: { p_chat_id: string }
+        Returns: undefined
+      }
+      support_unread_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      admin_support_chats: {
+        Args: { p_filter?: string; p_search?: string; p_limit?: number; p_offset?: number; p_chat_id?: string; p_role?: string }
+        Returns: {
+          id: string; user_id: string; user_name: string; user_email: string; user_phone: string | null; user_role: string
+          admin_id: string | null; admin_name: string | null; status: string; created_at: string; last_message_at: string
+          ended_at: string | null; ended_by_name: string | null; last_message: string | null; last_message_from_admin: boolean | null
+          unread: boolean; total_count: number; waiting_count: number; mine_count: number; open_count: number
+        }[]
+      }
+      admin_pick_support_chat: {
+        Args: { p_chat_id: string }
+        Returns: undefined
+      }
+      admin_reply_support_chat: {
+        Args: { p_chat_id: string; p_body: string }
+        Returns: undefined
+      }
+      admin_transfer_support_chat: {
+        Args: { p_chat_id: string; p_to_admin: string }
+        Returns: undefined
+      }
+      admin_end_support_chat: {
+        Args: { p_chat_id: string }
+        Returns: undefined
+      }
+      admin_support_team: {
+        Args: Record<PropertyKey, never>
+        Returns: { id: string; name: string; open_chats: number }[]
       }
       payout_method: {
         Args: Record<PropertyKey, never>

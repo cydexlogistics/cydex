@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
 import Notifications from '../pages/customer/Notifications';
+import Support from '../pages/customer/Support';
 import CustomerDashboard from '../pages/customer/CustomerDashboard';
 import NewOrder from '../pages/customer/NewOrder';
 import Orders from '../pages/customer/Orders';
@@ -120,6 +121,14 @@ const CustomerRoutes = () => {
             <Notifications />
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path="/support"
+        element={
+          <ProtectedRoute allowedRoles={['CUSTOMER']}>
+            <Support />
+          </ProtectedRoute>
+        }
       />
     </Routes>
   );

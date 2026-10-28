@@ -17,6 +17,7 @@ import AdminVehicles from '../pages/admin/Vehicles';
 import AdminPromotions from '../pages/admin/Promotions';
 import AdminRewards from '../pages/admin/Rewards';
 import AdminMessages from '../pages/admin/Messages';
+import AdminSupport from '../pages/admin/Support';
 import AdminBroadcasts from '../pages/admin/Broadcasts';
 
 const PAGES: [string, JSX.Element][] = [
@@ -33,6 +34,7 @@ const PAGES: [string, JSX.Element][] = [
   ['/promotions', <AdminPromotions />],
   ['/rewards', <AdminRewards />],
   ['/broadcasts', <AdminBroadcasts />],
+  ['/support', <AdminSupport />],
   ['/messages', <AdminMessages />],
   ['/emails', <AdminEmails />],
   ['/notifications', <AdminNotifications />],

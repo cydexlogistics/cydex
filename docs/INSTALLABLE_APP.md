@@ -14,6 +14,7 @@ Cydex can be installed on phones and computers like an app: its own icon, no bro
 - **Banner timing:** the banner only shows on phone-sized screens and never once the app is installed. **Not now** hides it for two weeks; the menu item stays.
 - **Installed app:**
   - opens full-screen in portrait, with the Cydex icon and a white splash screen;
+  - on phones and tablets, customers, vendors and riders get a bottom tab bar (icons only) instead of the menu button: four shortcuts for their role plus **More**, which opens the side menu. Vendors see a badge for new orders to accept and riders for available orders. The website keeps the menu button;
   - long-pressing the icon on Android offers **My orders** and **Notifications** shortcuts;
   - Android's install dialog shows the screenshots in `public/screenshots/`.
 
@@ -39,6 +40,7 @@ Orders, wallets, products and anything else from Supabase, Google or Squad are *
 | `public/splash/` | iPhone launch screens for current models, linked from `index.html` |
 | `public/screenshots/` | Screenshots shown in Android's install dialog |
 | `src/lib/pwa.ts` | Registers the service worker on every visit; keeps Android's install prompt for our own button |
+| `src/components/layout/BottomTabBar.tsx` | The installed app's bottom tab bar (badge counts come from `src/hooks/useTabBarBadges.ts`) |
 | `src/components/pwa/` | The install banner, the **Install app** menu item, and the iPhone steps |
 | `vercel.json` | Headers: `sw.js` never cached by the browser (so updates arrive), the manifest's content type, long caching for `/assets/` |
 

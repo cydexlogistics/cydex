@@ -6,6 +6,8 @@ Database: migration [`20261007000000_verification.sql`](../supabase/migrations/2
 
 ## Onboarding
 
+Everyone confirms their email first: after sign-up (customers, vendors and riders) a **Check your email** page (`/auth/check-email`) explains the confirmation link and can resend it once a minute. Logging in before confirming resends the link and shows the same page. The link brings them back to the login page.
+
 Every vendor and rider, new or existing, goes through onboarding before using the dashboard. Logging in sends them to `/vendor/onboarding` or `/rider/onboarding` until they've submitted it.
 
 | Vendors provide | Riders provide |

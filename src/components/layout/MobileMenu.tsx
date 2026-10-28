@@ -9,6 +9,7 @@ import { User } from '@/types/auth.types';
 import UnreadBadge from '@/components/notifications/UnreadBadge';
 import InstallAppMenuItem from '@/components/pwa/InstallAppMenuItem';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useSupportUnread } from '@/hooks/useSupport';
 
 interface SidebarLink {
   name: string;
@@ -34,6 +35,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   userRoleTitle
 }) => {
   const { unreadCount } = useNotifications();
+  const supportUnread = useSupportUnread();
   if (!isOpen) return null;
 
   return (
@@ -82,6 +84,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                     <link.icon className="h-5 w-5" />
                     <span className="ml-3 flex-1">{link.name}</span>
                     {link.href.endsWith('/notifications') && <UnreadBadge count={unreadCount} />}
+                    {link.href.endsWith('/support') && <UnreadBadge count={supportUnread} />}
                   </Link>
                 </li>
               ))}

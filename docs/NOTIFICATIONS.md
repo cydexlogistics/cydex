@@ -51,6 +51,14 @@ The installed app's icon shows the number of unread notifications. It's set whil
 - **App closed:** the phone plays its **own** notification sound. Browsers don't let a website choose the sound; a custom one needs a native app. Android also vibrates: a longer pattern for urgent ones, which stay on screen until tapped. iPhones ignore vibration and use their own settings.
 - **No sound?** Check the phone isn't on silent or Do Not Disturb, and that Cydex's notifications aren't muted in the phone's settings (Android: Settings → Apps → Cydex or Chrome → Notifications; iPhone: Settings → Notifications → Cydex).
 
+## Support chat
+
+Support chat messages ([ADMIN.md → Support](ADMIN.md#support)) alert people the same way, but they are **not notifications**: they never appear on the Notifications page or count towards its unread number or the app icon's badge. The number shows on **Support** in the menu instead (and on **More** in the installed app's tab bar).
+
+- **Who gets each message:** a customer's, vendor's or rider's message goes to the admin handling the chat, or to every admin while it's waiting. The admin's replies, and the chat being picked up or ended, go to the person. A transferred chat alerts the admin it went to.
+- **Push:** each new row in `support_messages` calls the same `send-push` function (`push_new_support_message` trigger), for people with push on. People see the admin's first name ("Tobi from Cydex Support"); admins see the person's name and whether they're a customer, vendor or rider. Tapping it opens the chat. On the phone, a chat's newer message replaces its older one.
+- **App open:** the normal chime and a pop-up with **Open**. The pop-up is skipped when that chat is already on screen; the chime still plays.
+
 ## Setup (once per Supabase project)
 
 - **VAPID keys:** the standard Web Push signing keys, generated with `npx web-push generate-vapid-keys`.

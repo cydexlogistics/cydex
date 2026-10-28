@@ -13,7 +13,7 @@ Before an action runs, the admin is asked **"Are you sure…?"**. Actions that a
 | **Overview** | A To do list, money for a chosen period, a chart, live numbers and stuck orders. See below. |
 | **Orders** | Every customer order and rider request. Search by order number, customer, vendor, rider or recipient, and filter by status and type. Open an order for its full details and the support actions. |
 | **Money** | Six tabs: Earnings (the per-order breakdown), Withdrawals (approve or reject), Wallets, Held funds, Customer payments and Rewards (every reward given out). |
-| **Users** | Everyone, with their role, status and verification. Edit a name or phone, suspend or reinstate customers, and invite or remove admins. |
+| **Users** | Everyone, with their role, status and verification. Open a person's full details, edit a name or phone, suspend or reinstate customers, and invite or remove admins. |
 | **Verifications** | Review vendors and riders, and manage business categories. See [VERIFICATION.md](VERIFICATION.md). |
 | **Reviews** | Vendor and rider reviews. Hide fake or abusive ones. |
 | **Pricing** | The delivery charge, Service Charge and commissions, with the change history. |
@@ -21,6 +21,7 @@ Before an action runs, the admin is asked **"Are you sure…?"**. Actions that a
 | **Promotions** | Two tabs. **General:** discounts and coupon codes for customers, vendors and riders, with limits, optionally only for some email domains. **Vendor partnerships:** partner vendors with their own commission rates, and promotions for customers ordering from them. |
 | **Rewards** | Two tabs. **Rewards:** achievements for customers, vendors and riders, and daily or weekly challenges for riders, each with a wallet bonus or a personal offer. **Referrals:** the referral reward and goal for each kind of account, and every referral. See below. |
 | **Broadcasts** | Announcements to customers, vendors or riders, as a notification, an email or both. |
+| **Support** | Live chats with customers, vendors and riders: pick up a waiting chat, reply, transfer it to another admin or end it, and read past chats. See below. |
 | **Messages** | Messages from the website's contact form: reply by email, mark each one unresolved, in progress or resolved, and keep an internal note. A **Newsletter** tab lists sign-ups, with a CSV download. Admins are notified of each new message, and unresolved ones show in the Overview's To do list. |
 | **Notifications** | The admin's own notifications (withdrawals to approve, verifications to review), with a bell on mobile. |
 | **Emails** | Emails the app sends. Retry failed ones. |
@@ -188,6 +189,23 @@ Migration [`20261014200000_broadcasts.sql`](../supabase/migrations/2026101420000
 - **Emails** use the Cydex email template (the "announcement" layout) and go only to people who haven't turned email notifications off. Suspended accounts are skipped.
 - The list shows when each went out and to how many people.
 
+### Support
+
+Migration [`20261101100000_support_chat.sql`](../supabase/migrations/20261101100000_support_chat.sql). Customers, vendors and riders chat with the team from **Support** in their menu; admins answer from **Admin → Support**.
+
+**For customers, vendors and riders**
+- One chat at a time. Their first message starts it; until an admin picks it up it shows **Waiting for the team**, and they can keep adding details.
+- They see the admin's **first name** only ("Chatting with Tobi").
+- Only the admin can end a chat. Ended chats stay in **Your chats** to read back, with **Chat ended** at the bottom, and a message after that starts a new chat.
+
+**For admins**
+- The list shows each chat's person, whether they're a **customer, vendor or rider**, and its status: **Waiting**, the **full name** of the admin handling it, or **Ended**. Filter by Open, Waiting, Mine, Ended or All, by account type, or search by name, email or phone. **All their chats** on an open chat shows that person's history.
+- **Pick up chat** takes a waiting chat. From then on only that admin can reply, **Transfer** it to another admin (who carries on from there) or **End chat**. Other admins can read it but not reply.
+- If an admin is removed, their open chats go back to **Waiting**.
+- Picking up, transferring and ending are in the activity log.
+
+**Alerts:** each message pushes and chimes for whoever it's for (see [NOTIFICATIONS.md → Support chat](NOTIFICATIONS.md#support-chat)). Messages never appear on the Notifications page. The number on **Support** in the menu counts unread replies for customers, vendors and riders, and for admins the waiting chats plus their own chats with unread messages.
+
 ### Business and product categories
 
 **Admin → Verifications → Business categories.** A business category (Restaurant, Shop) has its own list of **product categories** that its vendors choose from when adding a product. A new business category needs at least one product category, and the last one can't be removed.
@@ -213,6 +231,7 @@ Actions:
 
 ## Users
 
+- **View details:** click a name (or **View details** in the row menu) to open **/admin/users/:id**, loaded by `admin_user_detail`. It shows the account and sign-up details, referral info, default address, what a vendor or rider entered at onboarding (verification, opening hours), and activity: products and orders for vendors, deliveries and earnings for riders, orders for customers.
 - **Suspend a customer** (with a reason): `admin_set_customer_suspended`. They see an **Account suspended** screen with the reason, get a notification and an email, and the database refuses new orders from them. **Reinstate** lifts it.
 - **Vendors and riders** are suspended through Verifications, so their store or deliveries stop too.
 - **Edit name and phone** for anyone.

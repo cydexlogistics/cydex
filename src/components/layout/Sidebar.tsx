@@ -8,6 +8,7 @@ import { User } from '@/types/auth.types';
 import LogoutConfirmationDialog from '@/components/auth/LogoutConfirmationDialog';
 import UnreadBadge from '@/components/notifications/UnreadBadge';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useSupportUnread } from '@/hooks/useSupport';
 
 interface SidebarLink {
   name: string;
@@ -34,6 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const location = useLocation();
   const { unreadCount } = useNotifications();
+  const supportUnread = useSupportUnread();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -141,7 +143,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             <ul className="space-y-1">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
-                const isNotifications = link.href.endsWith('/notifications');
+                // Unread notifications, or support chats needing attention
+                const badge = link.href.endsWith('/notifications') ? unreadCount : link.href.endsWith('/support') ? supportUnread : null;
                 
                 return (
                   <li key={link.href}>
@@ -157,12 +160,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                     >
                       <span className="relative">
                         <link.icon className={cn("h-5 w-5", isActive ? "text-primary" : "text-muted-foreground")} />
-                        {isNotifications && !(isSidebarOpen || isHovering) && (
-                          <UnreadBadge count={unreadCount} className="absolute -right-2.5 -top-2 h-4 min-w-4 text-[10px]" />
+                        {badge !== null && !(isSidebarOpen || isHovering) && (
+                          <UnreadBadge count={badge} className="absolute -right-2.5 -top-2 h-4 min-w-4 text-[10px]" />
                         )}
                       </span>
                       {(isSidebarOpen || isHovering) && <span className="ml-3 flex-1">{link.name}</span>}
-                      {isNotifications && (isSidebarOpen || isHovering) && <UnreadBadge count={unreadCount} />}
+                      {badge !== null && (isSidebarOpen || isHovering) && <UnreadBadge count={badge} />}
                     </Link>
                   </li>
                 );

@@ -4,6 +4,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import RiderOnboarding from '../pages/onboarding/RiderOnboarding';
 import VerificationStatus from '../pages/onboarding/VerificationStatus';
 import Notifications from '../pages/rider/Notifications';
+import Support from '../pages/rider/Support';
 import DeliveryHistory from '../pages/rider/DeliveryHistory';
 import RiderDashboard from '../pages/rider/RiderDashboard';
 import AvailableOrders from '../pages/rider/AvailableOrders';
@@ -102,6 +103,14 @@ const RiderRoutes = () => {
             <Notifications />
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path="/support"
+        element={
+          <ProtectedRoute allowedRoles={['RIDER']}>
+            <Support />
+          </ProtectedRoute>
+        }
       />
     </Routes>
   );

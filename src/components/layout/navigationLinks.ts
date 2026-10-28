@@ -1,7 +1,7 @@
 
 import { 
   Bell, Bike, Boxes, Home, Package, Wallet, Recycle, User, Settings, Users, ShieldCheck, Navigation,
-  Banknote, Mail, ScrollText, Shield, SlidersHorizontal, Star, TicketPercent, Zap, Megaphone, Trophy, Inbox } from 'lucide-react';
+  Banknote, Mail, ScrollText, Shield, SlidersHorizontal, Star, TicketPercent, Zap, Megaphone, Trophy, Inbox, Headset } from 'lucide-react';
 
 interface SidebarLink {
   name: string;
@@ -23,6 +23,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
         { name: 'Wallet', href: '/customer/wallet', icon: Wallet },
         { name: 'Rewards', href: '/customer/rewards', icon: Trophy },
         // { name: 'Recycling', href: '/customer/recycling', icon: Recycle },
+        { name: 'Support', href: '/customer/support', icon: Headset },
         { name: 'Profile', href: '/customer/profile', icon: User },
       ];
     case 'RIDER':
@@ -32,6 +33,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
         { name: 'Current Deliveries', href: '/rider/current', icon: Navigation },
         { name: 'Notifications', href: '/rider/notifications', icon: Bell },
         { name: 'Earnings', href: '/rider/earnings', icon: Wallet },
+        { name: 'Support', href: '/rider/support', icon: Headset },
         { name: 'Profile', href: '/rider/profile', icon: User },
       ];
     case 'VENDOR':
@@ -44,6 +46,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
         { name: 'Wallet', href: '/vendor/wallet', icon: Wallet },
         { name: 'Rewards', href: '/vendor/rewards', icon: Trophy },
         // { name: 'Recycling', href: '/vendor/recycling', icon: Recycle },
+        { name: 'Support', href: '/vendor/support', icon: Headset },
         { name: 'Settings', href: '/vendor/settings', icon: Settings },
       ];
     case 'ADMIN':
@@ -59,6 +62,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
         { name: 'Promotions', href: '/admin/promotions', icon: TicketPercent },
         { name: 'Rewards', href: '/admin/rewards', icon: Trophy },
         { name: 'Broadcasts', href: '/admin/broadcasts', icon: Megaphone },
+        { name: 'Support', href: '/admin/support', icon: Headset },
         { name: 'Messages', href: '/admin/messages', icon: Inbox },
         { name: 'Notifications', href: '/admin/notifications', icon: Bell },
         { name: 'Emails', href: '/admin/emails', icon: Mail },

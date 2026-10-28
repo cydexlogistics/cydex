@@ -13,6 +13,7 @@ import DeliveryAddressBar from '@/components/customer/address/DeliveryAddressBar
 import RiderLocationBar from '@/components/rider/location/RiderLocationBar';
 import RiderLocationGate from '@/components/rider/location/RiderLocationGate';
 import { useNotificationsRealtime } from '@/hooks/useNotifications';
+import { useSupportRealtime } from '@/hooks/useSupport';
 import RiderRatingPrompt from '@/components/customer/ratings/RiderRatingPrompt';
 import PushPrompt from '@/components/notifications/PushPrompt';
 import BottomTabBar, { showsBottomTabBar } from './BottomTabBar';
@@ -28,6 +29,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   useNotificationsRealtime();
+  useSupportRealtime();
 
   // Memoize navigation links to prevent recreation on every render
   const navLinks = useMemo(() => getNavLinks(userRole), [userRole]);
