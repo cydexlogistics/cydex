@@ -245,6 +245,19 @@ const AdminSupport = () => {
     },
   });
   const first = rows[0];
+  // The counts on the filters, fetched on their own so they show whatever list is open (even an empty one)
+  const { data: counts } = useQuery({
+    queryKey: [...supportKey(user?.id), 'admin-counts', role, query],
+    placeholderData: (previous) => previous,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('admin_support_chats', {
+        p_role: role === 'all' ? undefined : role, p_search: query || undefined, p_limit: 1,
+      });
+      if (error) throw error;
+      const c = data?.[0];
+      return { open_count: Number(c?.open_count ?? 0), waiting_count: Number(c?.waiting_count ?? 0), mine_count: Number(c?.mine_count ?? 0) };
+    },
+  });
   // Opening a chat from the list adds a history entry (so Back returns to the list on phones)
   const openChat = (id: string | null) => setParams(id ? { chat: id } : {}, { replace: !!chatId });
   const showTheirChats = (email: string) => {
@@ -258,13 +271,27 @@ const AdminSupport = () => {
       <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
         <div className={cn('space-y-3', chatId && 'hidden lg:block')}>
           <div className="flex flex-wrap gap-1.5">
-            {FILTERS.map((f) => (
-              <Button key={f.value} size="sm" variant={filter === f.value ? 'default' : 'outline'} className={cn('h-8 px-2.5', filter === f.value && 'text-black')}
-                onClick={() => { setFilter(f.value); setPage(1); }}>
-                {f.label}
-                {f.count && first && <span className="ml-1.5 rounded-full bg-background/60 px-1.5 text-xs">{first[f.count]}</span>}
-              </Button>
-            ))}
+            {FILTERS.map((f) => {
+              const count = f.count && counts ? counts[f.count] : null;
+              // People waiting for someone to pick up their chat: make it stand out
+              const alert = f.value === 'waiting' && !!count;
+              return (
+                <Button key={f.value} size="sm" variant={filter === f.value ? 'default' : 'outline'}
+                  className={cn('relative h-8 px-2.5', filter === f.value && 'text-black', alert && filter !== f.value && 'border-amber-500/60')}
+                  onClick={() => { setFilter(f.value); setPage(1); }}>
+                  {f.label}
+                  {count !== null && (
+                    <span className={cn('ml-1.5 rounded-full px-1.5 text-xs', alert ? 'bg-amber-500 font-semibold text-black' : 'bg-background/60')}>{count}</span>
+                  )}
+                  {alert && (
+                    <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5" aria-hidden>
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
+                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
+                    </span>
+                  )}
+                </Button>
+              );
+            })}
           </div>
           <div className="flex gap-2">
             <div className="relative flex-1">
