@@ -13,6 +13,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 import InstallBanner from "@/components/pwa/InstallBanner";
 import { ConfirmProvider } from "@/contexts/ConfirmContext";
+import { DocumentViewerProvider } from "@/contexts/DocumentViewerContext";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ function App() {
             <CartProvider>
               <TooltipProvider>
                <ConfirmProvider>
+               <DocumentViewerProvider>
                 <Toaster />
                 <ShadcnToaster />
                 <BrowserRouter>
@@ -36,6 +38,7 @@ function App() {
                   </div>
                   <InstallBanner />
                 </BrowserRouter>
+               </DocumentViewerProvider>
                </ConfirmProvider>
               </TooltipProvider>
             </CartProvider>

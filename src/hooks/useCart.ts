@@ -64,7 +64,7 @@ export const useCart = () => {
       }
       toast.warning(`Only ${limit} of ${item.name} available. Added ${next - current}.`);
     } else {
-      toast.success('Added to cart');
+      // toast.success('Added to cart');
     }
 
     setCartItems(prev =>

@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ExternalLink, FileText, ShieldCheck } from 'lucide-react';
-import { toast } from 'sonner';
+import { FileText, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,11 +9,11 @@ import { useConfirm } from '@/contexts/ConfirmContext';
 import { useMyVerification } from '@/hooks/useMyVerification';
 import { useVehicleTypes } from '@/hooks/useVehicleTypes';
 import { supabase } from '@/integrations/supabase/client';
-import { errorMessage } from '@/lib/address';
 import { cn } from '@/lib/utils';
 import {
-  ID_TYPES, STATUS_LABELS, verificationDocUrl, type VerificationStatus,
+  ID_TYPES, STATUS_LABELS, type VerificationStatus,
 } from '@/lib/verification';
+import { useDocumentViewer } from '@/contexts/DocumentViewerContext';
 
 const STATUS_CLASS: Record<VerificationStatus, string> = {
   verified: 'bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300',
@@ -48,13 +47,7 @@ const VerificationCard = ({ role }: { role: 'vendor' | 'rider' }) => {
     },
   });
 
-  const openDoc = async (path: string) => {
-    try {
-      window.open(await verificationDocUrl(path), '_blank', 'noopener');
-    } catch (e) {
-      toast.error(errorMessage(e, 'Could not open the document'));
-    }
-  };
+  const viewDoc = useDocumentViewer();
 
   const update = async () => {
     if (!v) return navigate(`/${role}/onboarding`);
@@ -129,16 +122,16 @@ const VerificationCard = ({ role }: { role: 'vendor' | 'rider' }) => {
                   {v.vehicle_color && <Row label="Colour">{v.vehicle_color}</Row>}
                   {v.vehicle_photo_path && (
                     <Row label="Vehicle photo">
-                      <Button variant="link" size="sm" className="h-auto p-0" onClick={() => openDoc(v.vehicle_photo_path!)}>
-                        <FileText className="mr-1 h-3.5 w-3.5" /> View <ExternalLink className="ml-1 h-3 w-3" />
+                      <Button variant="link" size="sm" className="h-auto p-0" onClick={() => viewDoc(v.vehicle_photo_path!, 'Vehicle photo')}>
+                        <FileText className="mr-1 h-3.5 w-3.5" /> View
                       </Button>
                     </Row>
                   )}
                   {v.vehicle_registration && <Row label="Registration number">{v.vehicle_registration}</Row>}
                   {v.vehicle_registration_doc_path && (
                     <Row label="Registration document">
-                      <Button variant="link" size="sm" className="h-auto p-0" onClick={() => openDoc(v.vehicle_registration_doc_path!)}>
-                        <FileText className="mr-1 h-3.5 w-3.5" /> View <ExternalLink className="ml-1 h-3 w-3" />
+                      <Button variant="link" size="sm" className="h-auto p-0" onClick={() => viewDoc(v.vehicle_registration_doc_path!, 'Registration document')}>
+                        <FileText className="mr-1 h-3.5 w-3.5" /> View
                       </Button>
                     </Row>
                   )}
@@ -147,8 +140,8 @@ const VerificationCard = ({ role }: { role: 'vendor' | 'rider' }) => {
               )}
               <Row label={role === 'vendor' ? 'Business licence' : 'ID document'}>
                 {docPath ? (
-                  <Button variant="link" size="sm" className="h-auto p-0" onClick={() => openDoc(docPath)}>
-                    <FileText className="mr-1 h-3.5 w-3.5" /> View <ExternalLink className="ml-1 h-3 w-3" />
+                  <Button variant="link" size="sm" className="h-auto p-0" onClick={() => viewDoc(docPath, role === 'vendor' ? 'Business licence' : 'ID document')}>
+                    <FileText className="mr-1 h-3.5 w-3.5" /> View
                   </Button>
                 ) : (
                   <span className="text-muted-foreground">Not uploaded</span>

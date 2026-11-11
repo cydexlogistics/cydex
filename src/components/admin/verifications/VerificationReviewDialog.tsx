@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ExternalLink, Loader2 } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useConfirm } from '@/contexts/ConfirmContext';
 import { supabase } from '@/integrations/supabase/client';
 import { errorMessage } from '@/lib/address';
-import { ID_TYPES, STATUS_LABELS, verificationDocUrl, type Verification } from '@/lib/verification';
+import { ID_TYPES, STATUS_LABELS, type Verification } from '@/lib/verification';
 import { useVehicleTypes } from '@/hooks/useVehicleTypes';
+import { useDocumentViewer } from '@/contexts/DocumentViewerContext';
 
 export interface VerificationRow extends Verification {
   profile: { name: string | null; email: string | null; phone: string | null; avatar: string | null; store_banner_url: string | null } | null;
@@ -31,6 +32,7 @@ const Field = ({ label, value }: { label: string; value?: string | number | null
 const VerificationReviewDialog = ({ row, onClose, onDone }: { row: VerificationRow | null; onClose: () => void; onDone: () => void }) => {
   const { nameOf } = useVehicleTypes(true);
   const confirm = useConfirm();
+  const viewDoc = useDocumentViewer();
   const [pending, setPending] = useState<Action | null>(null);
   const [reason, setReason] = useState('');
   const [saving, setSaving] = useState(false);
@@ -47,14 +49,6 @@ const VerificationReviewDialog = ({ row, onClose, onDone }: { row: VerificationR
   if (!row) return null;
   const docPath = row.role === 'vendor' ? row.business_license_path : row.id_document_path;
   const needsReason = pending === 'reject' || pending === 'suspend';
-
-  const openDoc = async (path: string = docPath!) => {
-    try {
-      window.open(await verificationDocUrl(path), '_blank', 'noopener');
-    } catch (e) {
-      toast.error(errorMessage(e, 'Could not open the document'));
-    }
-  };
 
   const decide = async (action: Action) => {
     const who = row.profile?.name || `this ${row.role}`;
@@ -140,19 +134,19 @@ const VerificationReviewDialog = ({ row, onClose, onDone }: { row: VerificationR
 
         <div className="flex flex-wrap gap-2">
           {docPath && (
-            <Button variant="outline" onClick={() => openDoc()}>
-              <ExternalLink className="mr-2 h-4 w-4" />
+            <Button variant="outline" onClick={() => viewDoc(docPath, row.role === 'vendor' ? 'business licence' : 'ID document')}>
+              <FileText className="mr-2 h-4 w-4" />
               View {row.role === 'vendor' ? 'business licence' : 'ID document'}
             </Button>
           )}
           {row.vehicle_photo_path && (
-            <Button variant="outline" onClick={() => openDoc(row.vehicle_photo_path!)}>
-              <ExternalLink className="mr-2 h-4 w-4" /> View vehicle photo
+            <Button variant="outline" onClick={() => viewDoc(row.vehicle_photo_path!, 'vehicle photo')}>
+              <FileText className="mr-2 h-4 w-4" /> View vehicle photo
             </Button>
           )}
           {row.vehicle_registration_doc_path && (
-            <Button variant="outline" onClick={() => openDoc(row.vehicle_registration_doc_path!)}>
-              <ExternalLink className="mr-2 h-4 w-4" /> View registration document
+            <Button variant="outline" onClick={() => viewDoc(row.vehicle_registration_doc_path!, 'registration document')}>
+              <FileText className="mr-2 h-4 w-4" /> View registration document
             </Button>
           )}
         </div>

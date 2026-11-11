@@ -64,7 +64,8 @@ export type VerificationDocKind = 'license' | 'id' | 'vehicle' | 'registration';
 export const uploadVerificationDoc = async (userId: string, kind: VerificationDocKind, file: File) => {
   if (!DOC_TYPES.includes(file.type)) throw new Error('Upload a PDF, PNG, JPG or WebP file');
   if (file.size > MAX_UPLOAD_BYTES) throw new Error(`Files must be ${MAX_UPLOAD_LABEL} or smaller`);
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'pdf';
+  // From the file's type, not its name, so the viewer knows a PDF from an image
+  const ext = { 'application/pdf': 'pdf', 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }[file.type] ?? 'pdf';
   const path = `${userId}/${kind}-${Date.now()}.${ext}`;
   const { error } = await supabase.storage.from('verification-docs').upload(path, file, { contentType: file.type });
   if (error) throw new Error(error.message);
@@ -72,8 +73,8 @@ export const uploadVerificationDoc = async (userId: string, kind: VerificationDo
 };
 
 // A short-lived link to view a document (owner or admin)
-export const verificationDocUrl = async (path: string) => {
-  const { data, error } = await supabase.storage.from('verification-docs').createSignedUrl(path, 60 * 10);
+export const verificationDocUrl = async (path: string, download = false) => {
+  const { data, error } = await supabase.storage.from('verification-docs').createSignedUrl(path, 60 * 10, download ? { download: true } : undefined);
   if (error) throw new Error(error.message);
   return data.signedUrl;
 };

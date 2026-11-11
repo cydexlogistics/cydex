@@ -1,8 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ArrowLeft, Bike, ExternalLink, Package, ShieldCheck, Store, User } from 'lucide-react';
-import { toast } from 'sonner';
+import { ArrowLeft, Bike, FileText, Package, ShieldCheck, Store, User } from 'lucide-react';
 import AdminPage from '@/components/admin/AdminPage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { errorMessage } from '@/lib/address';
 import { summariseHours, type OpeningHours } from '@/lib/openingHours';
 import { nairaWhole } from '@/lib/adminPeriod';
-import { ID_TYPES, STATUS_LABELS, verificationDocUrl, type Verification, type VerificationStatus } from '@/lib/verification';
+import { ID_TYPES, STATUS_LABELS, type Verification, type VerificationStatus } from '@/lib/verification';
+import { useDocumentViewer } from '@/contexts/DocumentViewerContext';
 
 type Counts = { total: number; delivered: number; in_progress: number; cancelled: number };
 
@@ -65,6 +65,7 @@ const breakdown = (c: Counts) => `${c.in_progress} in progress · ${c.cancelled}
 const UserDetail = () => {
   const { id = '' } = useParams();
   const { nameOf } = useVehicleTypes(true);
+  const viewDoc = useDocumentViewer();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-user', id],
@@ -96,13 +97,6 @@ const UserDetail = () => {
   const isRider = p.role === 'rider';
   const hours = data.hours?.opening_hours && Object.keys(data.hours.opening_hours).length ? summariseHours(data.hours.opening_hours) : [];
 
-  const openDoc = async (path: string) => {
-    try {
-      window.open(await verificationDocUrl(path), '_blank', 'noopener');
-    } catch (e) {
-      toast.error(errorMessage(e, 'Could not open the document'));
-    }
-  };
   const docs = v ? ([
     [isVendor ? 'business licence' : 'ID document', isVendor ? v.business_license_path : v.id_document_path],
     ['vehicle photo', v.vehicle_photo_path],
@@ -224,8 +218,8 @@ const UserDetail = () => {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {docs.map(([label, path]) => (
-                      <Button key={label} variant="outline" size="sm" onClick={() => openDoc(path!)}>
-                        <ExternalLink className="mr-2 h-4 w-4" /> View {label}
+                      <Button key={label} variant="outline" size="sm" onClick={() => viewDoc(path!, label)}>
+                        <FileText className="mr-2 h-4 w-4" /> View {label}
                       </Button>
                     ))}
                     <Button asChild variant="outline" size="sm">

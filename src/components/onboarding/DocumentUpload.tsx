@@ -3,7 +3,8 @@ import { FileCheck2, Loader2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { DOC_TYPES, uploadVerificationDoc, verificationDocUrl, type VerificationDocKind } from '@/lib/verification';
+import { DOC_TYPES, uploadVerificationDoc, type VerificationDocKind } from '@/lib/verification';
+import { useDocumentViewer } from '@/contexts/DocumentViewerContext';
 import { MAX_UPLOAD_LABEL } from '@/lib/uploads';
 import { errorMessage } from '@/lib/address';
 
@@ -35,14 +36,8 @@ const DocumentUpload = ({ kind, value, onChange, label }: DocumentUploadProps) =
     }
   };
 
-  const view = async () => {
-    if (!value) return;
-    try {
-      window.open(await verificationDocUrl(value), '_blank', 'noopener');
-    } catch (e) {
-      toast.error(errorMessage(e, 'Could not open the file'));
-    }
-  };
+  const viewDoc = useDocumentViewer();
+  const view = () => value && viewDoc(value, label);
 
   return (
     <div className="space-y-2">

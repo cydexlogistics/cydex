@@ -915,6 +915,10 @@ export type Database = {
           sent_at: string | null
           recipients: number | null
           emails_queued: number | null
+          repeats: boolean
+          schedules: Json | null
+          send_count: number
+          updated_at: string | null
           created_by: string | null
           created_at: string
         }
@@ -3155,6 +3159,7 @@ export type Database = {
         Args: {
           p_title: string; p_body: string; p_audience: string[]; p_send_push?: boolean; p_send_email?: boolean
           p_area_address?: string; p_latitude?: number; p_longitude?: number; p_radius_km?: number; p_scheduled_at?: string
+          p_repeats?: boolean; p_schedules?: Json; p_id?: string
         }
         Returns: string
       }

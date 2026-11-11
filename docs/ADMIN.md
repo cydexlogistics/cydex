@@ -173,7 +173,7 @@ Migration [`20261024200000_rewards.sql`](../supabase/migrations/20261024200000_r
 
 ### Broadcasts
 
-Migration [`20261014200000_broadcasts.sql`](../supabase/migrations/20261014200000_broadcasts.sql). **Admin → Broadcasts → New broadcast.**
+Migrations [`20261014200000_broadcasts.sql`](../supabase/migrations/20261014200000_broadcasts.sql) and [`20261111000000_repeating_broadcasts.sql`](../supabase/migrations/20261111000000_repeating_broadcasts.sql). **Admin → Broadcasts → New broadcast.**
 
 | Field | Choices |
 |---|---|
@@ -181,13 +181,15 @@ Migration [`20261014200000_broadcasts.sql`](../supabase/migrations/2026101420000
 | **Send as** | A notification in the app (which also goes out as a push to people who have push on), an email, or both |
 | **Send to** | Customers, vendors, riders, or any mix |
 | **Where** | Everyone in those groups, or only people near a place: pick the point on the map or search for an address, then set the radius in km |
-| **When** | Now, or at a set time |
+| **When** | Now, once at a set time, or **repeat on a schedule** |
 
 - **"Near a place"** means the person has a saved address inside the circle (a customer's delivery addresses, a vendor's store, a rider's home), or, for riders, their last known location is inside it.
 - **The form shows how many people it reaches** before you send.
-- **Scheduled broadcasts** are sent by a job that runs every minute (`send-due-broadcasts`), and can be cancelled until then. A sent broadcast can't be taken back.
+- **Repeating broadcasts** have one or more schedules. Each is a date range and the times of day (Nigerian time) to send it on every day of that range, e.g. the 21st–25th at 9:00 AM and 6:00 PM, plus a second schedule for the 28th–31st at 12:00 PM. Up to 20 schedules, 24 times a day, ending within a year. The form shows how many sends are left and when the next one is. Who it reaches is worked out again at each send.
+- **Scheduled broadcasts** are sent by a job that runs every minute (`send-due-broadcasts`). If the job misses a time, that send is skipped rather than sent late.
+- **Editing:** a broadcast that is **Scheduled** or **Repeating** (some sends done, more to come) can be edited (**Edit**) or stopped (**Cancel** / **Stop**) until its last send. Edits apply to the sends still to come. A sent broadcast can't be taken back. Edits are in the activity log.
 - **Emails** use the Cydex email template (the "announcement" layout) and go only to people who haven't turned email notifications off. Suspended accounts are skipped.
-- The list shows when each went out and to how many people.
+- The list shows when each went out and to how many people; for repeating ones, how many times it has gone out, the last send and the next.
 
 ### Support
 
