@@ -22,6 +22,7 @@ export const ICONS: Record<string, React.ElementType> = {
   order_accepted: CircleCheck,
   order_ready: Package,
   order_nearby: MapPin,
+  incoming_order: Bike,
   rider_assigned: Truck,
   rider_heading_to_vendor: Truck,
   out_for_delivery: Truck,
@@ -56,6 +57,8 @@ const orderLink = (role: Role, n: AppNotification): string | null => {
   if (n.type === 'reward') return role === 'rider' ? '/rider/profile?tab=achievements' : `/${role}/rewards`;
   // Referral rewards are paid into the wallet (riders: earnings)
   if (n.type === 'referral') return role === 'rider' ? '/rider/earnings' : `/${role}/wallet`;
+  // "Incoming order": go online from the dashboard
+  if (n.type === 'incoming_order') return role === 'rider' ? '/rider' : null;
   if (!orderId) return null;
   if (role === 'customer') return `/customer/orders/${orderId}`;
   if (role === 'vendor') return `/vendor/orders/${orderId}`;

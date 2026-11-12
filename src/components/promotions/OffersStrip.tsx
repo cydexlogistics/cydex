@@ -4,6 +4,7 @@ import { Check, Copy, TicketPercent } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMyPromotions, type MyPromotion } from '@/hooks/useMyPromotions';
 import { useVehicleTypes } from '@/hooks/useVehicleTypes';
+import { formatNaira } from '@/lib/pricing';
 import { describePromotion, type PromoAudience } from '@/lib/promotions';
 
 const WHERE_TO_ENTER: Record<Exclude<PromoAudience, 'all'>, string> = {
@@ -48,6 +49,7 @@ const OffersStrip = ({ role }: { role: Exclude<PromoAudience, 'all'> }) => {
 
   const conditionsOf = (o: MyPromotion) => [
     o.partner_vendor_names?.length ? `orders from ${o.partner_vendor_names.join(', ')}` : null,
+    o.min_order_amount != null ? `orders of ${formatNaira(Number(o.min_order_amount))} or more` : null,
     o.email_domains?.length ? `for ${o.email_domains.map((d) => `@${d}`).join(', ')} emails` : null,
     o.max_distance_km != null ? `deliveries up to ${Number(o.max_distance_km)} km` : null,
     o.vehicle_types?.length ? o.vehicle_types.map(labelOf).join(' or ') : null,

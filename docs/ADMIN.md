@@ -123,6 +123,7 @@ Audiences and limits: migration [`20261014100000_promotion_audience_limits.sql`]
 | **Discount** | A percentage, or a flat amount in naira |
 | **Who pays for it** | Cydex, or the business (items only) |
 | **Limits** | **Only the first … people**, and **Uses for each person**. Leave either empty for no limit. |
+| **Minimum order** (customer promotions, both tabs, optional) | The items must come to at least this much (after product discounts, before the delivery fee and Service Charge). Leave empty for any order. Cydex Express has no items, so it never gets these promotions. Migration [`20261112100000_promotion_min_order.sql`](../supabase/migrations/20261112100000_promotion_min_order.sql). |
 | **Coupon code** | Leave empty for a promotion that applies by itself; enter a code to make people type it. Commission promotions can't have a code. |
 | **Conditions** | Maximum distance in km; one or more delivery modes (rider groups) |
 | **Dates** | Start and end |
@@ -131,6 +132,7 @@ Audiences and limits: migration [`20261014100000_promotion_audience_limits.sql`]
 
 - An order gets one discount on what's paid: a valid coupon first, otherwise the promotion that saves the most. A commission promotion for the vendor or rider can apply on top.
 - **Limits count paid orders that aren't cancelled.** Cancelling or refunding an order gives the use back.
+- **Below the minimum order**, a coupon says "This coupon is for orders of ₦5,000 or more. Add ₦1,200 more to use it." An automatic one is listed at checkout with how much more to add. **Offers for you** shows "orders of ₦5,000 or more", and the admin list shows the minimum.
 - The list shows each promotion's state (scheduled, running, fully claimed, ended, off), who it's for, and how many times and by how many people it's been used.
 - People see every promotion they can still use under **Offers for you** on their home page, with the uses and places left. Coupons are listed with their code, and offered at checkout, one tap to apply. For a code meant only for particular people, switch **Show in "Offers for you"** off (migration [`20261015100000_promotion_show_in_offers.sql`](../supabase/migrations/20261015100000_promotion_show_in_offers.sql)); the list marks it **Not in offers**.
 - **Earnings** has a **Promo cost** column and the Overview shows what promotions cost Cydex in the period, commission promotions included. The row still adds up: customer paid = vendor + rider + Cydex.

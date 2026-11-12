@@ -28,6 +28,8 @@ import { useHasPhone } from '@/hooks/useHasPhone';
 import { invokeFunction } from '@/lib/edgeFunctions';
 import { addressHeadline, errorMessage } from '@/lib/address';
 import { NO_RIDERS_MESSAGE, type DeliveryMode } from '@/lib/deliveryModes';
+import { useRiderSearch } from '@/hooks/useRiderSearch';
+import FindingRiderNotice from '@/components/delivery/FindingRiderNotice';
 import { isValidEmail, isValidPhone } from '@/lib/phone';
 import { formatNaira } from '@/lib/pricing';
 import type { PickedLocation } from '@/lib/googleMaps';
@@ -91,7 +93,7 @@ const NewRiderRequest = () => {
 
   const located = stops.filter((s) => s.location);
   const allLocated = located.length === stops.length;
-  const { data: quote, isFetching: quoting } = useQuery({
+  const { data: quote, isFetching: quoting, refetch } = useQuery({
     queryKey: ['rider-request-quote', mode, vehicle, batch ? null : coupon, ...stops.map((s) => `${s.location?.latitude},${s.location?.longitude}`)],
     enabled: allLocated,
     queryFn: async () => {
@@ -133,6 +135,9 @@ const NewRiderRequest = () => {
     queryClient.invalidateQueries({ queryKey: ['vendor-customers', user?.id] });
   };
 
+  // Before saying riders are busy, call them online and wait a minute. The
+  // pickup is always the store.
+  const riderSearch = useRiderSearch(quote?.status === 'ok' && quote.riders_available === false, 'rider-request', refetch);
   const badLeg = quote?.stops?.findIndex((l) => l.status === 'out_of_range') ?? -1;
   const problem =
     !quote ? null
@@ -141,7 +146,7 @@ const NewRiderRequest = () => {
           ? batch && badLeg >= 0
             ? `Drop-off ${badLeg + 1} is more than ${maxTripText} from ${badLeg === 0 ? 'your store' : `drop-off ${badLeg}`}, which is further than we deliver.`
             : `This location is more than ${maxTripText} from your store, which is further than we deliver.`
-          : quote.riders_available === false ? NO_RIDERS_MESSAGE
+          : riderSearch === 'none' ? NO_RIDERS_MESSAGE
             : null;
   const canSubmit = hasPhone && stops.every(stopReady) && quote?.status === 'ok' && quote.riders_available !== false && !submitting;
   const chosenVehicle = quote?.vehicle_type ?? vehicle;
@@ -335,6 +340,7 @@ const NewRiderRequest = () => {
                   <DeliveryModeSelect modes={quote.modes} value={chosenVehicle} onChange={setVehicle} disabled={submitting} />
                 )}
                 {problem && <Alert variant="destructive"><AlertDescription>{problem}</AlertDescription></Alert>}
+                {riderSearch === 'searching' && <FindingRiderNotice />}
                 {quote.status === 'ok' && !batch && (
                   <CheckoutOffers
                     role="vendor"

@@ -2,17 +2,21 @@
 // notifications on a closed app use the phone's own sound; see public/sw.js).
 // Made with Web Audio, so there's no sound file to load.
 
-// Need attention straight away: a longer, louder chime (keep in step with public/sw.js)
+// Need attention straight away: a 5-second alarm at full volume (keep in step with public/sw.js)
 export const URGENT_NOTIFICATION_TYPES = new Set([
   'new_order', // vendor
   'order_nearby', // rider
+  'incoming_order', // rider: someone is about to order and no rider is online
   'assigned_by_admin', // rider
   'payout_request', // admin
   'verification_request', // admin
   'rider_arrived', // customer: the rider is at the door
+  'support_message', // everyone: a support chat message
 ]);
 
 let ctx: AudioContext | null = null;
+// When the alarm that's playing ends, so alarms don't pile up on each other
+let alarmUntil = 0;
 
 const audioContext = () => {
   const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -34,36 +38,57 @@ export const unlockNotificationSound = () => {
   return wake;
 };
 
-const tone = (ac: AudioContext, freq: number, start: number, length: number, volume: number) => {
+// One note: a quick fade in, held at full volume, then a quick fade out
+const tone = (ac: AudioContext, freq: number, start: number, length: number, volume: number, wave: OscillatorType = 'sine') => {
   const osc = ac.createOscillator();
   const gain = ac.createGain();
-  osc.type = 'sine';
+  osc.type = wave;
   osc.frequency.value = freq;
-  gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(volume, start + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + length);
+  gain.gain.setValueAtTime(0, start);
+  gain.gain.linearRampToValueAtTime(volume, start + 0.01);
+  gain.gain.setValueAtTime(volume, start + length - 0.02);
+  gain.gain.linearRampToValueAtTime(0, start + length);
   osc.connect(gain).connect(ac.destination);
   osc.start(start);
   osc.stop(start + length + 0.05);
+};
+
+// Alarm clock: 5 bursts of 4 fast beeps (high, low, high, low), one burst a second
+const ALARM_BURSTS = 5;
+const ALARM_BEEPS = [1319, 988, 1319, 988]; // E6, B5
+const BEEP = 0.1; // seconds on
+const BEEP_GAP = 0.05; // seconds off
+const ALARM_LENGTH = ALARM_BURSTS; // seconds
+
+const playAlarm = (ac: AudioContext, t: number) => {
+  for (let burst = 0; burst < ALARM_BURSTS; burst++) {
+    ALARM_BEEPS.forEach((freq, i) => {
+      tone(ac, freq, t + burst + i * (BEEP + BEEP_GAP), BEEP, 1, 'square');
+    });
+  }
+  // Buzz along with each burst (Android; iPhones don't allow web vibration)
+  const burst = ALARM_BEEPS.flatMap(() => [BEEP * 1000, BEEP_GAP * 1000]);
+  const rest = 1000 - burst.reduce((a, b) => a + b, 0);
+  navigator.vibrate?.(Array.from({ length: ALARM_BURSTS }, () => [...burst.slice(0, -1), BEEP_GAP * 1000 + rest]).flat());
 };
 
 export const playNotificationSound = (type?: string) => {
   try {
     const ac = audioContext();
     if (!ac || ac.state !== 'running') return; // not unlocked yet: stay quiet rather than error
+    // An alarm is already going: it covers this one too
+    if (ac.currentTime < alarmUntil) return;
     const t = ac.currentTime + 0.01;
     if (type && URGENT_NOTIFICATION_TYPES.has(type)) {
-      // Three rising notes, repeated once
-      [0, 0.6].forEach((offset) => {
-        tone(ac, 784, t + offset, 0.18, 0.35); // G5
-        tone(ac, 988, t + offset + 0.15, 0.18, 0.35); // B5
-        tone(ac, 1319, t + offset + 0.3, 0.28, 0.35); // E6
-      });
+      alarmUntil = t + ALARM_LENGTH;
+      playAlarm(ac, t);
     } else {
-      tone(ac, 880, t, 0.16, 0.2); // A5
-      tone(ac, 1175, t + 0.13, 0.26, 0.2); // D6
+      // Three rising notes
+      tone(ac, 880, t, 0.14, 0.6); // A5
+      tone(ac, 1109, t + 0.14, 0.14, 0.6); // C#6
+      tone(ac, 1319, t + 0.28, 0.3, 0.6); // E6
+      navigator.vibrate?.(150);
     }
-    navigator.vibrate?.(type && URGENT_NOTIFICATION_TYPES.has(type) ? [200, 100, 200] : 120);
   } catch {
     // Sound is a nice-to-have; never let it break notifications
   }

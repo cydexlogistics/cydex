@@ -24,6 +24,8 @@ export interface MyPromotion {
   partner_vendor_names: string[] | null;
   /** Only for emails at these domains (null: anyone) */
   email_domains: string[] | null;
+  /** Only when the items come to at least this much (null: any order) */
+  min_order_amount: number | null;
 }
 
 export const MY_PROMOTIONS_KEY = 'my-promotions';

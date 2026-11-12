@@ -44,7 +44,7 @@ The installed app's icon shows the number of unread notifications. It's set whil
 - **App open:** a short chime plays with the pop-up ([`src/lib/notificationSound.ts`](../src/lib/notificationSound.ts)). Urgent notifications get a longer chime:
   - **Customers:** your rider is around
   - **Vendors:** new order
-  - **Riders:** order nearby, order assigned by an admin
+  - **Riders:** order nearby, incoming order (someone is about to order and no rider is online), order assigned by an admin
   - **Admins:** withdrawal to approve, verification to review
 
   Browsers only allow sound after the person has tapped the page once, so there's no chime before then. The push notification shown at the same time is silent, so there's no double sound.

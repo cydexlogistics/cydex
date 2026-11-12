@@ -22,6 +22,8 @@ import CouponField from '@/components/delivery/CouponField';
 import CheckoutOffers from '@/components/promotions/CheckoutOffers';
 import DeliveryModeSelect from '@/components/delivery/DeliveryModeSelect';
 import { etaText, NO_RIDERS_MESSAGE } from '@/lib/deliveryModes';
+import { useRiderSearch } from '@/hooks/useRiderSearch';
+import FindingRiderNotice from '@/components/delivery/FindingRiderNotice';
 
 export interface CheckoutChoices {
   /** Preferred delivery mode (a vehicle type key) */
@@ -73,11 +75,13 @@ export const ConfirmDeliveryAddressDialog: React.FC<ConfirmDeliveryAddressDialog
   }, [open]);
 
   const selected = addresses.find((a) => a.id === selectedId) ?? null;
-  const { quote, isLoading: quoteLoading, isFetching } = useOrderQuote(open ? vendorId : null, selected?.id, items, mode, coupon);
+  const { quote, isLoading: quoteLoading, isFetching, refetch } = useOrderQuote(open ? vendorId : null, selected?.id, items, mode, coupon);
   const deliverable = quote?.status === 'ok';
   const problem = selected ? quoteProblem(quote?.status) : null;
   const closed = deliverable && !quote.vendor_open;
   const noRiders = deliverable && !closed && !quote.riders_available;
+  // Before saying riders are busy, call them online and wait a minute
+  const riderSearch = useRiderSearch(noRiders, `checkout:${vendorId}:${selected?.id}`, refetch);
   const canOrder = deliverable && !closed && !noRiders;
   const couponApplied = !!coupon && quote?.coupon_status === 'applied';
 
@@ -144,7 +148,9 @@ export const ConfirmDeliveryAddressDialog: React.FC<ConfirmDeliveryAddressDialog
             </div>
           )}
 
-          {noRiders && (
+          {riderSearch === 'searching' && <FindingRiderNotice />}
+
+          {riderSearch === 'none' && (
             <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm font-medium text-destructive">
               {NO_RIDERS_MESSAGE}
             </div>
@@ -179,6 +185,7 @@ export const ConfirmDeliveryAddressDialog: React.FC<ConfirmDeliveryAddressDialog
                 distanceKm={quote.distance_km}
                 modes={quote.modes}
                 onPickMode={setMode}
+                itemsTotal={quote.subtotal}
                 disabled={confirming}
               />
 

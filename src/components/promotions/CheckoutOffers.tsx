@@ -25,6 +25,8 @@ interface Props {
   onPickMode?: (key: string) => void;
   disabled?: boolean;
   thing?: string;
+  /** The items total, to explain a discount with a minimum order (checkout only) */
+  itemsTotal?: number | null;
 }
 
 const km = (n: number) => `${Number(Number(n).toFixed(1))} km`;
@@ -37,7 +39,7 @@ const km = (n: number) => `${Number(Number(n).toFixed(1))} km`;
 // One discount applies per order, so using a code replaces the automatic one.
 const CheckoutOffers = ({
   role, promotionName, discount, usesLeft, couponApplied, fits, onUseCode, vehicleType, distanceKm, modes = [], onPickMode,
-  disabled, thing = 'order',
+  disabled, thing = 'order', itemsTotal,
 }: Props) => {
   const offers = useMyPromotions().filter((o) => !fits || fits(o));
   const codes = couponApplied ? [] : offers.filter((o) => !!o.code);
@@ -48,6 +50,10 @@ const CheckoutOffers = ({
   const missed = offers
     .filter((o) => !o.code && o.applies_to !== 'commission' && !(automatic && o.name === promotionName))
     .map((o) => {
+      if (o.min_order_amount != null && itemsTotal != null && Number(itemsTotal) < Number(o.min_order_amount)) {
+        const short = Number(o.min_order_amount) - Number(itemsTotal);
+        return { offer: o, why: `For orders of ${formatNaira(Number(o.min_order_amount))} or more. Add ${formatNaira(short)} more to get it.`, switchTo: null };
+      }
       if (o.max_distance_km != null && distanceKm != null && Number(distanceKm) > Number(o.max_distance_km)) {
         return { offer: o, why: `Only for deliveries up to ${km(o.max_distance_km)}. This one is ${km(Number(distanceKm))}.`, switchTo: null };
       }
@@ -117,7 +123,10 @@ const CheckoutOffers = ({
                 className="rounded-md border border-dashed border-primary bg-primary/5 px-2.5 py-1.5 text-left text-xs hover:bg-primary/10 disabled:opacity-50"
               >
                 <span className="font-mono text-sm font-semibold">{o.code}</span>
-                <span className="block text-muted-foreground">{describePromotion(o, role)}</span>
+                <span className="block text-muted-foreground">
+                  {describePromotion(o, role)}
+                  {o.min_order_amount != null && ` · orders of ${formatNaira(Number(o.min_order_amount))}+`}
+                </span>
               </button>
             ))}
           </div>

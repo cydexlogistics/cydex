@@ -60,7 +60,7 @@ self.addEventListener('fetch', (event) => {
 
 // Need attention straight away: stay on screen until tapped, longer buzz
 // (keep in step with src/lib/notificationSound.ts)
-const URGENT = ['new_order', 'order_nearby', 'assigned_by_admin', 'payout_request', 'verification_request', 'rider_arrived'];
+const URGENT = ['new_order', 'order_nearby', 'incoming_order', 'assigned_by_admin', 'payout_request', 'verification_request', 'rider_arrived', 'support_message'];
 
 // Unread notifications on the installed app's icon. Phones only take a number
 // (no "9+"), so it's capped at 9; some show just a dot. Support chat pushes

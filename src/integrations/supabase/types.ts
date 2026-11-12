@@ -3163,6 +3163,10 @@ export type Database = {
         }
         Returns: string
       }
+      call_riders_online: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       admin_cancel_broadcast: {
         Args: { p_id: string }
         Returns: undefined
@@ -3174,6 +3178,7 @@ export type Database = {
           vendor_id: string | null; vendor_name: string | null; max_distance_km: number | null; vehicle_types: string[] | null
           ends_at: string; uses_left: number | null; places_left: number | null
           partner_vendor_ids: string[] | null; partner_vendor_names: string[] | null; email_domains: string[] | null
+          min_order_amount: number | null
         }[]
       }
       admin_create_business_category: {
@@ -3274,7 +3279,7 @@ export type Database = {
           p_starts_at: string; p_ends_at: string; p_audience?: string; p_id?: string; p_code?: string; p_vendor_id?: string
           p_cost_bearer?: string; p_max_distance_km?: number; p_vehicle_types?: string[]
           p_max_users?: number; p_max_uses_per_user?: number; p_is_active?: boolean; p_show_in_offers?: boolean
-          p_email_domains?: string[]; p_partner_vendor_ids?: string[]
+          p_email_domains?: string[]; p_partner_vendor_ids?: string[]; p_min_order_amount?: number
         }
         Returns: string
       }
@@ -3288,6 +3293,7 @@ export type Database = {
           audience: string; max_users: number | null; max_uses_per_user: number | null; users: number
           show_in_offers: boolean
           email_domains: string[] | null; partner_vendor_ids: string[] | null; partner_vendor_names: string[] | null
+          min_order_amount: number | null
         }[]
       }
       admin_earnings: {

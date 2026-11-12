@@ -60,7 +60,7 @@ export const useOrderQuote = (
 ) => {
   const enabled = !!vendorId && !!addressId && items.length > 0;
 
-  const { data, isLoading, isFetching, error } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ['order-quote', vendorId, addressId, items, vehicleType ?? null, couponCode ?? null],
     enabled,
     placeholderData: (previous) => previous,
@@ -108,7 +108,7 @@ export const useOrderQuote = (
     },
   });
 
-  return { quote: enabled ? data ?? null : null, isLoading: enabled && isLoading, isFetching: enabled && isFetching, error };
+  return { quote: enabled ? data ?? null : null, isLoading: enabled && isLoading, isFetching: enabled && isFetching, error, refetch };
 };
 
 // Cart items → the lines sent to the database

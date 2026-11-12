@@ -25,6 +25,8 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { errorMessage } from '@/lib/address';
 import { etaText, NO_RIDERS_MESSAGE, type DeliveryMode } from '@/lib/deliveryModes';
+import { useRiderSearch } from '@/hooks/useRiderSearch';
+import FindingRiderNotice from '@/components/delivery/FindingRiderNotice';
 import { invokeFunction } from '@/lib/edgeFunctions';
 import type { PickedLocation } from '@/lib/googleMaps';
 import { isValidEmail, isValidPhone } from '@/lib/phone';
@@ -120,7 +122,7 @@ const CydexExpress = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const located = !!pickup.location && !!dropoff.location;
-  const { data: quote, isLoading: quoteLoading, isFetching } = useQuery({
+  const { data: quote, isLoading: quoteLoading, isFetching, refetch } = useQuery({
     queryKey: ['express-quote', pickup.location?.latitude, pickup.location?.longitude,
       dropoff.location?.latitude, dropoff.location?.longitude, mode, coupon],
     enabled: located,
@@ -140,6 +142,8 @@ const CydexExpress = () => {
 
   const priced = located && quote?.status === 'ok';
   const noRiders = priced && !quote.riders_available;
+  // Before saying riders are busy, call them online and wait a minute
+  const riderSearch = useRiderSearch(noRiders, `express:${pickup.location?.latitude},${pickup.location?.longitude}`, refetch);
   const couponApplied = !!coupon && quote?.coupon_status === 'applied';
   const emailOk = isValidEmail(email);
   const phoneOk = isValidPhone(phone);
@@ -300,6 +304,8 @@ const CydexExpress = () => {
                 <Alert variant="destructive">
                   <AlertDescription>The drop-off is more than {maxTripText} from the pickup point, which is further than we deliver. Choose a closer place.</AlertDescription>
                 </Alert>
+              ) : riderSearch === 'searching' ? (
+                <FindingRiderNotice />
               ) : noRiders ? (
                 <Alert variant="destructive">
                   <AlertDescription className="font-medium">{NO_RIDERS_MESSAGE}</AlertDescription>
@@ -333,8 +339,8 @@ const CydexExpress = () => {
                     discount={quote.discount_amount}
                     usesLeft={quote.promotion_uses_left}
                     couponApplied={couponApplied}
-                    // Items and vendor partnership offers are for orders from a business, not Express
-                    fits={(o) => o.applies_to !== 'items' && !o.partner_vendor_ids}
+                    // Items, vendor partnership and minimum-order offers are for orders from a business, not Express
+                    fits={(o) => o.applies_to !== 'items' && !o.partner_vendor_ids && o.min_order_amount == null}
                     onUseCode={setCoupon}
                     vehicleType={quote.vehicle_type}
                     distanceKm={quote.distance_km}

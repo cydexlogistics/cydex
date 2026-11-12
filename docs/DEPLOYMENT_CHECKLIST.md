@@ -238,7 +238,7 @@ Use three test accounts on phones (customer, vendor and rider) and an admin acco
 - [ ] **Withdrawal.**
   - The vendor withdraws a small amount, and the admin approves it in **Admin → Money → Withdrawals**.
   - The money arrives in the bank, and **Check status** shows it as paid.
-- [ ] **Delivery mode and "riders busy".** With the rider offline, checkout shows the "all our riders are busy" message and doesn't let the customer pay. With the rider online, their vehicle type can be picked as the preferred delivery mode.
+- [ ] **Delivery mode and "riders busy".** With the rider offline, checkout first shows "Looking for a rider near you…" and the rider gets an **Incoming order** notification. Going online within a minute lets the customer carry on. Otherwise, after a minute, checkout shows the "all our riders are busy" message and doesn't let the customer pay. With the rider online, their vehicle type can be picked as the preferred delivery mode.
 - [ ] **Wallet first.** With money in the customer's wallet (from a refund), place an order: the wallet pays first and the card only the rest.
 - [ ] **Rider is around.** On a delivery, the rider taps **I've arrived**; the customer gets the notification and push.
 - [ ] **Opening hours.** Set the vendor's hours to closed for today; the customer can't check out.

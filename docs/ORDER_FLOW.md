@@ -74,7 +74,7 @@ Migration [`20261013100000_ordering.sql`](../supabase/migrations/20261013100000_
 - **The cart never opens by itself.** The order page always starts on the vendor list. While there's something in the cart, a large **Go to cart (₦6,600)** button stays at the bottom of the screen with the items total.
 - **The Deliver to step** shows, for the chosen address: the preferred delivery mode, the estimated delivery time, a coupon field, the price, and how it will be paid. One database function, `checkout_quote`, works all of it out; `place_order` prices the real order the same way.
 - **Blocked before payment** when:
-  - **No rider is free** within range of the store: "Our service is currently unavailable because all our riders are busy at the moment. Please check again later."
+  - **No rider is free** within range of the store: "Our service is currently unavailable because all our riders are busy at the moment. Please check again later." Before showing this, the app first sends every verified rider who isn't online an **Incoming order** notification and push ("Go online in Cydex now to take it"; migration [`20261112000000_call_riders_online.sql`](../supabase/migrations/20261112000000_call_riders_online.sql)). It then shows "Looking for a rider near you…" for up to a minute, checking again every 10 seconds. If a rider comes online in range, checkout carries on; otherwise the message appears. Each rider gets this alert at most once every 10 minutes. The same happens in Cydex Express and Request a Rider.
   - **The vendor is closed** (see [Opening hours](#opening-hours-and-preparation-time)).
   - The vendor is too far away for any delivery mode (see [How far each mode goes](#how-far-each-mode-goes)), or has no store location.
 

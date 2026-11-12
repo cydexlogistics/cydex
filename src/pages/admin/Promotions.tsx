@@ -31,6 +31,7 @@ type Promo = {
   audience: string; max_users: number | null; max_uses_per_user: number | null; users: number;
   show_in_offers: boolean;
   email_domains: string[] | null; partner_vendor_ids: string[] | null; partner_vendor_names: string[] | null;
+  min_order_amount: number | null;
 };
 
 type Draft = {
@@ -39,6 +40,8 @@ type Draft = {
   max_distance_km: string; vehicle_types: string[]; starts_at: string; ends_at: string; is_active: boolean;
   // '' = no limit
   max_users: string; max_uses_per_user: string;
+  // Items total the order must reach, in naira ('' = any order). Customers only.
+  min_order: string;
   // Listed under "Offers for you" (home pages and the codes offered at checkout)
   show_in_offers: boolean;
   // General: only for emails at these domains, comma separated ('' = anyone)
@@ -60,7 +63,7 @@ const toLocal = (iso: string) => format(new Date(iso), "yyyy-MM-dd'T'HH:mm");
 const blank = (partner = false): Draft => ({
   email_domains: '', partner, partners: [],
   id: null, name: '', code: '', discount_type: 'percent', discount_value: '', audience: 'customer', applies_to: 'delivery_fee',
-  vendor_id: '', vendor_name: '', cost_bearer: 'cydex', max_distance_km: '', vehicle_types: [], max_users: '', max_uses_per_user: '', show_in_offers: true,
+  vendor_id: '', vendor_name: '', cost_bearer: 'cydex', max_distance_km: '', vehicle_types: [], max_users: '', max_uses_per_user: '', min_order: '', show_in_offers: true,
   starts_at: toLocal(new Date().toISOString()), ends_at: toLocal(new Date(Date.now() + 7 * 86400e3).toISOString()), is_active: true,
 });
 
@@ -112,10 +115,14 @@ const AdminPromotions = () => {
 
   const value = Number(draft?.discount_value);
   const km = draft?.max_distance_km === '' ? null : Number(draft?.max_distance_km);
+  // A minimum order needs items, so only customer promotions (not commission) have one
+  const canMin = draft?.audience === 'customer' && draft.applies_to !== 'commission';
+  const minOrder = !canMin || !draft?.min_order.trim() ? null : Number(draft.min_order);
   const valid = !!draft && draft.name.trim().length > 1 && value > 0 && (draft.discount_type === 'flat' || value <= 100)
     && (draft.applies_to !== 'items' || !!draft.vendor_id)
     && !!draft.starts_at && !!draft.ends_at && new Date(draft.ends_at) > new Date(draft.starts_at)
     && (km === null || km > 0)
+    && (minOrder === null || minOrder > 0)
     && !Number.isNaN(limit(draft.max_users)) && !Number.isNaN(limit(draft.max_uses_per_user))
     && domainsOf(draft.email_domains).every((d) => DOMAIN.test(d))
     && (!draft.partner || draft.partners.length > 0);
@@ -136,6 +143,7 @@ const AdminPromotions = () => {
     const limits = [
       people ? `the first ${people} ${people === 1 ? 'person' : 'people'}` : null,
       each ? `${each} use${each === 1 ? '' : 's'} each` : null,
+      minOrder ? `orders with items of ${formatNaira(minOrder)} or more` : null,
     ].filter(Boolean).join(', ');
     if (!(await confirm({
       title: draft.id ? `Are you sure you want to save “${draft.name.trim()}”?` : `Are you sure you want to create “${draft.name.trim()}”?`,
@@ -172,6 +180,7 @@ const AdminPromotions = () => {
       p_show_in_offers: draft.show_in_offers,
       p_email_domains: !draft.partner && domainsOf(draft.email_domains).length ? domainsOf(draft.email_domains) : undefined,
       p_partner_vendor_ids: draft.partner ? draft.partners.map((v) => v.id) : undefined,
+      p_min_order_amount: minOrder ?? undefined,
     });
     setSaving(false);
     if (error) return toast.error(errorMessage(error, 'Could not save the promotion'));
@@ -188,6 +197,7 @@ const AdminPromotions = () => {
       applies_to: p.applies_to as Draft['applies_to'], vendor_id: p.vendor_id ?? '',
       max_users: p.max_users == null ? '' : String(p.max_users),
       max_uses_per_user: p.max_uses_per_user == null ? '' : String(p.max_uses_per_user),
+      min_order: p.min_order_amount == null ? '' : String(Number(p.min_order_amount)),
       show_in_offers: p.show_in_offers ?? true,
       email_domains: (p.email_domains ?? []).join(', '),
       partner: !!p.partner_vendor_ids?.length,
@@ -225,6 +235,7 @@ const AdminPromotions = () => {
                 ) : null}
                 <p className="text-xs text-muted-foreground">
                   {format(new Date(p.starts_at), 'd MMM yyyy, HH:mm')} – {format(new Date(p.ends_at), 'd MMM yyyy, HH:mm')}
+                  {p.min_order_amount != null && ` · orders of ${formatNaira(Number(p.min_order_amount))} or more`}
                   {p.max_distance_km != null && ` · up to ${Number(p.max_distance_km)} km`}
                   {p.vehicle_types?.length ? ` · ${p.vehicle_types.map(labelOf).join(', ')}` : ''}
                   {p.applies_to === 'items' && ` · paid by ${p.cost_bearer === 'vendor' ? 'the business' : 'Cydex'}`}
@@ -430,6 +441,20 @@ const AdminPromotions = () => {
                 </div>
                 {(Number.isNaN(limit(draft.max_users)) || Number.isNaN(limit(draft.max_uses_per_user))) && (
                   <p className="text-xs text-destructive">Enter whole numbers of 1 or more, or leave them empty for no limit.</p>
+                )}
+                {canMin && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pr-min">Minimum order (₦)</Label>
+                    <Input id="pr-min" type="number" min={1} step="any" value={draft.min_order} onChange={(e) => setDraft({ ...draft, min_order: e.target.value })} placeholder="Any order" />
+                    {minOrder !== null && !(minOrder > 0) ? (
+                      <p className="text-xs text-destructive">Enter an amount above ₦0, or leave it empty for any order.</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        The items must come to at least this much (before the delivery fee and Service Charge). Cydex
+                        Express has no items, so it doesn't get promotions with a minimum.
+                      </p>
+                    )}
+                  </div>
                 )}
                 <p className="text-xs text-muted-foreground">
                   A use is an order that's paid and not cancelled. People see how many uses they have left; once the

@@ -69,6 +69,8 @@ const sendNotification = async (db: SupabaseClient, notificationId: string) => {
   const role = String(profile?.role ?? '').toLowerCase();
   const orderId = (n.metadata as { order_id?: string } | null)?.order_id;
   const url = orderId && ORDER_LINKS[role] ? ORDER_LINKS[role](orderId, n.type)
+    // "Incoming order": go online from the dashboard
+    : role === 'rider' && n.type === 'incoming_order' ? '/rider'
     : (role === 'admin' && ADMIN_LINKS[n.type]) || `/${role || 'customer'}/notifications`;
   // Unread count for the badge on the installed app's icon
   const { count: unread } = await db.from('notifications')
