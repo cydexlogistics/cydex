@@ -1,5 +1,6 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -26,19 +27,19 @@ export interface Product {
   };
 }
 
-export const useProducts = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// One vendor's products with the vendor's name, for their storefront.
+// Nothing is fetched until a vendor is chosen (vendorId null). Unavailable
+// products are included: they're shown but can't be added to the cart (see
+// lib/products). Cached per vendor, so going back to a store is instant.
+export const useProducts = (vendorId: string | null) => {
+  const queryClient = useQueryClient();
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Every product with its vendor; unavailable ones are shown but can't be
-      // added to the cart (see lib/products)
-      const { data: productsData, error: productsError } = await supabase
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['vendor-products', vendorId],
+    enabled: !!vendorId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('products')
         .select(`
           *,
@@ -47,51 +48,37 @@ export const useProducts = () => {
             email
           )
         `)
+        .eq('vendor_id', vendorId!)
         .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as Product[];
+    },
+  });
 
-      if (productsError) throw productsError;
-
-      setProducts(productsData as Product[]);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch products';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Subscribe to real-time updates
   useEffect(() => {
+    if (error) toast.error(error instanceof Error ? error.message : 'Failed to fetch products');
+  }, [error]);
+
+  // Live updates to this vendor's products only
+  useEffect(() => {
+    if (!vendorId) return;
     const channel = supabase
-      .channel('products_channel')
+      .channel(`products_${vendorId}`)
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'products'
-        },
-        () => {
-          fetchProducts();
-        }
+        { event: '*', schema: 'public', table: 'products', filter: `vendor_id=eq.${vendorId}` },
+        () => queryClient.invalidateQueries({ queryKey: ['vendor-products', vendorId] }),
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  }, [vendorId, queryClient]);
 
   return {
-    products,
-    loading,
-    error,
-    refetch: fetchProducts
+    products: data ?? [],
+    loading: !!vendorId && isLoading,
+    error: error ? (error instanceof Error ? error.message : 'Failed to fetch products') : null,
+    refetch,
   };
 };

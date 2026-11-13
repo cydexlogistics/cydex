@@ -189,8 +189,8 @@ const UserDetail = () => {
                 <>
                   {isVendor && (p.store_banner_url || p.avatar) && (
                     <div className="relative h-24 overflow-hidden rounded-lg bg-gray-200 dark:bg-muted">
-                      {p.store_banner_url && <img src={p.store_banner_url} alt="Store banner" className="h-full w-full object-cover" />}
-                      {p.avatar && <img src={p.avatar} alt="Store logo" className="absolute bottom-2 left-2 h-14 w-14 rounded-lg border-2 border-background object-cover" />}
+                      {p.store_banner_url && <img src={p.store_banner_url} alt="Store banner" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
+                      {p.avatar && <img src={p.avatar} alt="Store logo" loading="lazy" decoding="async" className="absolute bottom-2 left-2 h-14 w-14 rounded-lg border-2 border-background object-cover" />}
                     </div>
                   )}
                   <div>

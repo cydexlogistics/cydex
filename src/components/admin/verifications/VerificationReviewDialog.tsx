@@ -104,9 +104,9 @@ const VerificationReviewDialog = ({ row, onClose, onDone }: { row: VerificationR
 
         {row.role === 'vendor' && (row.profile?.store_banner_url || row.profile?.avatar) && (
           <div className="relative h-24 overflow-hidden rounded-lg bg-muted">
-            {row.profile?.store_banner_url && <img src={row.profile.store_banner_url} alt="Banner" className="h-full w-full object-cover" />}
+            {row.profile?.store_banner_url && <img src={row.profile.store_banner_url} alt="Banner" decoding="async" className="h-full w-full object-cover" />}
             {row.profile?.avatar && (
-              <img src={row.profile.avatar} alt="Logo" className="absolute bottom-2 left-2 h-14 w-14 rounded-lg border-2 border-background object-cover" />
+              <img src={row.profile.avatar} alt="Logo" decoding="async" className="absolute bottom-2 left-2 h-14 w-14 rounded-lg border-2 border-background object-cover" />
             )}
           </div>
         )}

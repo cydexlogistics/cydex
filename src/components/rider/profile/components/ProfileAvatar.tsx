@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { checkUploadSize } from '@/lib/uploads';
+import { checkUploadSize, uploadPhoto } from '@/lib/uploads';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
@@ -30,34 +30,15 @@ const ProfileAvatar = ({ profile, onAvatarUpdate }: ProfileAvatarProps) => {
     setUploading(true);
     
     try {
-      // Create a unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
-      
-      // For now, we'll use a simple data URL approach
-      // In a production app, you'd upload to Supabase Storage
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const avatarUrl = e.target?.result as string;
-        
-        // Update profile with new avatar
-        const { error } = await supabase
-          .from('profiles')
-          .update({ avatar: avatarUrl })
-          .eq('id', profile.id);
-
-        if (error) {
-          console.error('Error updating avatar:', error);
-          toast.error('Failed to update profile photo');
-        } else {
-          toast.success('Profile photo updated successfully');
-          if (onAvatarUpdate) {
-            onAvatarUpdate(avatarUrl);
-          }
-        }
-      };
-      
-      reader.readAsDataURL(file);
+      // Stored as a file, not as text in the profile (see uploadPhoto)
+      const avatarUrl = await uploadPhoto(file, profile.id, 'avatar');
+      const { error } = await supabase
+        .from('profiles')
+        .update({ avatar: avatarUrl })
+        .eq('id', profile.id);
+      if (error) throw error;
+      toast.success('Profile photo updated successfully');
+      onAvatarUpdate?.(avatarUrl);
     } catch (error) {
       console.error('Error uploading avatar:', error);
       toast.error('Failed to upload profile photo');
@@ -70,7 +51,7 @@ const ProfileAvatar = ({ profile, onAvatarUpdate }: ProfileAvatarProps) => {
     <div className="relative">
       <Avatar className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24">
         {profile.avatar ? (
-          <AvatarImage src={profile.avatar} alt={profile.name} />
+          <AvatarImage src={profile.avatar} alt={profile.name} decoding="async" />
         ) : (
           <AvatarFallback className="text-lg sm:text-xl bg-primary-light text-primary">
             {profile.name.split(' ').map((n: string) => n[0]).join('')}

@@ -37,7 +37,6 @@ const NewOrder = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { products, loading } = useProducts();
   const queryClient = useQueryClient();
   const { 
     cartItems, 
@@ -53,6 +52,8 @@ const NewOrder = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
   const [selectedVendorName, setSelectedVendorName] = useState<string | null>(null);
+  // Only the open store's products are loaded
+  const { products, loading } = useProducts(selectedVendor);
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
   const [sortBy, setSortBy] = useState('recommended');
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,12 +132,6 @@ const NewOrder = () => {
 
   // Get unique categories from filtered products
   const categories = Array.from(new Set(filteredProducts.map(p => p.category).filter(Boolean)));
-
-  // Get unique vendors from products (for backup)
-  const vendors = Array.from(new Set(products.map(p => ({ 
-    id: p.vendor_id, 
-    name: p.vendor?.name || 'Unknown Vendor' 
-  })).filter(v => v.name !== 'Unknown Vendor')));
 
   // Sort products
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -401,24 +396,6 @@ const NewOrder = () => {
     </>
   );
 
-  if (loading) {
-    return (
-      <DashboardLayout userRole="CUSTOMER">
-        <div className="p-2 sm:p-4 md:p-6 max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-3">
-            <div className="h-6 sm:h-8 bg-muted rounded w-1/4"></div>
-            <div className="h-10 sm:h-12 bg-muted rounded"></div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="h-40 sm:h-48 bg-muted rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   // Show vendor selection if no vendor is selected
   if (!selectedVendor) {
     return (
@@ -472,6 +449,14 @@ const NewOrder = () => {
             categories={categories}
           />
           
+          {/* The store header shows straight away; only the products wait */}
+          {loading ? (
+            <div className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-4" aria-busy="true" aria-label="Loading products">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div key={i} className="h-40 animate-pulse rounded bg-muted sm:h-48" />
+              ))}
+            </div>
+          ) : (
           <ProductsGrid 
             selectedCategory={selectedCategory}
             filteredProducts={filteredProducts}
@@ -483,6 +468,7 @@ const NewOrder = () => {
             setSelectedVendor={setSelectedVendor}
             addToCart={addToCart}
           />
+          )}
         </div>
 
         <PaginationSection 

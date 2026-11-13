@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { errorMessage } from '@/lib/address';
-import { checkUploadSize, MAX_UPLOAD_LABEL } from '@/lib/uploads';
+import { checkUploadSize, MAX_UPLOAD_LABEL, uploadPhoto } from '@/lib/uploads';
 
 const TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
@@ -42,15 +42,8 @@ const StoreImagesUpload = () => {
 
     setUploading(kind);
     try {
-      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const path = `${user.id}/${kind}-${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from('store-images').upload(path, file, {
-        cacheControl: '3600',
-        contentType: file.type,
-      });
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage.from('store-images').getPublicUrl(path);
+      // Shrunk before upload: banners show on every vendor card and store page
+      const publicUrl = await uploadPhoto(file, user.id, kind);
       const { error: updateError } = await supabase
         .from('profiles')
         .update(kind === 'logo' ? { avatar: publicUrl } : { store_banner_url: publicUrl })
@@ -73,7 +66,7 @@ const StoreImagesUpload = () => {
         <p className="text-sm font-medium">Store banner <span className="font-normal text-muted-foreground">(optional)</span></p>
         <div className="relative h-24 w-full overflow-hidden rounded-lg border bg-muted sm:h-28">
           {images?.store_banner_url ? (
-            <img src={images.store_banner_url} alt="Store banner" className="h-full w-full object-cover" />
+            <img src={images.store_banner_url} alt="Store banner" decoding="async" className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-foreground">
               <ImageIcon className="h-6 w-6" />
@@ -94,7 +87,7 @@ const StoreImagesUpload = () => {
         <p className="self-start text-sm font-medium">Store logo</p>
         <div className="h-24 w-24 overflow-hidden rounded-xl border bg-muted sm:h-28 sm:w-28">
           {images?.avatar ? (
-            <img src={images.avatar} alt="Store logo" className="h-full w-full object-cover" />
+            <img src={images.avatar} alt="Store logo" decoding="async" className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-foreground">
               <Store className="h-8 w-8" />

@@ -13,11 +13,12 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Package, ArrowLeft, Upload, Store } from 'lucide-react';
+import { Package, ArrowLeft, Upload, Store, Loader2 } from 'lucide-react';
 import { useVendorProducts } from '@/hooks/useVendorProducts';
 import { useProductCategories } from '@/hooks/useProductCategories';
 import { supabase } from '@/integrations/supabase/client';
-import { checkUploadSize, MAX_UPLOAD_LABEL } from '@/lib/uploads';
+import { checkUploadSize, MAX_UPLOAD_LABEL, uploadPhoto } from '@/lib/uploads';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { discountLabel, salePrice } from '@/lib/products';
 import { formatNaira } from '@/lib/pricing';
 
@@ -63,6 +64,8 @@ const AddProduct = () => {
   const { categories, business } = useProductCategories();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const { user } = useAuth();
   const [loadingProduct, setLoadingProduct] = useState(isEditing);
 
   const form = useForm<ProductFormValues>({
@@ -118,22 +121,29 @@ const AddProduct = () => {
       });
   }, [productId, form, navigate]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // The photo is shrunk and uploaded to storage straight away; the product
+  // keeps only its URL (see uploadPhoto)
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (!checkUploadSize(file)) {
-      e.target.value = '';
+    e.target.value = '';
+    if (!file || !user?.id) return;
+    if (!checkUploadSize(file)) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setSelectedImage(reader.result);
-        form.setValue('image_url', reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    setUploadingImage(true);
+    try {
+      const url = await uploadPhoto(file, user.id, 'product');
+      setSelectedImage(url);
+      form.setValue('image_url', url, { shouldDirty: true });
+    } catch (error) {
+      console.error('Error uploading product image:', error);
+      toast.error(error instanceof Error ? error.message : 'Could not upload the image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const onSubmit = async (data: ProductFormValues) => {
@@ -414,12 +424,14 @@ const AddProduct = () => {
                           htmlFor="image-upload"
                           className="cursor-pointer text-primary hover:underline font-medium text-sm sm:text-base"
                         >
-                          {selectedImage ? 'Change image' : 'Click to upload'}
+                          {uploadingImage ? (
+                            <span className="inline-flex items-center gap-1.5"><Loader2 className="h-4 w-4 animate-spin" /> Uploading…</span>
+                          ) : selectedImage ? 'Change image' : 'Click to upload'}
                         </Label>
                         <p className="text-xs sm:text-sm text-muted-foreground mt-1 text-center">
-                          SVG, PNG, JPG or GIF (max. {MAX_UPLOAD_LABEL})
+                          PNG, JPG or WebP (max. {MAX_UPLOAD_LABEL}). Large photos are resized automatically.
                         </p>
-                        <Input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                        <Input id="image-upload" type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
                       </div>
 
                       {selectedImage && (
@@ -448,7 +460,7 @@ const AddProduct = () => {
                     <Button
                       type="submit"
                       className="bg-primary hover:bg-primary-hover text-black w-full sm:w-auto text-xs sm:text-sm"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || uploadingImage}
                     >
                       {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Save Product'}
                     </Button>

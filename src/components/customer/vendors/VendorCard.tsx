@@ -18,12 +18,12 @@ const VendorCard = ({ vendor, onSelect }: { vendor: VendorCardData; onSelect: (v
     {/* Banner is optional: plain grey without one */}
     <div className="relative h-20 w-full bg-gray-200 dark:bg-muted sm:h-24">
       {vendor.banner_url && (
-        <img src={vendor.banner_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+        <img src={vendor.banner_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
       )}
       <OpenBadge info={vendor.hours} className="absolute right-2 top-2 bg-background/95 shadow-sm" />
       <div className="absolute -bottom-6 left-3 h-14 w-14 overflow-hidden rounded-lg border-2 border-background bg-muted shadow-sm">
         {vendor.logo_url ? (
-          <img src={vendor.logo_url} alt={`${vendor.name} logo`} className="h-full w-full object-cover" loading="lazy" />
+          <img src={vendor.logo_url} alt={`${vendor.name} logo`} className="h-full w-full object-cover" loading="lazy" decoding="async" />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
             <Store className="h-6 w-6 text-muted-foreground" />

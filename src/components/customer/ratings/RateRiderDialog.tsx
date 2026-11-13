@@ -81,7 +81,7 @@ const RateRiderDialog = ({ rider, open, onDismiss, onRated }: RateRiderDialogPro
           <div className="flex flex-col items-center gap-2">
             <div className="h-16 w-16 overflow-hidden rounded-full bg-muted">
               {rider?.riderAvatar ? (
-                <img src={rider.riderAvatar} alt="" className="h-full w-full object-cover" />
+                <img src={rider.riderAvatar} alt="" decoding="async" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
                   <Truck className="h-7 w-7 text-muted-foreground" />

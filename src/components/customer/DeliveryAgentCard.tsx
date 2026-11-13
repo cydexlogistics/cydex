@@ -40,7 +40,7 @@ const DeliveryAgentCard = ({ rider, status, express }: DeliveryAgentCardProps) =
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-background sm:h-12 sm:w-12">
           {rider.photo ? (
-            <img src={rider.photo} alt={rider.name} className="h-10 w-10 rounded-full object-cover sm:h-12 sm:w-12" />
+            <img src={rider.photo} alt={rider.name} loading="lazy" decoding="async" className="h-10 w-10 rounded-full object-cover sm:h-12 sm:w-12" />
           ) : (
             <Truck className="h-5 w-5 text-muted-foreground sm:h-6 sm:w-6" />
           )}

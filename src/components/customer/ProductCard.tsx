@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Star, Plus } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
 import ProductImage from '@/components/customer/ProductImage';
-import { useVendorRatings } from '@/hooks/useVendorRatings';
+import { useVendorRating } from '@/hooks/useVendorRatings';
 import { discountLabel, isAvailable, salePrice, stockLabel } from '@/lib/products';
 import { cn } from '@/lib/utils';
 
@@ -16,7 +16,6 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) => {
   const navigate = useNavigate();
-  const { getRatingForVendor } = useVendorRatings();
 
   const handleClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking the add to cart button
@@ -29,7 +28,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) 
   const available = isAvailable(product);
   const stock = stockLabel(product);
   const discount = discountLabel(product);
-  const vendorRating = getRatingForVendor(product.vendor_id);
+  const vendorRating = useVendorRating(product.vendor_id);
   const displayRating = vendorRating.average_rating > 0 ? vendorRating.average_rating : 4.5; // Fallback rating
 
   return (

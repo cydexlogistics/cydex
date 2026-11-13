@@ -28,7 +28,7 @@ const OrderItemsList = ({ products }: OrderItemsListProps) => {
               <div key={product.id} className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
                 <div className="h-12 w-12 sm:h-16 sm:w-16 bg-muted rounded flex items-center justify-center flex-shrink-0">
                   {product.image ? (
-                    <img src={product.image} alt={product.name} className="h-10 w-10 sm:h-14 sm:w-14 object-cover rounded" />
+                    <img src={product.image} alt={product.name} loading="lazy" decoding="async" className="h-10 w-10 sm:h-14 sm:w-14 object-cover rounded" />
                   ) : (
                     <Package className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
                   )}

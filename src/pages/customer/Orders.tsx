@@ -10,14 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, Package, Calendar, MapPin, CreditCard, Truck, Plus } from 'lucide-react';
 import { useCustomerOrders } from '@/hooks/useCustomerOrders';
-import { useVendorRatings } from '@/hooks/useVendorRatings';
+import { useVendorRating } from '@/hooks/useVendorRatings';
 import { VendorRatingModal } from '@/components/customer/VendorRatingModal';
 import { formatDistanceToNow } from 'date-fns';
 
 const OrdersPage = () => {
   const navigate = useNavigate();
   const { orders, loading, error } = useCustomerOrders();
-  const { getRatingForVendor } = useVendorRatings();
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [selectedOrderForRating, setSelectedOrderForRating] = useState<{
     orderId: string;
@@ -44,7 +43,7 @@ const OrdersPage = () => {
   };
 
   const OrderCard = ({ order, showRatingButton = false }: { order: any; showRatingButton?: boolean }) => {
-    const vendorRating = getRatingForVendor(order.vendor_id);
+    const vendorRating = useVendorRating(order.vendor_id);
     
     return (
       <Card key={order.id} className="hover:shadow-md transition-shadow">

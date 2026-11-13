@@ -93,7 +93,7 @@ const AboutUs = () => (
               whileHover={{ scale: 1.03 }}
               className={`relative overflow-hidden rounded-3xl border-4 border-background shadow-xl ${className}`}
             >
-              <img src={src} alt={`A Cydex rider delivering ${label.toLowerCase()}`} className="h-full w-full object-cover" />
+              <img src={src} loading="lazy" decoding="async" alt={`A Cydex rider delivering ${label.toLowerCase()}`} className="h-full w-full object-cover" />
               <figcaption className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
                 <Icon className="h-3.5 w-3.5 text-primary" /> {label}
               </figcaption>

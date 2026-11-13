@@ -11,7 +11,7 @@ import { ArrowLeft, ShoppingCart, Star, Store, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { Product } from '@/hooks/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useVendorRatings } from '@/hooks/useVendorRatings';
+import { useVendorRating } from '@/hooks/useVendorRatings';
 import { ShoppingCartSidebar } from '@/components/customer/ShoppingCartSidebar';
 import ProductImage from '@/components/customer/ProductImage';
 
@@ -30,7 +30,6 @@ const ProductDetails = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const { getRatingForVendor } = useVendorRatings();
 
   // Filter cart items to show only items from the current product's vendor
   const vendorCartItems = useMemo(() => {
@@ -99,7 +98,8 @@ const ProductDetails = () => {
   };
 
   // Get vendor rating
-  const vendorRating = product ? getRatingForVendor(product.vendor_id) : null;
+  const rating = useVendorRating(product?.vendor_id);
+  const vendorRating = product ? rating : null;
   const displayRating = vendorRating?.average_rating > 0 ? vendorRating.average_rating : 4.5;
 
   if (loading) {
