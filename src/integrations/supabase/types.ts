@@ -3496,6 +3496,17 @@ export type Database = {
         Args: { p_from?: string; p_to?: string }
         Returns: Json
       }
+      admin_metrics: {
+        Args: {
+          p_end: string
+          p_start?: string
+          p_prev_start?: string
+          p_prev_end?: string
+          p_prior_start?: string
+          p_prior_end?: string
+        }
+        Returns: Json
+      }
       admin_orders_needing_attention: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3820,6 +3831,10 @@ export type Database = {
         Returns: string
       }
       shares_order_with: { Args: { p_profile_id: string }; Returns: boolean }
+      track_app_open: {
+        Args: { p_platform?: string }
+        Returns: undefined
+      }
       update_customer_wallet_on_payment: {
         Args: { p_amount: number; p_customer_id: string }
         Returns: undefined

@@ -1,6 +1,6 @@
 
 import { 
-  Bell, Bike, Boxes, Home, Package, Wallet, Recycle, User, Settings, Users, ShieldCheck, Navigation,
+  BarChart3, Bell, Bike, Boxes, Home, Package, Wallet, Recycle, User, Settings, Users, ShieldCheck, Navigation,
   Banknote, Mail, ScrollText, Shield, SlidersHorizontal, Star, TicketPercent, Zap, Megaphone, Trophy, Inbox, Headset } from 'lucide-react';
 
 interface SidebarLink {
@@ -52,6 +52,7 @@ export const getNavLinks = (userRole: 'CUSTOMER' | 'RIDER' | 'VENDOR' | 'ADMIN')
     case 'ADMIN':
       return [
         { name: 'Overview', href: '/admin', icon: Home },
+        { name: 'Metrics', href: '/admin/metrics', icon: BarChart3 },
         { name: 'Orders', href: '/admin/orders', icon: Package },
         { name: 'Money', href: '/admin/payments', icon: Banknote },
         { name: 'Users', href: '/admin/users', icon: Users },

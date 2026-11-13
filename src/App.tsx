@@ -14,6 +14,7 @@ import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 import InstallBanner from "@/components/pwa/InstallBanner";
 import { ConfirmProvider } from "@/contexts/ConfirmContext";
 import { DocumentViewerProvider } from "@/contexts/DocumentViewerContext";
+import AppOpenTracker from "@/components/AppOpenTracker";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <SupabaseProvider supabaseUrl={supabaseUrl} supabaseKey={supabaseAnonKey}>
           <AuthProvider>
+            <AppOpenTracker />
             <CartProvider>
               <TooltipProvider>
                <ConfirmProvider>

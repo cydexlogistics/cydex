@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminMetrics from '../pages/admin/Metrics';
 import AdminUsers from '../pages/admin/Users';
 import AdminUserDetail from '../pages/admin/UserDetail';
 import AdminOrders from '../pages/admin/Orders';
@@ -22,6 +23,7 @@ import AdminBroadcasts from '../pages/admin/Broadcasts';
 
 const PAGES: [string, JSX.Element][] = [
   ['/', <AdminDashboard />],
+  ['/metrics', <AdminMetrics />],
   ['/orders', <AdminOrders />],
   ['/orders/:id', <AdminOrderDetail />],
   ['/payments', <AdminPayments />],
